@@ -21,16 +21,11 @@
 - Coupon codes live in `coupon_codes` (service-role only, no user policies) and are redeemed once per account by the SECURITY DEFINER `redeem_coupon` RPC, which logs the use in `coupon_redemptions` and writes the ledger row; admins manage codes from the Coupons tab via `admin_coupons` / `admin_create_coupon` / `admin_set_coupon_active`. Why: codes can't be read, edited or double-redeemed from the client.
 - Series generator (`/series`) plans episodes via the `generate-series` edge function (free), then creates each episode through the normal `generate-script` pipeline with a brief that carries the shared visual motif. Why: one script/credit pipeline.
 - Intro/outro cards are saved per account in `user_brand_cards` (jsonb, owner-only RLS; localStorage is just a cache) and drawn by `exportVideo` before/after scenes. Why: settings follow the user across devices.
-
 - Billing history is read live from Stripe (`billing-history`) via the server-stored customer id; records carry `ledger_keys` to match credit lines. Why: invoices stay authoritative, owner-scoped.
 - Plan changes: Vydora-only portal config (`customer-portal`); upgrades immediate (grant new minus old), downgrades at period end. Why: one allowance per cycle.
 - Scheduled plan changes are read live from Stripe by read-only `subscription-status`, never stored. Why: follows portal changes.
 - Free accounts with 0 credits are read-only: DB `can_mutate_project` gates project/scene writes and uploads; edge functions call `requireMutable` first. Why: server enforces credit exhaustion.
-
 - Refunds/disputes reverse credits proportionally (`_shared/refunds.ts`), idempotent, capped at balance; won disputes restore. Why: no negative balances.
 - Live activation: one-time admin `activate-live-billing` (checks, typed confirm, audited); owner sets STRIPE_MODE. Why: both switches must agree.
-- YouTube: `youtube` fn keeps tokens. Why: server-side.
-- `voice-sample`: free previews cached in `samples/`.
-- Autopilot: `autopilot_plans` is free planning only; YouTube scheduling uses native `publishAt`. Why: no unattended credit spend.
-
 - Product Ads: `/ads` = Create `adMode` + `ad` brief to `generate-script`. Why: one pipeline.
+- `voice-sample`: free previews cached in `samples/`. Why: previews cost nothing to replay.
