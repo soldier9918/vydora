@@ -71,7 +71,10 @@ export default function SiteFooter() {
             ))}
           </ul>
           <h3 className="mt-8 text-xs uppercase tracking-widest text-muted-foreground">Help &amp; contact</h3>
-          <a className="mt-4 block text-sm transition-colors hover:text-primary" href="mailto:contact@vydora.ai">contact@vydora.ai</a>
+          <ul className="mt-4 space-y-2 text-sm">
+            <li><Link className="transition-colors hover:text-primary" to="/feedback">Leave feedback</Link></li>
+            <li><a className="transition-colors hover:text-primary" href="mailto:contact@vydora.ai">contact@vydora.ai</a></li>
+          </ul>
         </div>
       </div>
 

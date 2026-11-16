@@ -7,6 +7,7 @@ import ScrollToTop from "@/components/ScrollToTop";
 import RouteSeo from "@/components/RouteSeo";
 import { AuthProvider } from "@/hooks/useAuth";
 import Autopilot from "@/pages/Autopilot";
+import Feedback from "@/pages/Feedback";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/guides" element={<Guides />} />
             {GUIDES.map((g) => <Route key={g.slug} path={`/guides/${g.slug}`} element={<GuideArticle guide={g} />} />)}
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/feedback" element={<Feedback />} />
             <Route path="/billing" element={<Billing />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
