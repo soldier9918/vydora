@@ -59,7 +59,15 @@ Deno.serve(async (req) => {
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({ model: IMAGE_MODEL, prompt, size, quality: "low" }),
       });
-      const res = await gen(scene.visual_prompt);
+      // Keep every scene's picture unique: show the generator the other scenes to avoid.
+      const { data: siblings } = await auth.client.from("video_scenes")
+        .select("id, visual_prompt").eq("video_id", scene.video_id).eq("user_id", auth.user.id);
+      const others = (siblings ?? []).filter((s) => s.id !== scene.id && s.visual_prompt)
+        .map((s) => String(s.visual_prompt).split(". Style:")[0].slice(0, 160)).slice(0, 12);
+      const unique = others.length
+        ? ` This picture must look clearly different from the other scenes in this video (different composition, camera angle, framing and focal subject); do not repeat any of these: ${others.map((o) => `"${o}"`).join("; ")}.`
+        : "";
+      const res = await gen(`${scene.visual_prompt} Narration for this scene: "${String(scene.narration ?? "").slice(0, 300)}". Make it a beautiful, detailed, high-quality image.${unique}`);
       if (!res.ok && res.status === 400) {
         const text = await res.text();
         if (/safety|violation|moderation|content policy/i.test(text)) {
