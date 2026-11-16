@@ -50,8 +50,9 @@ export async function renderVideo(scenes, v, opts) {
     } else {
       const z = zoompanExpr(motionFor(v.motion_type ?? "zoom-in", i), frames, v.motion_enabled !== false);
       input = ["-loop", "1", "-i", s.image];
-      // Upscale first so zoompan stays smooth (no jitter).
-      vf = `scale=${W * 2}:${H * 2}:force_original_aspect_ratio=increase,crop=${W * 2}:${H * 2},zoompan=z='${z.z}':x='${z.x}':y='${z.y}':d=${frames}:s=${W}x${H}:fps=${FPS},subtitles='${assArg}'`;
+      // zoompan snaps its crop to whole input pixels; a large supersample makes each snap sub-pixel in the output (no wobble).
+      const SS = W * H > 1_500_000 ? 4 : 6;
+      vf = `scale=${W * SS}:${H * SS}:force_original_aspect_ratio=increase:flags=lanczos,crop=${W * SS}:${H * SS},zoompan=z='${z.z}':x='${z.x}':y='${z.y}':d=${frames}:s=${W}x${H}:fps=${FPS},subtitles='${assArg}'`;
     }
     await run("ffmpeg", ["-y", ...input, "-t", len.toFixed(3), "-vf", vf, "-an", "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p", seg]);
     segs.push(seg);

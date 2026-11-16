@@ -36,7 +36,9 @@ export function motionFor(type, i) {
 
 /** zoompan expressions; p = progress 0..1 over the segment. */
 export function zoompanExpr(type, frames, enabled = true) {
-  const p = `(on/${Math.max(1, frames - 1)})`;
+  // Same smoothstep easing as the browser (motion.ts) so the glide starts and ends gently.
+  const q = `(on/${Math.max(1, frames - 1)})`;
+  const p = `(${q}*${q}*(3-2*${q}))`;
   const c = { x: "iw/2-(iw/zoom/2)", y: "ih/2-(ih/zoom/2)" };
   if (!enabled) return { z: "1", ...c };
   const m = {
