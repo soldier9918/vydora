@@ -6,6 +6,7 @@ import path from "node:path";
 import { renderVideo } from "./render.mjs";
 import { youtubeUpload } from "./youtube.mjs";
 import { api, WORKER } from "./api.mjs";
+import { autopilotTick } from "./autopilot.mjs";
 
 const POLL = Number(process.env.POLL_SECONDS ?? "15");
 const WORK = process.env.WORK_DIR ?? "/tmp/vydora";
@@ -75,6 +76,8 @@ console.log(`Vydora worker ${WORKER} started`);
 while (!stopping) {
   let m = null;
   try { m = await api("claim"); } catch (e) { console.error("claim", e.message); }
-  if (m?.job) await processJob(m);
-  else await new Promise((r) => setTimeout(r, POLL * 1000));
+  if (m?.job) { await processJob(m); continue; }
+  let worked = false;
+  try { worked = await autopilotTick(); } catch (e) { console.error("autopilot", e.message); }
+  if (!worked) await new Promise((r) => setTimeout(r, POLL * 1000));
 }

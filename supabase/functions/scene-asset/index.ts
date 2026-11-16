@@ -1,5 +1,5 @@
 import { charge, refund, COSTS } from "../_shared/credits.ts";
-import { corsHeaders, GATEWAY_URL, json, getUserClient, adminClient, gatewayError } from "../_shared/common.ts";
+import { corsHeaders, GATEWAY_URL, json, getCaller, adminClient, gatewayError } from "../_shared/common.ts";
 import { toneOf } from "../_shared/tones.ts";
 
 const IMAGE_MODEL = "openai/gpt-image-2.5-sunburst";
@@ -23,7 +23,7 @@ function b64ToBytes(b64: string) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const auth = await getUserClient(req);
+    const auth = await getCaller(req);
     if (!auth) return json({ error: "Please sign in first." }, 401);
     const { sceneId, kind } = await req.json();
     if (!sceneId || (kind !== "image" && kind !== "audio")) return json({ error: "Invalid request." }, 400);
@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
     const { data: scene, error } = await auth.client
       .from("video_scenes")
       .select("id, video_id, narration, visual_prompt, videos(voice, aspect_ratio, tone, accent)")
-      .eq("id", sceneId)
+      .eq("id", sceneId).eq("user_id", auth.user.id)
       .maybeSingle();
     if (error) throw error;
     if (!scene) return json({ error: "Scene not found." }, 404);

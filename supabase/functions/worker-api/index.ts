@@ -2,7 +2,7 @@
 // Auth = WORKER_SECRET bearer token (never the service-role key). Every action is bound to a job the
 // calling worker currently holds the lease on, so a worker can only see the one job it claimed.
 // Credits, refunds, storage permissions and Google refresh tokens never leave this function.
-import { adminClient } from "../_shared/common.ts";
+import { adminClient, signTask } from "../_shared/common.ts";
 
 const SECRET = Deno.env.get("WORKER_SECRET") ?? "";
 const CID = Deno.env.get("GOOGLE_YOUTUBE_CLIENT_ID") ?? "";
@@ -56,6 +56,83 @@ async function ytToken(db: DB, uid: string) {
   return { token: t.access_token as string, expires_at };
 }
 
+// ---------- Autopilot (hands-off generation) ----------
+// The worker is the clock: each poll it leases one due run, gets one bounded step (script, or a batch of scene
+// pictures/voices) with a short-lived task token for that run's owner, calls the normal generate-script /
+// scene-asset functions (which charge and refund credits exactly as for manual creation), then reports back.
+// Only missing assets are requested, so retries never pay twice. When every scene is ready a render job is queued.
+const BATCH = 6;
+type Run = { id: string; plan_id: string; user_id: string; video_id: string | null; attempts: number };
+
+async function finishRun(db: DB, run: Run, status: "skipped" | "failed", note: string) {
+  await db.from("autopilot_runs").update({ status, error: note, locked_by: null, locked_until: null, updated_at: new Date().toISOString() }).eq("id", run.id);
+  await db.from("autopilot_plans").update({ status, note }).eq("id", run.plan_id);
+}
+
+async function autopilotClaim(db: DB, worker: string) {
+  const { data, error } = await db.rpc("claim_autopilot_run", { _worker: worker, _lease_seconds: 240 });
+  if (error) throw error;
+  const run = (Array.isArray(data) ? data[0] : null) as Run | null;
+  if (!run) return { run: null };
+  const { data: plan } = await db.from("autopilot_plans").select("*").eq("id", run.plan_id).maybeSingle();
+  if (!plan) { await finishRun(db, run, "failed", "Plan was removed"); return { run: null }; }
+  if (run.attempts >= 30) { await finishRun(db, run, "failed", "Gave up after repeated errors"); return { run: null }; }
+  const token = await signTask(run.user_id);
+  if (!run.video_id) {
+    const st = (plan.settings ?? {}) as Record<string, unknown>;
+    return { run: { id: run.id }, token, tasks: [{ fn: "generate-script", body: {
+      topic: plan.topic, style: st.style, voice: st.voice, tone: st.tone, sceneCount: Number(st.scenes) || 6, captionStyle: st.caption,
+      aspectRatio: st.ratio, quality: st.quality, targetSeconds: Number(st.length) || undefined, accent: st.accent,
+      narrationSpeed: Number(st.speed) || 1, useFacts: st.useFacts === true } }] };
+  }
+  const { data: scenes } = await db.from("video_scenes").select("id, image_path, clip_path, audio_path").eq("video_id", run.video_id).eq("user_id", run.user_id).order("position");
+  const tasks: { fn: string; body: Record<string, unknown> }[] = [];
+  for (const s of scenes ?? []) {
+    if (!s.image_path && !s.clip_path) tasks.push({ fn: "scene-asset", body: { sceneId: s.id, kind: "image" } });
+    if (!s.audio_path) tasks.push({ fn: "scene-asset", body: { sceneId: s.id, kind: "audio" } });
+  }
+  if (!scenes?.length) { await finishRun(db, run, "failed", "Script had no scenes"); return { run: null }; }
+  if (tasks.length) return { run: { id: run.id }, token, tasks: tasks.slice(0, BATCH) };
+  // Everything is ready: queue the cloud render (and YouTube upload) once.
+  const key = `autopilot:${run.plan_id}`;
+  let { data: job } = await db.from("render_jobs").select("id").eq("idempotency_key", key).maybeSingle();
+  if (!job) {
+    const ins = await db.from("render_jobs").insert({ user_id: run.user_id, video_id: run.video_id, plan_id: run.plan_id, kind: "autopilot",
+      idempotency_key: key, publish: !!plan.publish_on, publish_at: plan.publish_on }).select("id").single();
+    if (ins.error) throw ins.error;
+    job = ins.data;
+  }
+  await db.from("autopilot_runs").update({ status: "rendering", render_job_id: job!.id, locked_by: null, locked_until: null, error: null, updated_at: new Date().toISOString() }).eq("id", run.id);
+  await db.from("autopilot_plans").update({ status: "made", video_id: run.video_id, note: null }).eq("id", run.plan_id);
+  return { run: null, queued: job!.id };
+}
+
+async function autopilotResult(db: DB, worker: string, body: Record<string, unknown>) {
+  if (!isUuid(body.run)) return { error: "bad run" };
+  const { data: run } = await db.from("autopilot_runs").select("*").eq("id", body.run).eq("locked_by", worker).eq("status", "generating").maybeSingle() as { data: Run | null };
+  if (!run) return { error: "not_owner" };
+  const results = Array.isArray(body.results) ? body.results as { fn?: string; status?: number; videoId?: string; error?: string }[] : [];
+  const script = results.find((r) => r.fn === "generate-script" && r.status === 200 && isUuid(r.videoId));
+  if (script && !run.video_id) {
+    const { data: v } = await db.from("videos").select("id").eq("id", script.videoId!).eq("user_id", run.user_id).maybeSingle();
+    if (v) {
+      const { data: plan } = await db.from("autopilot_plans").select("settings").eq("id", run.plan_id).maybeSingle();
+      const mood = String((plan?.settings as Record<string, unknown> | null)?.mood ?? "none");
+      await db.from("videos").update({ music_mood: mood, music_enabled: mood !== "none" }).eq("id", v.id);
+      await db.from("autopilot_runs").update({ video_id: v.id }).eq("id", run.id);
+      await db.from("autopilot_plans").update({ video_id: v.id }).eq("id", run.plan_id);
+    }
+  }
+  const noCredits = results.find((r) => r.status === 402);
+  if (noCredits) { await finishRun(db, run, "skipped", "Skipped: not enough credits. Top up and press Retry."); return { ok: true }; }
+  const hard = results.find((r) => r.status && r.status >= 400 && r.status < 500 && r.status !== 429);
+  if (hard) { await finishRun(db, run, "failed", String(hard.error ?? "Couldn't make this video").slice(0, 500)); return { ok: true }; }
+  const soft = results.some((r) => !r.status || r.status >= 429);
+  await db.from("autopilot_runs").update({ locked_by: null, locked_until: null, updated_at: new Date().toISOString(),
+    run_after: new Date(Date.now() + (soft ? 120_000 : 0)).toISOString(), error: soft ? String(results.find((r) => r.error)?.error ?? "Temporary error, retrying").slice(0, 500) : null }).eq("id", run.id);
+  return { ok: true };
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") return ok({ error: "method" }, 405);
   if (!SECRET) return ok({ error: "Worker gateway not configured" }, 503);
@@ -103,6 +180,9 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === "autopilot_claim") return ok(await autopilotClaim(db, worker));
+    if (action === "autopilot_result") return ok(await autopilotResult(db, worker, body));
+
     const job = await heldJob(db, body.job, worker);
     if (!job) return ok({ error: "not_owner", lost: true }, 409);
 
@@ -140,12 +220,12 @@ Deno.serve(async (req) => {
         if (job.youtube_session_url) return ok({ session: job.youtube_session_url });
         const t = await ytToken(db, job.user_id);
         if ("error" in t) return ok(t, 400);
-        const { data: v } = await db.from("videos").select("title, seo").eq("id", job.video_id).single();
+        const { data: v } = await db.from("videos").select("title, seo, description").eq("id", job.video_id).single();
         const seo = (v?.seo ?? {}) as Record<string, unknown>;
         const publishAt = job.publish_at && new Date(job.publish_at).getTime() > Date.now() + 5 * 60_000 ? new Date(job.publish_at).toISOString() : null;
         const init = await fetch("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", {
           method: "POST", headers: { Authorization: `Bearer ${t.token}`, "Content-Type": "application/json", "X-Upload-Content-Type": "video/mp4", "X-Upload-Content-Length": String(job.size_bytes) },
-          body: JSON.stringify({ snippet: { title: String(seo.title ?? v?.title ?? "Untitled").slice(0, 100), description: String(seo.description ?? "").slice(0, 5000), tags: Array.isArray(seo.tags) ? seo.tags.slice(0, 30) : [], categoryId: "22" },
+          body: JSON.stringify({ snippet: { title: String(seo.title ?? v?.title ?? "Untitled").slice(0, 100), description: String(seo.description ?? v?.description ?? "").slice(0, 5000), tags: Array.isArray(seo.tags) ? seo.tags.slice(0, 30) : [], categoryId: "22" },
             status: { privacyStatus: "private", ...(publishAt ? { publishAt } : {}), selfDeclaredMadeForKids: false, containsSyntheticMedia: true } }),
         });
         if (!init.ok) return ok({ error: `YouTube refused upload: ${init.status}` }, 400);

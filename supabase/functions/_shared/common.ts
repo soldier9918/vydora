@@ -44,3 +44,28 @@ export async function gatewayError(res: Response) {
   if (res.status === 429) message = "Too many requests right now — please wait a moment and try again.";
   return json({ error: message }, res.status);
 }
+
+async function hmac(msg: string) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode("autopilot-task:" + (Deno.env.get("WORKER_SECRET") ?? "")), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(msg)));
+  return Array.from(sig, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Short-lived task token for one user, issued by worker-api only for an Autopilot run the worker holds. */
+export async function signTask(userId: string, ttlSeconds = 600) {
+  const exp = Math.floor(Date.now() / 1000) + ttlSeconds;
+  return `${userId}.${exp}.${await hmac(`${userId}.${exp}`)}`;
+}
+
+/** Signed-in user, or an Autopilot task token (x-vydora-task) issued by worker-api. */
+export async function getCaller(req: Request) {
+  const task = req.headers.get("x-vydora-task");
+  if (task) {
+    const m = /^([0-9a-f-]{36})\.(\d{10})\.([0-9a-f]{64})$/i.exec(task);
+    if (!m || !Deno.env.get("WORKER_SECRET") || Number(m[2]) < Date.now() / 1000) return null;
+    const want = await hmac(`${m[1]}.${m[2]}`);
+    let d = want.length ^ m[3].length; for (let i = 0; i < want.length; i++) d |= want.charCodeAt(i) ^ m[3].toLowerCase().charCodeAt(i);
+    return d === 0 ? { client: adminClient(), user: { id: m[1] } as { id: string } } : null;
+  }
+  return getUserClient(req);
+}

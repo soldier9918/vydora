@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarClock, Clapperboard, Trash2, Youtube } from "lucide-react";
+import { CalendarClock, Clapperboard, Download, RotateCcw, Trash2, Youtube } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { useAccount } from "@/lib/account";
 import { toast } from "sonner";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
@@ -19,6 +21,36 @@ export default function Autopilot() {
   const qc = useQueryClient();
   const [createOn, setCreateOn] = useState("");
   const [publishOn, setPublishOn] = useState("");
+  const [cloud, setCloud] = useState(false);
+  const { data: acct } = useAccount();
+  const canCloud = !!acct?.adminAccess;
+  // Hands-off runs (admin-only while being proven): poll while anything is in progress.
+  const { data: runs = [] } = useQuery({
+    queryKey: ["autopilot-runs"], enabled: !!user && canCloud, refetchInterval: 15_000,
+    queryFn: async () => (await supabase.from("autopilot_runs").select("plan_id, status, error, render_job_id")).data ?? [],
+  });
+  const { data: jobs = [] } = useQuery({
+    queryKey: ["autopilot-jobs"], enabled: !!user && canCloud, refetchInterval: 15_000,
+    queryFn: async () => (await supabase.from("render_jobs").select("id, plan_id, status, progress, output_path, youtube_video_id, error").eq("kind", "autopilot")).data ?? [],
+  });
+  const STATUS: Record<string, string> = { queued: "Queued", generating: "Generating", rendering: "Rendering", uploading: "Uploading", completed: "Completed", failed: "Failed", cancelled: "Cancelled", skipped: "Skipped" };
+  const cloudStatus = (planId: string) => {
+    const job = jobs.find((j) => j.plan_id === planId);
+    if (job) return { label: `${STATUS[job.status] ?? job.status}${["rendering", "uploading"].includes(job.status) ? ` ${job.progress}%` : ""}`, job, error: job.status === "failed" ? job.error : null };
+    const run = runs.find((r) => r.plan_id === planId);
+    if (run) return { label: STATUS[run.status] ?? run.status, job: null, error: run.error };
+    return null;
+  };
+  const download = async (p: string) => {
+    const { data, error } = await supabase.storage.from("video-assets").createSignedUrl(p, 3600, { download: true });
+    if (error || !data) { toast.error("Couldn't prepare the download."); return; }
+    window.location.href = data.signedUrl;
+  };
+  const retry = async (id: string) => {
+    const { data } = await supabase.rpc("retry_autopilot_plan", { _plan: id });
+    if (!data) toast.error("Couldn't retry this one."); else toast.success("It will be retried in a moment.");
+    qc.invalidateQueries({ queryKey: ["autopilot-plans"] }); qc.invalidateQueries({ queryKey: ["autopilot-runs"] });
+  };
 
   const { data: plans = [] } = useQuery({
     queryKey: ["autopilot-plans"], enabled: !!user,
@@ -31,12 +63,12 @@ export default function Autopilot() {
   const now = Date.now();
   const upcoming = uploads.filter((u) => u.status === "uploaded" && new Date(u.publish_at!).getTime() > now);
   const released = uploads.filter((u) => u.status === "uploaded" && new Date(u.publish_at!).getTime() <= now);
-  const due = plans.filter((p) => p.status === "planned" && new Date(p.create_on).getTime() <= now);
+  const due = plans.filter((p) => !p.cloud && p.status === "planned" && new Date(p.create_on).getTime() <= now);
 
   const addPlan = async (topic: string, settings: PlanSettings) => {
     if (!user || topic.trim().length < 3) { toast.error("Describe your video idea first."); return false; }
     if (!createOn) { toast.error("Choose when to make it."); return false; }
-    const { error } = await supabase.from("autopilot_plans").insert({ user_id: user.id, topic: topic.trim(), settings, create_on: new Date(createOn).toISOString(), publish_on: publishOn ? new Date(publishOn).toISOString() : null });
+    const { error } = await supabase.from("autopilot_plans").insert({ user_id: user.id, topic: topic.trim(), settings, cloud: canCloud && cloud, create_on: new Date(createOn).toISOString(), publish_on: publishOn ? new Date(publishOn).toISOString() : null });
     if (error) { toast.error(error.message); return false; }
     setCreateOn(""); setPublishOn("");
     toast.success("Added to your Autopilot plan.");
@@ -78,6 +110,12 @@ export default function Autopilot() {
                     <Input type="datetime-local" min={createOn || localMin()} value={publishOn} onChange={(e) => setPublishOn(e.target.value)} />
                   </label>
                 </div>
+                {canCloud && (
+                  <label className="flex items-start gap-3 rounded-lg border border-primary/40 bg-primary/5 p-3 text-sm">
+                    <Switch checked={cloud} onCheckedChange={setCloud} aria-label="Make it automatically" />
+                    <span><span className="font-semibold">Make it automatically (admin test)</span><br /><span className="text-xs text-muted-foreground">At the chosen time Vydora writes, creates, renders{publishOn ? " and schedules it on YouTube" : ""} with your browser closed. Uses the same credits as making it yourself.</span></span>
+                  </label>
+                )}
                 <p className="text-xs text-muted-foreground">Planning is free. Credits are only used when you press “Make video” and create it.</p>
               </div>
             } />
@@ -90,7 +128,13 @@ export default function Autopilot() {
                   <p className="truncate font-semibold">{p.topic}</p>
                   <p className="text-xs text-muted-foreground">Make: {fmt(p.create_on)}{p.publish_on && ` · Go live: ${fmt(p.publish_on)}`}</p>
                 </div>
-                {p.status === "made" ? <span className="text-xs font-semibold text-primary">Made</span> : (
+                {p.cloud && (() => { const c = cloudStatus(p.id); return (<>
+                  <span className="text-xs font-semibold text-primary" title={c?.error ?? p.note ?? undefined}>{c?.label ?? (p.status === "skipped" ? "Skipped" : p.status === "failed" ? "Failed" : "Automatic")}</span>
+                  {(p.note || c?.error) && <span className="w-full text-xs text-destructive">{p.note ?? c?.error}</span>}
+                  {c?.job?.output_path && c.job.status === "completed" && <Button size="sm" variant="outline" onClick={() => download(c.job!.output_path!)}><Download className="mr-1 h-4 w-4" />Download</Button>}
+                  {(p.status === "skipped" || p.status === "failed") && <Button size="sm" variant="outline" onClick={() => retry(p.id)}><RotateCcw className="mr-1 h-4 w-4" />Retry</Button>}
+                </>); })()}
+                {p.cloud ? null : p.status === "made" ? <span className="text-xs font-semibold text-primary">Made</span> : (
                   <Button asChild size="sm" onClick={() => markMade(p.id)}><Link to={`/create?idea=${encodeURIComponent(p.topic)}&settings=${encodeURIComponent(JSON.stringify(p.settings ?? {}))}`}>Make video</Link></Button>
                 )}
                 <Button size="icon" variant="ghost" aria-label="Remove" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /></Button>

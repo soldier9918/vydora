@@ -337,6 +337,20 @@
       "when": 1794807878074,
       "tag": "0047_create_render_job_queue",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1794866157975,
+      "tag": "0048_autopilot_cloud_runs",
+      "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1794866235068,
+      "tag": "0049_autopilot_retry_rpc",
+      "breakpoints": true
     }
   ]
 }

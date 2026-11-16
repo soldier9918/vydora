@@ -29,3 +29,4 @@
 - Live activation: one-time admin `activate-live-billing` (checks, typed confirm, audited); owner sets STRIPE_MODE. Why: both switches must agree.
 - Product Ads: `/ads` = Create `adMode` + `ad` brief to `generate-script`. Why: one pipeline.
 - `voice-sample`: free previews cached in `samples/`. Why: previews cost nothing to replay.
+- Hands-off Autopilot: the worker is the clock; `autopilot_runs` (claim_autopilot_run lease) step through script then missing scene assets via normal generate-script/scene-asset using a 10-min HMAC task token from worker-api, then queue one `render_jobs` row (idempotency `autopilot:<plan>`). Admin-only plans with `cloud=true` until proven. Why: same credit rules, no cron, retries never pay twice.

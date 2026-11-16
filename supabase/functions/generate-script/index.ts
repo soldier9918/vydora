@@ -4,7 +4,7 @@ import { effectiveAccount } from "../_shared/account.ts";
 import { createOpenAI } from "npm:@ai-sdk/openai@3";
 import { streamText, Output, NoObjectGeneratedError } from "npm:ai@6";
 import { z } from "npm:zod@3";
-import { corsHeaders, GATEWAY_URL, json, getUserClient, adminClient } from "../_shared/common.ts";
+import { corsHeaders, GATEWAY_URL, json, getCaller, adminClient } from "../_shared/common.ts";
 import { TONES, toneOf } from "../_shared/tones.ts";
 
 const schema = z.object({
@@ -49,7 +49,7 @@ async function fetchArticleText(url: string): Promise<string> {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const auth = await getUserClient(req);
+    const auth = await getCaller(req);
     if (!auth) return json({ error: "Please sign in first." }, 401);
 
     const { topic: topicIn, style = "Documentary", voice = "Kore", sceneCount = 6, captionStyle = "typewriter", aspectRatio = "16:9", quality = "720p", targetSeconds, useFacts, tone: toneIn, sourceUrl, narrationSpeed, accent: accentIn, ad } = await req.json();

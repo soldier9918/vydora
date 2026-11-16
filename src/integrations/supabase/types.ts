@@ -61,9 +61,11 @@ export type Database = {
       }
       autopilot_plans: {
         Row: {
+          cloud: boolean
           create_on: string
           created_at: string
           id: string
+          note: string | null
           publish_on: string | null
           settings: Json
           status: string
@@ -72,9 +74,11 @@ export type Database = {
           video_id: string | null
         }
         Insert: {
+          cloud?: boolean
           create_on: string
           created_at?: string
           id?: string
+          note?: string | null
           publish_on?: string | null
           settings?: Json
           status?: string
@@ -83,9 +87,11 @@ export type Database = {
           video_id?: string | null
         }
         Update: {
+          cloud?: boolean
           create_on?: string
           created_at?: string
           id?: string
+          note?: string | null
           publish_on?: string | null
           settings?: Json
           status?: string
@@ -94,6 +100,62 @@ export type Database = {
           video_id?: string | null
         }
         Relationships: []
+      }
+      autopilot_runs: {
+        Row: {
+          attempts: number
+          created_at: string
+          error: string | null
+          id: string
+          locked_by: string | null
+          locked_until: string | null
+          plan_id: string
+          render_job_id: string | null
+          run_after: string
+          status: string
+          updated_at: string
+          user_id: string
+          video_id: string | null
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          error?: string | null
+          id?: string
+          locked_by?: string | null
+          locked_until?: string | null
+          plan_id: string
+          render_job_id?: string | null
+          run_after?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          video_id?: string | null
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          error?: string | null
+          id?: string
+          locked_by?: string | null
+          locked_until?: string | null
+          plan_id?: string
+          render_job_id?: string | null
+          run_after?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          video_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "autopilot_runs_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: true
+            referencedRelation: "autopilot_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       billing_config: {
         Row: {
@@ -920,6 +982,30 @@ export type Database = {
       }
       can_mutate_project: { Args: { _user_id: string }; Returns: boolean }
       cancel_render_job: { Args: { _job: string }; Returns: boolean }
+      claim_autopilot_run: {
+        Args: { _lease_seconds?: number; _worker: string }
+        Returns: {
+          attempts: number
+          created_at: string
+          error: string | null
+          id: string
+          locked_by: string | null
+          locked_until: string | null
+          plan_id: string
+          render_job_id: string | null
+          run_after: string
+          status: string
+          updated_at: string
+          user_id: string
+          video_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "autopilot_runs"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       claim_monthly_free_credits: { Args: never; Returns: number }
       claim_referral: { Args: { _code: string }; Returns: string }
       claim_render_job: {
@@ -987,6 +1073,7 @@ export type Database = {
         Args: { _amount: number; _reason: string; _user: string }
         Returns: undefined
       }
+      retry_autopilot_plan: { Args: { _plan: string }; Returns: boolean }
       spend_credits: {
         Args: { _amount: number; _reason: string; _user: string }
         Returns: string
