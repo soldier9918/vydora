@@ -1,4 +1,5 @@
 import { SCENE_COUNTS } from "@/lib/sceneCount";
+import { AUTOPILOT_MAX_SECONDS } from "@/lib/autopilot";
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Sparkles, Link2, Play, X } from "lucide-react";
@@ -264,7 +265,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
               <Label>Video length</Label>
               <Select value={length} onValueChange={setLength}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{VIDEO_LENGTHS.map((s) => (
+                <SelectContent>{VIDEO_LENGTHS.filter((s) => !onPlan || s <= AUTOPILOT_MAX_SECONDS).map((s) => (
                   <SelectItem key={s} value={String(s)} disabled={!isLengthAllowed(s, Number(scenes)) || !lengthAllowedForTier(s, pro)}>{!lengthAllowedForTier(s, pro) ? "🔒 " : ""}{formatSeconds(s)}{!lengthAllowedForTier(s, pro) ? " · PRO" : !isLengthAllowed(s, Number(scenes)) ? (Number(scenes) < minScenesForSeconds(s) ? ` · needs ${minScenesForSeconds(s)}+ scenes` : ` · max ${maxScenesForSeconds(s)} scenes`) : ""}</SelectItem>
                 ))}</SelectContent>
               </Select>

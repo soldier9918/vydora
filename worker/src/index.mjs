@@ -39,12 +39,14 @@ async function processJob(m) {
         caption: s.caption,
       });
       if (lost) throw Object.assign(new Error("Lease lost"), { lost: true });
-      const musicFile = await download(m.music, path.join(dir, `music.${m.music?.ext}`));
-      if (!m.music && v.music_enabled && v.music_mood !== "none") await log("Mood music is composed in the browser and is not yet ported to the worker; rendered without it.", "warn");
+      // Like the browser: an uploaded track only plays when the mood is "My uploaded track"; other moods are composed.
+      const musicFile = v.music_mood === "custom" ? await download(m.music, path.join(dir, `music.${m.music?.ext}`)) : null;
+      const card = async (c, name) => c ? { title: c.title, subtitle: c.subtitle, seconds: c.seconds, clip: c.clip ? await download(c.clip, path.join(dir, `${name}-clip.${c.clip.ext}`)) : null } : null;
+      const intro = await card(m.cards?.intro, "intro"), outro = await card(m.cards?.outro, "outro");
       const logoFile = await download(m.logo, path.join(dir, `logo.${m.logo?.ext}`));
       const out = path.join(dir, "out.mp4");
       let lastPct = 0;
-      const meta = await renderVideo(scenes, v, { workDir: dir, out, musicFile, logoFile, watermark: m.watermark,
+      const meta = await renderVideo(scenes, v, { workDir: dir, out, musicFile, logoFile, watermark: m.watermark, intro, outro,
         onProgress: (p) => { const pct = Math.round(5 + p * 80); if (pct - lastPct >= 5) { lastPct = pct; progress(pct); } } });
       if (lost) throw Object.assign(new Error("Lease lost"), { lost: true });
       const size = (await stat(out)).size;

@@ -1,7 +1,12 @@
+// Autopilot plans can be at most 20 Minutes long (manual videos keep their plan limits).
+export const AUTOPILOT_MAX_SECONDS = 20 * 60;
+export const autopilotLengthOk = (seconds: number) => Number(seconds) > 0 && Number(seconds) <= AUTOPILOT_MAX_SECONDS;
+
 // Customer-facing wording for Autopilot (hands-off) errors and the help section.
 export function friendlyAutopilotError(raw?: string | null): string | null {
   if (!raw) return null;
   const s = raw.toLowerCase();
+  if (s.includes("20 minutes")) return "Autopilot videos can be up to 20 Minutes long. Remove this plan and plan a shorter one.";
   if (s.includes("credit")) return "Skipped: you didn’t have enough credits at the scheduled time. Nothing was charged — top up and press Retry.";
   if (s.includes("creator or pro")) return "Skipped: automatic making needs an active Creator or Pro plan.";
   if (s.includes("youtube") && (s.includes("connect") || s.includes("expired"))) return "The video was made, but YouTube needs reconnecting. Reconnect your channel on My profile, then press Retry.";
@@ -19,6 +24,7 @@ export const AUTOPILOT_HELP: { q: string; a: string }[] = [
   { q: "Will it post to YouTube without asking?", a: "Never. Vydora only uploads if you turn on “Upload to my YouTube channel” for that plan. Uploads go up as private and go live at the time you chose." },
   { q: "My video says “Couldn’t finish”. What now?", a: "Vydora tries up to 3 times. Credits for any step that failed are refunded automatically. Press Retry to try again, or remove the plan." },
   { q: "YouTube upload failed", a: "Your channel may have been disconnected. Open My profile, reconnect your YouTube channel, then press Retry. The finished video is still available to download." },
+  { q: "How long can Autopilot videos be?", a: "Up to 20 Minutes each. For longer videos, use Create and make them yourself." },
   { q: "Who can use automatic making?", a: "Creator and Pro subscribers. Free accounts can still plan videos and make them with one click." },
   { q: "Can I stop a planned video?", a: "Yes — press the bin icon before its scheduled time. Once it has started, removing it stops any further steps." },
 ];

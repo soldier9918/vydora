@@ -1,4 +1,5 @@
 // Pure timeline + FFmpeg plan, mirroring src/lib/exportVideo.ts timing rules.
+import { wrapByChars, typedLine, typedWords, typedPair } from "./typewriter.mjs";
 export const TRANSITION_SECS = 0.8;
 const RATIOS = { "16:9": [1280, 720], "9:16": [720, 1280], "1:1": [1080, 1080], "4:5": [864, 1080], "21:9": [1680, 720] };
 const QUALITY = { "720p": { scale: 1, bitrate: "5M" }, "1080p": { scale: 1.5, bitrate: "8M" } };
@@ -13,7 +14,7 @@ export const even = (n) => Math.round(n / 2) * 2;
 export function frameSize(aspect, quality) {
   const [w, h] = RATIOS[aspect] ?? RATIOS["16:9"];
   const s = (QUALITY[quality] ?? QUALITY["720p"]).scale;
-  return { W: even(w * s), H: even(h * s) };
+  return { W: even(w * s), H: even(h * s), scale: s, baseW: w };
 }
 export const bitrateOf = (q) => (QUALITY[q] ?? QUALITY["720p"]).bitrate;
 
@@ -26,11 +27,13 @@ export function sceneDurations(audioSecs, speed = 1) {
 export function transitionFor(type, i) { return type === "random" ? XFADE_ROT[(i * 7 + 2) % XFADE_ROT.length] : type; }
 export const xfadeName = (type, i) => XFADE[transitionFor(type, i)] ?? "fade";
 
-const MOTION_ROT = ["zoom-in", "subtle-zoom", "zoom-out", "pan-left", "pan-right", "pan-up", "pan-down", "zoom-left", "zoom-right", "zoom-up", "zoom-down", "diagonal-down", "diagonal-up", "breathe"];
+// Same rotation as the browser (src/lib/motion.ts ROTATION), horror looks included.
+const MOTION_ROT = ["zoom-in","subtle-zoom","zoom-out","punch-in","pan-left","pan-right","pan-up","pan-down","zoom-left","zoom-right","zoom-up","zoom-down","out-left","out-right","diagonal-down","diagonal-up","rotate-zoom","breathe","float","handheld","h-flicker","h-strobe","h-streaks","h-vhs","h-static","h-creep","h-fade","h-lightning","h-blood","h-heartbeat","h-tilt","h-sway","h-shake","h-lurch","h-jumpscare","h-possessed"];
+const HORROR_ROT = MOTION_ROT.filter((m) => m.startsWith("h-"));
 export function motionFor(type, i) {
   if (type === "random") return MOTION_ROT[(i * 7 + 3) % MOTION_ROT.length];
+  if (type === "h-random") return HORROR_ROT[(i * 5 + 2) % HORROR_ROT.length];
   if (type === "alternate") return i % 2 === 0 ? "zoom-in" : "zoom-out";
-  if (type === "h-random" || String(type).startsWith("h-")) return "zoom-in"; // horror overlays not ported yet
   return type;
 }
 
@@ -58,24 +61,37 @@ export function zoompanExpr(type, frames, enabled = true) {
 
 const assEscape = (s) => String(s).replace(/\\/g, "\\\\").replace(/[{}]/g, "").replace(/\r?\n/g, " ");
 const ts = (s) => { const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = (s % 60).toFixed(2).padStart(5, "0"); return `${h}:${String(m).padStart(2, "0")}:${x}`; };
-/** Captions as ASS: narration split into short chunks timed by word count across the scene. */
-export function captionsAss(caption, dur, { W, H, color = "#ffffff", size = "medium", style = "typewriter" }) {
-  const px = Math.round(({ small: 28, medium: 36, large: 48 }[size] ?? 36) * (H / 720));
+const SIZE_PX = { small: 44, medium: 60, large: 80, xl: 100 };
+const FONT = { mono: ["DejaVu Sans Mono", 0.6], serif: ["DejaVu Serif", 0.55], sans: ["DejaVu Sans", 0.55], impact: ["DejaVu Sans Condensed", 0.5], rounded: ["DejaVu Sans", 0.55], heavy: ["DejaVu Sans", 0.6] };
+/** Caption lines visible at time t (same rules and timing as the browser export, src/lib/exportVideo.ts). */
+export function captionAt(lines, style, t, speak) {
+  const f = t / Math.max(0.001, speak);
+  if (style === "full") return lines;
+  if (style === "pop") return typedWords(lines, f);
+  if (style === "sentence") return typedPair(lines, f);
+  const l = typedLine(lines, f); return l ? [l] : [];
+}
+/** Captions as ASS events that follow the narration exactly like the browser (typewriter, word pop, sentence, full). */
+export function captionsAss(caption, dur, { W, H, color = "#ffffff", size = "medium", style = "typewriter", font = "mono", scale = 1, wrapPx, speak }) {
+  const px = Math.round((SIZE_PX[size] ?? 60) * scale);
+  const [fontName, cw] = FONT[font] ?? FONT.mono;
   const hex = /^#[0-9a-f]{6}$/i.test(color) ? color.slice(1) : "ffffff";
   const bgr = hex.slice(4, 6) + hex.slice(2, 4) + hex.slice(0, 2);
-  const head = `[Script Info]\nScriptType: v4.00+\nPlayResX: ${W}\nPlayResY: ${H}\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV\nStyle: Cap,DejaVu Sans,${px},&H00${bgr},&H00000000,&H99000000,1,0,3,2,0,2,${Math.round(W * 0.06)},${Math.round(W * 0.06)},${Math.round(H * 0.08)}\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n`;
+  const marginV = Math.max(0, Math.round(Math.min(W, H) * 0.09 - px * 0.22));
+  const head = `[Script Info]\nScriptType: v4.00+\nPlayResX: ${W}\nPlayResY: ${H}\nWrapStyle: 2\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV\nStyle: Cap,${fontName},${px},&H00${bgr},&H40000000,&H30000000,1,0,1,1.5,2,2,0,0,${marginV}\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n`;
   if (style === "none" || !caption?.trim()) return head;
-  const words = caption.trim().split(/\s+/);
-  const per = 8, chunks = [];
-  for (let i = 0; i < words.length; i += per) chunks.push(words.slice(i, i + per).join(" "));
-  const usable = Math.max(0.5, dur - 0.4);
-  let t = 0;
-  const lines = chunks.map((c) => {
-    const len = usable * (c.split(" ").length / words.length);
-    const line = `Dialogue: 0,${ts(t)},${ts(t + len)},Cap,,0,0,0,,${style === "typewriter" ? "{\\fad(120,0)}" : ""}${assEscape(c)}`;
-    t += len; return line;
-  });
-  return head + lines.join("\n") + "\n";
+  const lines = wrapByChars(caption, (wrapPx ?? W * 0.85) / (px * cw));
+  const maxLines = Math.max(1, Math.floor((H * 0.7) / Math.round(px * 1.2)));
+  const sp = speak > 0 ? speak : dur;
+  const out = []; let cur = null, start = 0;
+  const step = 1 / 30;
+  for (let t = 0; t <= dur + 1e-6; t += step) {
+    let d = captionAt(lines, style, t, sp); if (d.length > maxLines) d = d.slice(-maxLines);
+    const txt = d.map(assEscape).join("\\N");
+    if (txt !== cur) { if (cur) out.push(`Dialogue: 0,${ts(start)},${ts(t)},Cap,,0,0,0,,${cur}`); cur = txt; start = t; }
+  }
+  if (cur) out.push(`Dialogue: 0,${ts(start)},${ts(dur)},Cap,,0,0,0,,${cur}`);
+  return head + out.join("\n") + "\n";
 }
 
 /** Offsets for chaining xfade: segment i lasts dur_i (+T when a transition follows) so total length is unchanged. */

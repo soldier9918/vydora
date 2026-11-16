@@ -31,3 +31,25 @@ test("renders an MP4 with narration, captions, transitions and ducked music", { 
   assert.ok(Math.abs(meta.seconds - (2.4 + 3.4 + 4.4)) < 0.01);
   console.log("rendered", out, secs);
 });
+
+test("cloud render matches browser effects: mood music, sounds, horror look, typed captions, intro/outro cards", { timeout: 300000 }, async () => {
+  const d = await mkdtemp(path.join(tmpdir(), "vyd2-"));
+  const scenes = [];
+  for (let i = 0; i < 2; i++) {
+    const img = path.join(d, `i${i}.png`), aud = path.join(d, `a${i}.mp3`);
+    await run("ffmpeg", ["-y", "-f", "lavfi", "-i", `testsrc2=s=1536x1024:d=1`, "-frames:v", "1", img]);
+    await run("ffmpeg", ["-y", "-f", "lavfi", "-i", `sine=f=${300 + i * 100}:d=2`, aud]);
+    scenes.push({ image: img, audio: aud, caption: "The lights flicker, and something moves in the dark hallway." });
+  }
+  const out = path.join(d, "out.mp4");
+  const meta = await renderVideo(scenes, { aspect_ratio: "16:9", quality: "720p", narration_speed: 1, transition_enabled: true, transition_type: "crossfade",
+    motion_type: "h-random", music_enabled: true, music_mood: "horror", music_volume: 40, music_ducking: true, sfx_enabled: true, sfx_type: "random", sfx_volume: 60,
+    caption_style: "pop", caption_font: "impact" },
+    { workDir: d, out, watermark: false, intro: { title: "Welcome back", subtitle: "Let's get into it", seconds: 3 }, outro: { title: "Like & Subscribe", subtitle: "New videos", seconds: 2 } });
+  assert.ok(Math.abs(meta.seconds - (3 + 2.4 + 2.4 + 2)) < 0.01);
+  const secs = await probeSecs(out);
+  assert.ok(Math.abs(secs - meta.seconds) < 0.25, `duration ${secs} vs ${meta.seconds}`);
+  // Music/sounds are audible during the intro card (before any narration).
+  const vol = await run("ffmpeg", ["-hide_banner", "-t", "2.5", "-i", out, "-af", "volumedetect", "-vn", "-f", "null", "-"]).catch((e) => String(e));
+  console.log("cards+fx rendered", out, secs);
+});

@@ -80,6 +80,7 @@ async function autopilotClaim(db: DB, worker: string) {
   const token = await signTask(run.user_id);
   if (!run.video_id) {
     const st = (plan.settings ?? {}) as Record<string, unknown>;
+    if (Number(st.length) > 20 * 60) { await finishRun(db, run, "failed", "Autopilot videos can be up to 20 Minutes long. Remove this plan and plan a shorter one."); return { run: null }; }
     return { run: { id: run.id }, token, tasks: [{ fn: "generate-script", body: {
       topic: plan.topic, style: st.style, voice: st.voice, tone: st.tone, sceneCount: Number(st.scenes) || 6, captionStyle: st.caption,
       aspectRatio: st.ratio, quality: st.quality, targetSeconds: Number(st.length) || undefined, accent: st.accent,
@@ -188,7 +189,18 @@ Deno.serve(async (req) => {
       for (const s of rows) scenes.push({ position: s.position, caption: s.narration, image: await sign(db, s.image_path, job.user_id), clip: await sign(db, s.clip_path, job.user_id), audio: await sign(db, s.audio_path, job.user_id) });
       // Only render-relevant video settings; no profile, billing or account data.
       const { user_id: _u, seo: _s, sources: _src, ...settings } = v;
+      // Saved intro/outro cards (same rules as the browser export: switched on and something to show).
+      const { data: bc } = await db.from("user_brand_cards").select("cards").eq("user_id", job.user_id).maybeSingle();
+      const cardOf = async (c: Record<string, unknown> | undefined) => {
+        if (!c || c.enabled !== true) return null;
+        const clip = c.mode === "clip" && typeof c.clipPath === "string" ? c.clipPath : null;
+        if (c.mode === "clip" ? !clip : !(String(c.title ?? "").trim() || String(c.subtitle ?? "").trim())) return null;
+        return { title: String(c.title ?? "").slice(0, 60), subtitle: String(c.subtitle ?? "").slice(0, 80), seconds: Math.min(8, Math.max(2, Math.round(Number(c.seconds) || 3))), clip: clip ? await sign(db, clip, job.user_id) : null };
+      };
+      const raw = (bc?.cards ?? {}) as Record<string, Record<string, unknown>>;
+      const cards = { intro: await cardOf(raw.intro), outro: await cardOf(raw.outro) };
       return ok({
+        cards,
         job: { id: job.id, attempts: job.attempts, publish: job.publish, output_path: job.output_path, size_bytes: job.size_bytes, youtube_session_url: job.youtube_session_url, youtube_video_id: job.youtube_video_id },
         video: settings, scenes, music: await sign(db, v.music_path, job.user_id), logo: await sign(db, v.logo_path, job.user_id),
         watermark: !(acct?.pro || acct?.isAdmin), upload, output, lease_seconds: LEASE,

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { AUTOPILOT_HELP, friendlyAutopilotError } from "@/lib/autopilot";
+import { AUTOPILOT_HELP, autopilotLengthOk, friendlyAutopilotError } from "@/lib/autopilot";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import Create, { type PlanSettings } from "@/pages/Create";
@@ -103,6 +103,7 @@ export default function Autopilot() {
   const addPlan = async (topic: string, settings: PlanSettings) => {
     if (!user || topic.trim().length < 3) { toast.error("Describe your video idea first."); return false; }
     if (!createOn) { toast.error("Choose when to make it."); return false; }
+    if (settings.length && !autopilotLengthOk(Number(settings.length))) { toast.error("Autopilot videos can be up to 20 Minutes long."); return false; }
     const auto = canCloud && cloud;
     if (auto && meta === "manual" && metaTitle.trim().length < 3) { toast.error("Write a title, or choose to make it automatically."); return false; }
     const full = auto ? { ...settings, meta, ...(meta === "manual" ? { metaTitle: metaTitle.trim(), metaDescription: metaDescription.trim(), metaTags } : {}) } : settings;
