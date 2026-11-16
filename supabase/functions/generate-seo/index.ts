@@ -2,7 +2,7 @@ import { charge, refund, COSTS } from "../_shared/credits.ts";
 import { createOpenAI } from "npm:@ai-sdk/openai@3";
 import { streamText, Output, NoObjectGeneratedError } from "npm:ai@6";
 import { z } from "npm:zod@3";
-import { corsHeaders, GATEWAY_URL, json, getUserClient, adminClient } from "../_shared/common.ts";
+import { corsHeaders, GATEWAY_URL, json, getCaller, adminClient } from "../_shared/common.ts";
 
 const schema = z.object({
   titles: z.array(z.string()),
@@ -14,7 +14,7 @@ const schema = z.object({
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const auth = await getUserClient(req);
+    const auth = await getCaller(req);
     if (!auth) return json({ error: "Please sign in first." }, 401);
     const { videoId } = await req.json().catch(() => ({}));
     if (typeof videoId !== "string" || !/^[0-9a-f-]{36}$/i.test(videoId)) return json({ error: "Invalid video." }, 400);
@@ -22,14 +22,14 @@ Deno.serve(async (req) => {
     if (!apiKey) return json({ error: "AI is not configured." }, 500);
 
     const { client } = auth;
-    const { data: video } = await client.from("videos").select("id,title,description,topic").eq("id", videoId).maybeSingle();
+    const { data: video } = await client.from("videos").select("id,title,description,topic").eq("id", videoId).eq("user_id", auth.user.id).maybeSingle();
     if (!video) return json({ error: "Video not found." }, 404);
     const COST = COSTS.seo;
     const denied = await charge(auth.user.id, COST, "seo");
     if (denied) return denied;
     let charged = COST;
     try {
-    const { data: scenes } = await client.from("video_scenes").select("heading,narration").eq("video_id", videoId).order("position");
+    const { data: scenes } = await client.from("video_scenes").select("heading,narration").eq("video_id", videoId).eq("user_id", auth.user.id).order("position");
     const script = (scenes ?? []).map((s, i) => `${i + 1}. ${s.heading}: ${s.narration}`).join("\n").slice(0, 12000);
 
     const provider = createOpenAI({

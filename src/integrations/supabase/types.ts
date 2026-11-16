@@ -59,6 +59,24 @@ export type Database = {
         }
         Relationships: []
       }
+      app_flags: {
+        Row: {
+          enabled: boolean
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       autopilot_plans: {
         Row: {
           cloud: boolean
@@ -66,6 +84,7 @@ export type Database = {
           created_at: string
           id: string
           note: string | null
+          publish_consent: boolean
           publish_on: string | null
           settings: Json
           status: string
@@ -79,6 +98,7 @@ export type Database = {
           created_at?: string
           id?: string
           note?: string | null
+          publish_consent?: boolean
           publish_on?: string | null
           settings?: Json
           status?: string
@@ -92,6 +112,7 @@ export type Database = {
           created_at?: string
           id?: string
           note?: string | null
+          publish_consent?: boolean
           publish_on?: string | null
           settings?: Json
           status?: string
@@ -942,6 +963,10 @@ export type Database = {
         }[]
       }
       admin_overview: { Args: never; Returns: Json }
+      admin_set_autopilot_launch: {
+        Args: { _enabled: boolean }
+        Returns: boolean
+      }
       admin_set_coupon_active: {
         Args: { _active: boolean; _code: string }
         Returns: undefined
@@ -980,6 +1005,8 @@ export type Database = {
           voice: string
         }[]
       }
+      autopilot_access: { Args: never; Returns: Json }
+      autopilot_cloud_eligible: { Args: { _user: string }; Returns: boolean }
       can_mutate_project: { Args: { _user_id: string }; Returns: boolean }
       cancel_render_job: { Args: { _job: string }; Returns: boolean }
       claim_autopilot_run: {

@@ -1,5 +1,5 @@
 import { charge, refund, COSTS } from "../_shared/credits.ts";
-import { corsHeaders, GATEWAY_URL, json, getUserClient, adminClient, gatewayError } from "../_shared/common.ts";
+import { corsHeaders, GATEWAY_URL, json, getCaller, adminClient, gatewayError } from "../_shared/common.ts";
 
 const IMAGE_MODEL = "openai/gpt-image-2.5-sunburst";
 
@@ -13,7 +13,7 @@ function b64ToBytes(b64: string) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const auth = await getUserClient(req);
+    const auth = await getCaller(req);
     if (!auth) return json({ error: "Please sign in first." }, 401);
     const { videoId, mode, text, textSize } = await req.json();
     const sizeWords = ["small and tucked into a corner, taking up about 10% of the image", "modest, taking up about 20% of the image", "large, taking up about 35% of the image", "very large, taking up about half of the image", "huge, filling most of the image"][Math.min(4, Math.max(0, Math.round(Number(textSize) || 3) - 1))];
@@ -25,6 +25,7 @@ Deno.serve(async (req) => {
       .from("videos")
       .select("id, title, topic, style, aspect_ratio, thumbnail_path")
       .eq("id", videoId)
+      .eq("user_id", auth.user.id)
       .maybeSingle();
     if (error) throw error;
     if (!video) return json({ error: "Video not found." }, 404);

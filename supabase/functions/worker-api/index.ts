@@ -93,12 +93,25 @@ async function autopilotClaim(db: DB, worker: string) {
   }
   if (!scenes?.length) { await finishRun(db, run, "failed", "Script had no scenes"); return { run: null }; }
   if (tasks.length) return { run: { id: run.id }, token, tasks: tasks.slice(0, BATCH) };
+  // Title, description, tags and thumbnail: made automatically (normal paid functions) or taken from the plan.
+  const st = (plan.settings ?? {}) as Record<string, unknown>;
+  const { data: vid } = await db.from("videos").select("seo, thumbnail_path, title").eq("id", run.video_id).eq("user_id", run.user_id).maybeSingle();
+  if (st.meta === "auto") {
+    const meta: { fn: string; body: Record<string, unknown> }[] = [];
+    if (!vid?.seo) meta.push({ fn: "generate-seo", body: { videoId: run.video_id } });
+    if (!vid?.thumbnail_path) meta.push({ fn: "generate-thumbnail", body: { videoId: run.video_id } });
+    if (meta.length) return { run: { id: run.id }, token, tasks: meta };
+  } else if (st.meta === "manual" && !vid?.seo) {
+    const tags = String(st.metaTags ?? "").split(",").map((t) => t.trim()).filter(Boolean).slice(0, 30);
+    const title = String(st.metaTitle ?? "").trim().slice(0, 100) || vid?.title || plan.topic;
+    await db.from("videos").update({ seo: { titles: [title], description: String(st.metaDescription ?? "").slice(0, 5000), hashtags: [], tags } }).eq("id", run.video_id).eq("user_id", run.user_id);
+  }
   // Everything is ready: queue the cloud render (and YouTube upload) once.
   const key = `autopilot:${run.plan_id}`;
   let { data: job } = await db.from("render_jobs").select("id").eq("idempotency_key", key).maybeSingle();
   if (!job) {
     const ins = await db.from("render_jobs").insert({ user_id: run.user_id, video_id: run.video_id, plan_id: run.plan_id, kind: "autopilot",
-      idempotency_key: key, publish: !!plan.publish_on, publish_at: plan.publish_on }).select("id").single();
+      idempotency_key: key, publish: !!plan.publish_on && plan.publish_consent === true, publish_at: plan.publish_consent === true ? plan.publish_on : null }).select("id").single();
     if (ins.error) throw ins.error;
     job = ins.data;
   }
@@ -232,7 +245,7 @@ Deno.serve(async (req) => {
         const publishAt = job.publish_at && new Date(job.publish_at).getTime() > Date.now() + 5 * 60_000 ? new Date(job.publish_at).toISOString() : null;
         const init = await fetch("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", {
           method: "POST", headers: { Authorization: `Bearer ${t.token}`, "Content-Type": "application/json", "X-Upload-Content-Type": "video/mp4", "X-Upload-Content-Length": String(job.size_bytes) },
-          body: JSON.stringify({ snippet: { title: String(seo.title ?? v?.title ?? "Untitled").slice(0, 100), description: String(seo.description ?? v?.description ?? "").slice(0, 5000), tags: Array.isArray(seo.tags) ? seo.tags.slice(0, 30) : [], categoryId: "22" },
+          body: JSON.stringify({ snippet: { title: String((Array.isArray(seo.titles) && seo.titles[0]) || seo.title || v?.title || "Untitled").slice(0, 100), description: [String(seo.description ?? v?.description ?? ""), Array.isArray(seo.hashtags) ? seo.hashtags.join(" ") : ""].filter(Boolean).join("\n\n").slice(0, 5000), tags: Array.isArray(seo.tags) ? seo.tags.slice(0, 30) : [], categoryId: "22" },
             status: { privacyStatus: "private", ...(publishAt ? { publishAt } : {}), selfDeclaredMadeForKids: false, containsSyntheticMedia: true } }),
         });
         if (!init.ok) return ok({ error: `YouTube refused upload: ${init.status}` }, 400);

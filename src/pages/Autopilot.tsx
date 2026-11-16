@@ -9,6 +9,9 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { AUTOPILOT_HELP, friendlyAutopilotError } from "@/lib/autopilot";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import Create, { type PlanSettings } from "@/pages/Create";
@@ -23,22 +26,36 @@ export default function Autopilot() {
   const [publishOn, setPublishOn] = useState("");
   const [cloud, setCloud] = useState(false);
   const { data: acct } = useAccount();
-  const canCloud = !!acct?.adminAccess;
-  // Hands-off runs (admin-only while being proven): poll while anything is in progress.
+  const [meta, setMeta] = useState<"auto" | "manual">("auto");
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+  const [metaTags, setMetaTags] = useState("");
+  const [consent, setConsent] = useState(false);
+  const { data: access, refetch: refetchAccess } = useQuery({
+    queryKey: ["autopilot-access"], enabled: !!user,
+    queryFn: async () => ((await supabase.rpc("autopilot_access")).data ?? {}) as { eligible?: boolean; launched?: boolean; subscribed?: boolean; admin?: boolean },
+  });
+  const canCloud = !!access?.eligible;
+  const isAdmin = !!acct?.adminAccess || !!access?.admin;
+  const setLaunch = async (on: boolean) => {
+    const { error } = await supabase.rpc("admin_set_autopilot_launch", { _enabled: on });
+    if (error) toast.error("Couldn't change this."); else { toast.success(on ? "Automatic making is now on for Creator and Pro customers." : "Automatic making is now off for customers."); refetchAccess(); }
+  };
+  // Hands-off runs: poll while anything is in progress.
   const { data: runs = [] } = useQuery({
-    queryKey: ["autopilot-runs"], enabled: !!user && canCloud, refetchInterval: 15_000,
+    queryKey: ["autopilot-runs"], enabled: !!user, refetchInterval: 15_000,
     queryFn: async () => (await supabase.from("autopilot_runs").select("plan_id, status, error, render_job_id")).data ?? [],
   });
   const { data: jobs = [] } = useQuery({
-    queryKey: ["autopilot-jobs"], enabled: !!user && canCloud, refetchInterval: 15_000,
+    queryKey: ["autopilot-jobs"], enabled: !!user, refetchInterval: 15_000,
     queryFn: async () => (await supabase.from("render_jobs").select("id, plan_id, status, progress, output_path, youtube_video_id, error").eq("kind", "autopilot")).data ?? [],
   });
-  const STATUS: Record<string, string> = { queued: "Queued", generating: "Generating", rendering: "Rendering", uploading: "Uploading", completed: "Completed", failed: "Failed", cancelled: "Cancelled", skipped: "Skipped" };
+  const STATUS: Record<string, string> = { queued: "Waiting for its turn", claimed: "Starting", generating: "Writing and making scenes", rendering: "Putting the video together", uploading: "Uploading to YouTube", completed: "Ready", failed: "Couldn\u2019t finish", cancelled: "Cancelled", skipped: "Skipped" };
   const cloudStatus = (planId: string) => {
     const job = jobs.find((j) => j.plan_id === planId);
-    if (job) return { label: `${STATUS[job.status] ?? job.status}${["rendering", "uploading"].includes(job.status) ? ` ${job.progress}%` : ""}`, job, error: job.status === "failed" ? job.error : null };
+    if (job) return { label: `${STATUS[job.status] ?? job.status}${["rendering", "uploading"].includes(job.status) ? ` ${job.progress}%` : ""}`, job, error: job.status === "failed" ? friendlyAutopilotError(job.error) : null };
     const run = runs.find((r) => r.plan_id === planId);
-    if (run) return { label: STATUS[run.status] ?? run.status, job: null, error: run.error };
+    if (run) return { label: STATUS[run.status] ?? run.status, job: null, error: ["failed", "skipped", "cancelled"].includes(run.status) ? friendlyAutopilotError(run.error) : null };
     return null;
   };
   const download = async (p: string) => {
@@ -68,9 +85,12 @@ export default function Autopilot() {
   const addPlan = async (topic: string, settings: PlanSettings) => {
     if (!user || topic.trim().length < 3) { toast.error("Describe your video idea first."); return false; }
     if (!createOn) { toast.error("Choose when to make it."); return false; }
-    const { error } = await supabase.from("autopilot_plans").insert({ user_id: user.id, topic: topic.trim(), settings, cloud: canCloud && cloud, create_on: new Date(createOn).toISOString(), publish_on: publishOn ? new Date(publishOn).toISOString() : null });
+    const auto = canCloud && cloud;
+    if (auto && meta === "manual" && metaTitle.trim().length < 3) { toast.error("Write a title, or choose to make it automatically."); return false; }
+    const full = auto ? { ...settings, meta, ...(meta === "manual" ? { metaTitle: metaTitle.trim(), metaDescription: metaDescription.trim(), metaTags } : {}) } : settings;
+    const { error } = await supabase.from("autopilot_plans").insert({ user_id: user.id, topic: topic.trim(), settings: full, cloud: auto, publish_consent: auto && !!publishOn && consent, create_on: new Date(createOn).toISOString(), publish_on: publishOn ? new Date(publishOn).toISOString() : null });
     if (error) { toast.error(error.message); return false; }
-    setCreateOn(""); setPublishOn("");
+    setCreateOn(""); setPublishOn(""); setConsent(false); setMetaTitle(""); setMetaDescription(""); setMetaTags("");
     toast.success("Added to your Autopilot plan.");
     qc.invalidateQueries({ queryKey: ["autopilot-plans"] });
     return true;
@@ -95,6 +115,13 @@ export default function Autopilot() {
           <div className={stat}><p className="text-xs text-muted-foreground">Next release</p><p className="text-lg font-bold">{upcoming[0] ? fmt(upcoming[0].publish_at!) : "None yet"}</p></div>
         </div>
 
+        {isAdmin && (
+          <label className="mt-6 flex items-center gap-3 rounded-lg border border-border bg-card p-3 text-sm">
+            <Switch checked={!!access?.launched} onCheckedChange={setLaunch} aria-label="Automatic making for customers" />
+            <span><span className="font-semibold">Admin: automatic making for customers</span><br /><span className="text-xs text-muted-foreground">{access?.launched ? "On — Creator and Pro customers can use it." : "Off — only admins can use it."}</span></span>
+          </label>
+        )}
+
         {due.length > 0 && <div role="status" className="mt-6 rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm">{due.length} planned {due.length === 1 ? "video is" : "videos are"} ready to make today.</div>}
 
         <section className="mt-10">
@@ -110,13 +137,42 @@ export default function Autopilot() {
                     <Input type="datetime-local" min={createOn || localMin()} value={publishOn} onChange={(e) => setPublishOn(e.target.value)} />
                   </label>
                 </div>
-                {canCloud && (
-                  <label className="flex items-start gap-3 rounded-lg border border-primary/40 bg-primary/5 p-3 text-sm">
-                    <Switch checked={cloud} onCheckedChange={setCloud} aria-label="Make it automatically" />
-                    <span><span className="font-semibold">Make it automatically (admin test)</span><br /><span className="text-xs text-muted-foreground">At the chosen time Vydora writes, creates, renders{publishOn ? " and schedules it on YouTube" : ""} with your browser closed. Uses the same credits as making it yourself.</span></span>
-                  </label>
-                )}
-                <p className="text-xs text-muted-foreground">Planning is free. Credits are only used when you press “Make video” and create it.</p>
+                {canCloud ? (
+                  <div className="grid gap-3 rounded-lg border border-primary/40 bg-primary/5 p-3 text-sm">
+                    <label className="flex items-start gap-3">
+                      <Switch checked={cloud} onCheckedChange={setCloud} aria-label="Make it automatically" />
+                      <span><span className="font-semibold">Make it automatically</span><br /><span className="text-xs text-muted-foreground">At the chosen time Vydora writes, creates and renders the video for you, even with your browser closed.</span></span>
+                    </label>
+                    {cloud && (<>
+                      <div className="grid gap-2">
+                        <p className="text-xs font-semibold text-muted-foreground">Title, description, tags and thumbnail image</p>
+                        <div className="flex flex-wrap gap-2">
+                          <Button type="button" size="sm" variant={meta === "auto" ? "default" : "outline"} onClick={() => setMeta("auto")}>Create them automatically</Button>
+                          <Button type="button" size="sm" variant={meta === "manual" ? "default" : "outline"} onClick={() => setMeta("manual")}>I’ll write them myself</Button>
+                        </div>
+                        {meta === "auto" ? <p className="text-xs text-muted-foreground">Vydora writes the title, description and tags and makes a thumbnail image when the video is made (uses the usual credits for each).</p> : (
+                          <div className="grid gap-2">
+                            <Input placeholder="Title" maxLength={100} value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} />
+                            <Textarea placeholder="Description (optional)" maxLength={5000} value={metaDescription} onChange={(e) => setMetaDescription(e.target.value)} />
+                            <Input placeholder="Tags, separated by commas (optional)" value={metaTags} onChange={(e) => setMetaTags(e.target.value)} />
+                            <p className="text-xs text-muted-foreground">You can add a thumbnail image later from the video editor.</p>
+                          </div>
+                        )}
+                      </div>
+                      {publishOn && (
+                        <label className="flex items-start gap-3">
+                          <Switch checked={consent} onCheckedChange={setConsent} aria-label="Upload to my YouTube channel" />
+                          <span><span className="font-semibold">Upload to my YouTube channel</span><br /><span className="text-xs text-muted-foreground">I allow Vydora to upload this video to my connected channel as private, set to go live at the time above. Leave off to just get the video to download.</span></span>
+                        </label>
+                      )}
+                    </>)}
+                  </div>
+                ) : access && !access.subscribed && access.launched ? (
+                  <p className="rounded-lg border border-border bg-card p-3 text-xs text-muted-foreground">Want videos made for you automatically? <Link to="/pricing" className="font-semibold text-primary underline">Upgrade to Creator or Pro</Link>.</p>
+                ) : null}
+                <p className="text-xs text-muted-foreground">{cloud && canCloud
+                  ? "Planning is free. Credits are taken at the scheduled creation time, when Vydora makes the video. If you don’t have enough credits then, the video is skipped (nothing is charged) and you can top up and press Retry."
+                  : "Planning is free. Credits are only used when you press “Make video” and create it."}</p>
               </div>
             } />
           </div>
@@ -129,8 +185,10 @@ export default function Autopilot() {
                   <p className="text-xs text-muted-foreground">Make: {fmt(p.create_on)}{p.publish_on && ` · Go live: ${fmt(p.publish_on)}`}</p>
                 </div>
                 {p.cloud && (() => { const c = cloudStatus(p.id); return (<>
-                  <span className="text-xs font-semibold text-primary" title={c?.error ?? p.note ?? undefined}>{c?.label ?? (p.status === "skipped" ? "Skipped" : p.status === "failed" ? "Failed" : "Automatic")}</span>
-                  {(p.note || c?.error) && <span className="w-full text-xs text-destructive">{p.note ?? c?.error}</span>}
+                  <span className="text-xs font-semibold text-primary" >{c?.label ?? (p.status === "skipped" ? "Skipped" : p.status === "failed" ? "Couldn’t finish" : p.status === "queued" ? "Waiting for its turn" : "Automatic")}</span>
+                  {(p.note || c?.error) && <span className="w-full text-xs text-destructive">{c?.error ?? friendlyAutopilotError(p.note)}</span>}
+                  {p.status === "skipped" && /credit/i.test(p.note ?? "") && <Button asChild size="sm" variant="outline"><Link to="/pricing">Top up</Link></Button>}
+                  {c?.job?.youtube_video_id && <Button asChild size="sm" variant="outline"><a href={`https://studio.youtube.com/video/${c.job.youtube_video_id}/edit`} target="_blank" rel="noreferrer">YouTube</a></Button>}
                   {c?.job?.output_path && c.job.status === "completed" && <Button size="sm" variant="outline" onClick={() => download(c.job!.output_path!)}><Download className="mr-1 h-4 w-4" />Download</Button>}
                   {(p.status === "skipped" || p.status === "failed") && <Button size="sm" variant="outline" onClick={() => retry(p.id)}><RotateCcw className="mr-1 h-4 w-4" />Retry</Button>}
                 </>); })()}
@@ -141,6 +199,15 @@ export default function Autopilot() {
               </li>
             ))}
           </ul>
+        </section>
+
+        <section className="mt-10">
+          <h2 className="text-xl font-bold">Help and troubleshooting</h2>
+          <Accordion type="multiple" className="mt-2">
+            {AUTOPILOT_HELP.map((h) => (
+              <AccordionItem key={h.q} value={h.q}><AccordionTrigger className="text-left">{h.q}</AccordionTrigger><AccordionContent className="text-muted-foreground">{h.a}</AccordionContent></AccordionItem>
+            ))}
+          </Accordion>
         </section>
 
         <section className="mt-10">
