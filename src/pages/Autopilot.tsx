@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Progress } from "@/components/ui/progress";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AUTOPILOT_HELP, autopilotLengthOk, friendlyAutopilotError } from "@/lib/autopilot";
@@ -151,9 +152,19 @@ export default function Autopilot() {
   const STATUS: Record<string, string> = { queued: "Waiting for its turn", claimed: "Starting", generating: "Writing and making scenes", rendering: "Putting the video together", uploading: "Uploading to YouTube", completed: "Ready", failed: "Couldn\u2019t finish", cancelled: "Cancelled", skipped: "Skipped" };
   const cloudStatus = (planId: string) => {
     const job = jobs.find((j) => j.plan_id === planId);
-    if (job) return { label: `${STATUS[job.status] ?? job.status}${["rendering", "uploading"].includes(job.status) ? ` ${job.progress}%` : ""}`, job, error: job.status === "failed" ? friendlyAutopilotError(job.error) : null };
+    if (job) {
+      const pct = job.status === "completed" ? 100
+        : job.status === "rendering" ? Math.round(30 + job.progress * 0.6)
+        : job.status === "uploading" ? Math.round(90 + job.progress * 0.1)
+        : ["queued", "claimed"].includes(job.status) ? 10
+        : null;
+      return { label: STATUS[job.status] ?? job.status, pct, job, error: job.status === "failed" ? friendlyAutopilotError(job.error) : null };
+    }
     const run = runs.find((r) => r.plan_id === planId);
-    if (run) return { label: STATUS[run.status] ?? run.status, job: null, error: ["failed", "skipped", "cancelled"].includes(run.status) ? friendlyAutopilotError(run.error) : null };
+    if (run) {
+      const pct = run.status === "queued" ? 5 : run.status === "claimed" ? 10 : run.status === "generating" ? 30 : null;
+      return { label: STATUS[run.status] ?? run.status, pct, job: null, error: ["failed", "skipped", "cancelled"].includes(run.status) ? friendlyAutopilotError(run.error) : null };
+    }
     return null;
   };
   const download = async (p: string) => {
@@ -302,6 +313,12 @@ export default function Autopilot() {
                 </div>
                 {p.cloud && (() => { const c = cloudStatus(p.id); return (<>
                   <span className="text-xs font-semibold text-primary" >{c?.label ?? (p.status === "skipped" ? "Skipped" : p.status === "failed" ? "Couldn’t finish" : p.status === "queued" ? "Waiting for its turn" : "Automatic")}</span>
+                  {c?.pct != null && (
+                    <div className="flex w-full items-center gap-2" role="status" aria-label={`Progress ${c.pct}%`}>
+                      <Progress value={c.pct} className="h-2 flex-1" />
+                      <span className="w-10 text-right text-xs font-semibold text-primary">{c.pct}%</span>
+                    </div>
+                  )}
                   {(p.note || c?.error) && <span className="w-full text-xs text-destructive">{c?.error ?? friendlyAutopilotError(p.note)}</span>}
                   {p.status === "skipped" && /credit/i.test(p.note ?? "") && <Button asChild size="sm" variant="outline"><Link to="/pricing">Top up</Link></Button>}
                   {c?.job?.youtube_video_id && <Button asChild size="sm" variant="outline"><a href={`https://studio.youtube.com/video/${c.job.youtube_video_id}/edit`} target="_blank" rel="noreferrer">YouTube</a></Button>}
