@@ -29,4 +29,3 @@
 - Live activation: one-time admin `activate-live-billing` (checks, typed confirm, audited); owner sets STRIPE_MODE. Why: both switches must agree.
 - Product Ads: `/ads` = Create `adMode` + `ad` brief to `generate-script`. Why: one pipeline.
 - `voice-sample`: free previews cached in `samples/`. Why: previews cost nothing to replay.
-- Cloud rendering: `render_jobs` queue (lease claim via `claim_render_job`, heartbeat, `fail_render_job` refunds once) processed by the FFmpeg worker in `worker/` (Railway); browser export stays the live path until the worker is proven. Why: renders must survive a closed browser.

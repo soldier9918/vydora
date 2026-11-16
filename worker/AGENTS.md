@@ -1,0 +1,1 @@
+- Cloud rendering: `render_jobs` queue (lease claim via `claim_render_job`, heartbeat, `fail_render_job` refunds once) processed by the FFmpeg worker in `worker/` (Railway); browser export stays the live path until the worker is proven. Why: renders must survive a closed browser.
