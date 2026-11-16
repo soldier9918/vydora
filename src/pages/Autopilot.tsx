@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CalendarClock, Clapperboard, Download, RotateCcw, Trash2, Youtube } from "lucide-react";
+import { CalendarClock, Clapperboard, Download, Pencil, RotateCcw, Trash2, Youtube } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useAccount } from "@/lib/account";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AUTOPILOT_HELP, autopilotLengthOk, friendlyAutopilotError } from "@/lib/autopilot";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,6 +20,101 @@ import Create, { type PlanSettings } from "@/pages/Create";
 
 const fmt = (d: string) => new Date(d).toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 const localMin = (ms = 0) => new Date(Date.now() + ms - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+const pad2 = (n: number) => String(n).padStart(2, "0");
+const toLocalInput = (iso: string | null | undefined) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+};
+
+type Plan = {
+  id: string; topic: string; create_on: string; publish_on: string | null; status: string; cloud: boolean;
+  video_id: string | null; note: string | null; publish_consent: boolean;
+  settings: (PlanSettings & { meta?: "auto" | "manual"; metaTitle?: string; metaDescription?: string; metaTags?: string }) | null;
+};
+
+function EditPlanDialog({ plan, onClose, onSaved }: { plan: Plan; onClose: () => void; onSaved: () => void }) {
+  const [topic, setTopic] = useState(plan.topic);
+  const [makeOn, setMakeOn] = useState(toLocalInput(plan.create_on));
+  const [goLive, setGoLive] = useState(toLocalInput(plan.publish_on));
+  const [meta, setMeta] = useState<"auto" | "manual">(plan.settings?.meta ?? "auto");
+  const [mTitle, setMTitle] = useState(plan.settings?.metaTitle ?? "");
+  const [mDesc, setMDesc] = useState(plan.settings?.metaDescription ?? "");
+  const [mTags, setMTags] = useState(plan.settings?.metaTags ?? "");
+  const [consent, setConsent] = useState(plan.publish_consent);
+  const [busy, setBusy] = useState(false);
+
+  const save = async () => {
+    if (topic.trim().length < 3) { toast.error("Describe your video idea first."); return; }
+    if (!makeOn) { toast.error("Choose when to make it."); return; }
+    if (meta === "manual" && mTitle.trim().length < 3) { toast.error("Write a title, or choose to make it automatically."); return; }
+    setBusy(true);
+    const settings: Record<string, unknown> = { ...(plan.settings ?? {}) };
+    settings.meta = meta;
+    if (meta === "manual") { settings.metaTitle = mTitle.trim(); settings.metaDescription = mDesc.trim(); settings.metaTags = mTags; }
+    else { delete settings.metaTitle; delete settings.metaDescription; delete settings.metaTags; }
+    const { error } = await supabase.from("autopilot_plans").update({
+      topic: topic.trim(),
+      settings: settings as Plan["settings"],
+      create_on: new Date(makeOn).toISOString(),
+      publish_on: goLive ? new Date(goLive).toISOString() : null,
+      publish_consent: plan.cloud && !!goLive && consent,
+    }).eq("id", plan.id);
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Plan updated.");
+    onSaved();
+    onClose();
+  };
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit planned video</DialogTitle>
+          <DialogDescription>Change the idea, the dates, or the title, description and tags. The video itself is not made yet, so nothing is re-charged.</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-3 text-sm">
+          <label className="grid gap-1 text-xs font-semibold text-muted-foreground">Video idea
+            <Textarea rows={3} value={topic} onChange={(e) => setTopic(e.target.value)} />
+          </label>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="grid gap-1 text-xs font-semibold text-muted-foreground">Make it on
+              <DateTimePicker min={localMin()} value={makeOn} onChange={setMakeOn} placeholder="Pick a date & time" aria-label="Make it on" />
+            </label>
+            <label className="grid gap-1 text-xs font-semibold text-muted-foreground">Go live on YouTube (optional)
+              <DateTimePicker min={makeOn || localMin()} value={goLive} onChange={setGoLive} placeholder="Pick a date & time" aria-label="Go live on YouTube" />
+            </label>
+          </div>
+          <div className="grid gap-2 rounded-lg border border-border bg-card p-3">
+            <p className="text-xs font-semibold text-muted-foreground">Title, description, tags and thumbnail image</p>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" size="sm" variant={meta === "auto" ? "default" : "outline"} onClick={() => setMeta("auto")}>Create them automatically</Button>
+              <Button type="button" size="sm" variant={meta === "manual" ? "default" : "outline"} onClick={() => setMeta("manual")}>I’ll write them myself</Button>
+            </div>
+            {meta === "manual" && (
+              <div className="grid gap-2">
+                <Input placeholder="Title" maxLength={100} value={mTitle} onChange={(e) => setMTitle(e.target.value)} />
+                <Textarea placeholder="Description (optional)" maxLength={5000} value={mDesc} onChange={(e) => setMDesc(e.target.value)} />
+                <Input placeholder="Tags, separated by commas (optional)" value={mTags} onChange={(e) => setMTags(e.target.value)} />
+              </div>
+            )}
+          </div>
+          {plan.cloud && goLive && (
+            <label className="flex items-start gap-3 rounded-lg border border-primary/40 bg-primary/5 p-3">
+              <Switch checked={consent} onCheckedChange={setConsent} aria-label="Upload to my YouTube channel" />
+              <span><span className="font-semibold">Upload to my YouTube channel</span><br /><span className="text-xs text-muted-foreground">I allow Vydora to upload this video to my connected channel as private, set to go live at the time above.</span></span>
+            </label>
+          )}
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onClose}>Cancel</Button>
+            <Button onClick={save} disabled={busy}>{busy ? "Saving…" : "Save changes"}</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function Autopilot() {
   const { user } = useAuth();
@@ -32,6 +128,7 @@ export default function Autopilot() {
   const [metaDescription, setMetaDescription] = useState("");
   const [metaTags, setMetaTags] = useState("");
   const [consent, setConsent] = useState(false);
+  const [editing, setEditing] = useState<Plan | null>(null);
   const { data: access, refetch: refetchAccess } = useQuery({
     queryKey: ["autopilot-access"], enabled: !!user,
     queryFn: async () => ((await supabase.rpc("autopilot_access")).data ?? {}) as { eligible?: boolean; launched?: boolean; subscribed?: boolean; admin?: boolean },
@@ -214,6 +311,9 @@ export default function Autopilot() {
                 {p.cloud ? null : p.status === "made" ? <span className="text-xs font-semibold text-primary">Made</span> : (
                   <Button asChild size="sm" onClick={() => markMade(p.id)}><Link to={`/create?idea=${encodeURIComponent(p.topic)}&settings=${encodeURIComponent(JSON.stringify(p.settings ?? {}))}`}>Make video</Link></Button>
                 )}
+                {p.status === "planned" && !p.video_id && (
+                  <Button size="icon" variant="ghost" aria-label="Edit plan" onClick={() => setEditing(p as Plan)}><Pencil className="h-4 w-4" /></Button>
+                )}
                 <Button size="icon" variant="ghost" aria-label="Remove" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /></Button>
               </li>
             ))}
@@ -248,6 +348,7 @@ export default function Autopilot() {
           </ul>
         </section>
       </main>
+      {editing && <EditPlanDialog plan={editing} onClose={() => setEditing(null)} onSaved={() => qc.invalidateQueries({ queryKey: ["autopilot-plans"] })} />}
       <SiteFooter />
     </div>
   );
