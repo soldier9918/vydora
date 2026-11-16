@@ -304,6 +304,146 @@ export type Database = {
         }
         Relationships: []
       }
+      render_job_events: {
+        Row: {
+          created_at: string
+          id: number
+          job_id: string
+          level: string
+          message: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          job_id: string
+          level?: string
+          message: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          job_id?: string
+          level?: string
+          message?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_job_events_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "render_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      render_jobs: {
+        Row: {
+          attempts: number
+          completed_at: string | null
+          created_at: string
+          credits_charged: number
+          credits_refunded: boolean
+          error: string | null
+          id: string
+          idempotency_key: string
+          kind: string
+          locked_by: string | null
+          locked_until: string | null
+          max_attempts: number
+          output_path: string | null
+          plan_id: string | null
+          progress: number
+          publish: boolean
+          publish_at: string | null
+          run_after: string
+          scene_cursor: number
+          size_bytes: number | null
+          status: string
+          updated_at: string
+          user_id: string
+          video_id: string
+          youtube_bytes_sent: number
+          youtube_session_url: string | null
+          youtube_video_id: string | null
+        }
+        Insert: {
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          credits_charged?: number
+          credits_refunded?: boolean
+          error?: string | null
+          id?: string
+          idempotency_key: string
+          kind?: string
+          locked_by?: string | null
+          locked_until?: string | null
+          max_attempts?: number
+          output_path?: string | null
+          plan_id?: string | null
+          progress?: number
+          publish?: boolean
+          publish_at?: string | null
+          run_after?: string
+          scene_cursor?: number
+          size_bytes?: number | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          video_id: string
+          youtube_bytes_sent?: number
+          youtube_session_url?: string | null
+          youtube_video_id?: string | null
+        }
+        Update: {
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          credits_charged?: number
+          credits_refunded?: boolean
+          error?: string | null
+          id?: string
+          idempotency_key?: string
+          kind?: string
+          locked_by?: string | null
+          locked_until?: string | null
+          max_attempts?: number
+          output_path?: string | null
+          plan_id?: string | null
+          progress?: number
+          publish?: boolean
+          publish_at?: string | null
+          run_after?: string
+          scene_cursor?: number
+          size_bytes?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          video_id?: string
+          youtube_bytes_sent?: number
+          youtube_session_url?: string | null
+          youtube_video_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_jobs_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "autopilot_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "render_jobs_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_brand_cards: {
         Row: {
           cards: Json
@@ -779,10 +919,53 @@ export type Database = {
         }[]
       }
       can_mutate_project: { Args: { _user_id: string }; Returns: boolean }
+      cancel_render_job: { Args: { _job: string }; Returns: boolean }
       claim_monthly_free_credits: { Args: never; Returns: number }
       claim_referral: { Args: { _code: string }; Returns: string }
+      claim_render_job: {
+        Args: { _lease_seconds?: number; _worker: string }
+        Returns: {
+          attempts: number
+          completed_at: string | null
+          created_at: string
+          credits_charged: number
+          credits_refunded: boolean
+          error: string | null
+          id: string
+          idempotency_key: string
+          kind: string
+          locked_by: string | null
+          locked_until: string | null
+          max_attempts: number
+          output_path: string | null
+          plan_id: string | null
+          progress: number
+          publish: boolean
+          publish_at: string | null
+          run_after: string
+          scene_cursor: number
+          size_bytes: number | null
+          status: string
+          updated_at: string
+          user_id: string
+          video_id: string
+          youtube_bytes_sent: number
+          youtube_session_url: string | null
+          youtube_video_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "render_jobs"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       credit_balance: { Args: { _user: string }; Returns: number }
       effective_account: { Args: { _user: string }; Returns: Json }
+      fail_render_job: {
+        Args: { _error: string; _job: string; _retry: boolean; _worker: string }
+        Returns: string
+      }
       grant_monthly_free_credits_all: { Args: never; Returns: number }
       has_active_subscription: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
@@ -790,6 +973,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      heartbeat_render_job: {
+        Args: { _job: string; _lease_seconds?: number; _worker: string }
         Returns: boolean
       }
       live_activation_ready: { Args: never; Returns: Json }
