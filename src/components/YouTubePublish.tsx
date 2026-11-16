@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
 
 type Status = { configured: boolean; connection: { channel_id: string; channel_title: string; channel_thumbnail: string | null } | null };
 
@@ -216,7 +217,7 @@ export default function YouTubePublish({ videoId, title, description, tags, hasE
                   {(["now", "later"] as const).map((w) => <Button key={w} type="button" size="sm" variant={form.when === w ? "default" : "outline"} onClick={() => setForm({ ...form, when: w })}>{w === "now" ? "Publish now" : "Schedule for later"}</Button>)}
                 </div>
                 {form.when === "later" && <>
-                  <Input type="datetime-local" value={form.at} min={new Date(Date.now() + 10 * 60_000 - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 16)} onChange={(e) => setForm({ ...form, at: e.target.value })} />
+                  <DateTimePicker value={form.at} min={new Date(Date.now() + 10 * 60_000 - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 16)} onChange={(v) => setForm({ ...form, at: v })} placeholder="Pick a date & time" aria-label="Go-live time" />
                   <span className="font-normal">Uploads now as private, then YouTube makes it public at this time (your local time).</span>
                 </>}
               </div>

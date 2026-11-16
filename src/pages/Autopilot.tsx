@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
 import { AUTOPILOT_HELP, autopilotLengthOk, friendlyAutopilotError } from "@/lib/autopilot";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -150,10 +151,10 @@ export default function Autopilot() {
               <div className="grid gap-3">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="grid gap-1 text-xs font-semibold text-muted-foreground">Make it on
-                    <Input type="datetime-local" min={localMin()} value={createOn} onChange={(e) => setCreateOn(e.target.value)} />
+                    <DateTimePicker min={localMin()} value={createOn} onChange={setCreateOn} placeholder="Pick a date & time" aria-label="Make it on" />
                   </label>
                   <label className="grid gap-1 text-xs font-semibold text-muted-foreground">Go live on YouTube (optional)
-                    <Input type="datetime-local" min={createOn || localMin()} value={publishOn} onChange={(e) => setPublishOn(e.target.value)} />
+                    <DateTimePicker min={createOn || localMin()} value={publishOn} onChange={setPublishOn} placeholder="Pick a date & time" aria-label="Go live on YouTube" />
                   </label>
                 </div>
                       <div className="grid gap-2 rounded-lg border border-border bg-card p-3 text-sm">
