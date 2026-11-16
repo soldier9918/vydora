@@ -358,6 +358,13 @@
       "when": 1794866857030,
       "tag": "0050_autopilot_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1794868225552,
+      "tag": "0051_fix_claim_autopilot_run_ambiguity",
+      "breakpoints": true
     }
   ]
 }
