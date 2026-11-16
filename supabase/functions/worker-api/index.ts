@@ -22,7 +22,7 @@ async function sameSecret(a: string, b: string) {
 
 type DB = ReturnType<typeof adminClient>;
 const isUuid = (s: unknown): s is string => typeof s === "string" && /^[0-9a-f-]{36}$/i.test(s);
-const workerOk = (s: unknown): s is string => typeof s === "string" && /^[A-Za-z0-9._-]{1,64}$/.test(s);
+const workerOk = (s: unknown): s is string => typeof s === "string" && /^[A-Za-z0-9._:-]{1,64}$/.test(s);
 
 async function sign(db: DB, p: string | null | undefined, userId: string) {
   if (!p) return null;
@@ -62,8 +62,12 @@ Deno.serve(async (req) => {
   const auth = req.headers.get("authorization") ?? "";
   if (!(await sameSecret(auth.replace(/^Bearer\s+/i, ""), SECRET))) return ok({ error: "unauthorized" }, 401);
   const body = await req.json().catch(() => ({}));
-  const { action, worker } = body ?? {};
-  if (!workerOk(worker)) return ok({ error: "invalid worker id" }, 400);
+  const action = body?.action;
+  const worker = typeof body?.worker === "string" ? body.worker.trim().replace(/^["']+|["']+$/g, "").trim() : body?.worker;
+  if (!workerOk(worker)) {
+    console.warn("invalid worker id", JSON.stringify({ type: typeof body?.worker, length: typeof body?.worker === "string" ? body.worker.length : null }));
+    return ok({ error: "invalid worker id" }, 400);
+  }
   const db = adminClient();
   try {
     if (action === "claim") {
