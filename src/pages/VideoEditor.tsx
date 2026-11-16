@@ -545,7 +545,7 @@ export default function VideoEditor() {
     try {
       await generateSeo(id!);
       await qc.invalidateQueries({ queryKey: ["video", id] });
-      toast.success("SEO pack ready!");
+      toast.success("Title, description and tags ready!");
     } catch (e) {
       toast.error((e as Error).message);
     } finally {

@@ -172,16 +172,14 @@ export default function Autopilot() {
                         )}
                       </div>
                 {canCloud ? (
-                  <div className="grid gap-3 rounded-lg border border-primary/40 bg-primary/5 p-3 text-sm">
-                    {cloud && (<>
-                      {publishOn && (
-                        <label className="flex items-start gap-3">
-                          <Switch checked={consent} onCheckedChange={setConsent} aria-label="Upload to my YouTube channel" />
-                          <span><span className="font-semibold">Upload to my YouTube channel</span><br /><span className="text-xs text-muted-foreground">I allow Vydora to upload this video to my connected channel as private, set to go live at the time above. Leave off to just get the video to download.</span></span>
-                        </label>
-                      )}
-                    </>)}
-                  </div>
+                  cloud && publishOn ? (
+                    <div className="grid gap-3 rounded-lg border border-primary/40 bg-primary/5 p-3 text-sm">
+                      <label className="flex items-start gap-3">
+                        <Switch checked={consent} onCheckedChange={setConsent} aria-label="Upload to my YouTube channel" />
+                        <span><span className="font-semibold">Upload to my YouTube channel</span><br /><span className="text-xs text-muted-foreground">I allow Vydora to upload this video to my connected channel as private, set to go live at the time above. Leave off to just get the video to download.</span></span>
+                      </label>
+                    </div>
+                  ) : null
                 ) : access && !access.subscribed && access.launched ? (
                   <p className="rounded-lg border border-border bg-card p-3 text-xs text-muted-foreground">Want videos made for you automatically? <Link to="/pricing" className="font-semibold text-primary underline">Upgrade to Creator or Pro</Link>.</p>
                 ) : null}

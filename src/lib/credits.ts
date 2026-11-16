@@ -28,7 +28,7 @@ export function costBreakdown(i: EstimateInput): CostLine[] {
   lines.push({ label: `${i.scenes} voiceovers`, credits: i.scenes * c.voice });
   if (i.animated) lines.push({ label: `${i.animated} animated scenes`, credits: i.animated * c.animate });
   if (i.thumbnail) lines.push({ label: "Thumbnail", credits: c.thumbnail });
-  if (i.seo) lines.push({ label: "SEO titles & tags", credits: c.seo });
+  if (i.seo) lines.push({ label: "Title, description & tags", credits: c.seo });
   return lines;
 }
 

@@ -23,7 +23,7 @@ export const used30d = (ledger: LedgerRow[], now = Date.now()) =>
 
 export const REASON_LABEL: Record<string, string> = {
   starter: "Free monthly credits", monthly_free: "Monthly free credits", subscription: "Monthly plan credits", referral_joined: "Joined with an invite", referral_invite: "Friend joined with your invite", admin_adjustment: "Adjusted by Vydora", live_opening_adjustment: "Test-mode credits removed at launch",
-  topup: "Credit top-up", refund_reversal: "Refunded payment", dispute_reversal: "Disputed payment", dispute_restored: "Dispute resolved", coupon: "Coupon code", thumbnail: "Thumbnail", seo: "SEO title & tags", scene_voice: "Scene voiceover", scene_image: "Scene image", script: "Video script", animate: "Scene animation",
+  topup: "Credit top-up", refund_reversal: "Refunded payment", dispute_reversal: "Disputed payment", dispute_restored: "Dispute resolved", coupon: "Coupon code", thumbnail: "Thumbnail", seo: "Title, description & tags", scene_voice: "Scene voiceover", scene_image: "Scene image", script: "Video script", animate: "Scene animation",
 };
 
 export function useAccount() {
