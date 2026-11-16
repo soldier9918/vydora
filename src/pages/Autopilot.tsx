@@ -105,8 +105,8 @@ export default function Autopilot() {
     if (!createOn) { toast.error("Choose when to make it."); return false; }
     if (settings.length && !autopilotLengthOk(Number(settings.length))) { toast.error("Autopilot videos can be up to 20 Minutes long."); return false; }
     const auto = canCloud && cloud;
-    if (auto && meta === "manual" && metaTitle.trim().length < 3) { toast.error("Write a title, or choose to make it automatically."); return false; }
-    const full = auto ? { ...settings, meta, ...(meta === "manual" ? { metaTitle: metaTitle.trim(), metaDescription: metaDescription.trim(), metaTags } : {}) } : settings;
+    if (meta === "manual" && metaTitle.trim().length < 3) { toast.error("Write a title, or choose to make it automatically."); return false; }
+    const full = { ...settings, meta, ...(meta === "manual" ? { metaTitle: metaTitle.trim(), metaDescription: metaDescription.trim(), metaTags } : {}) };
     const { error } = await supabase.from("autopilot_plans").insert({ user_id: user.id, topic: topic.trim(), settings: full, cloud: auto, publish_consent: auto && !!publishOn && consent, create_on: new Date(createOn).toISOString(), publish_on: publishOn ? new Date(publishOn).toISOString() : null });
     if (error) { toast.error(error.message); return false; }
     setCreateOn(""); setPublishOn(""); setConsent(false); setMetaTitle(""); setMetaDescription(""); setMetaTags("");
@@ -156,14 +156,7 @@ export default function Autopilot() {
                     <Input type="datetime-local" min={createOn || localMin()} value={publishOn} onChange={(e) => setPublishOn(e.target.value)} />
                   </label>
                 </div>
-                {canCloud ? (
-                  <div className="grid gap-3 rounded-lg border border-primary/40 bg-primary/5 p-3 text-sm">
-                    <label className="flex items-start gap-3">
-                      <Switch checked={cloud} onCheckedChange={setCloud} aria-label="Make it automatically" />
-                      <span><span className="font-semibold">Make it automatically</span><br /><span className="text-xs text-muted-foreground">At the chosen time Vydora writes, creates and renders the video for you, even with your browser closed.</span></span>
-                    </label>
-                    {cloud && (<>
-                      <div className="grid gap-2">
+                      <div className="grid gap-2 rounded-lg border border-border bg-card p-3 text-sm">
                         <p className="text-xs font-semibold text-muted-foreground">Title, description, tags and thumbnail image</p>
                         <div className="flex flex-wrap gap-2">
                           <Button type="button" size="sm" variant={meta === "auto" ? "default" : "outline"} onClick={() => setMeta("auto")}>Create them automatically</Button>
@@ -178,6 +171,13 @@ export default function Autopilot() {
                           </div>
                         )}
                       </div>
+                {canCloud ? (
+                  <div className="grid gap-3 rounded-lg border border-primary/40 bg-primary/5 p-3 text-sm">
+                    <label className="flex items-start gap-3">
+                      <Switch checked={cloud} onCheckedChange={setCloud} aria-label="Make it automatically" />
+                      <span><span className="font-semibold">Make it automatically</span><br /><span className="text-xs text-muted-foreground">At the chosen time Vydora writes, creates and renders the video for you, even with your browser closed.</span></span>
+                    </label>
+                    {cloud && (<>
                       {publishOn && (
                         <label className="flex items-start gap-3">
                           <Switch checked={consent} onCheckedChange={setConsent} aria-label="Upload to my YouTube channel" />
