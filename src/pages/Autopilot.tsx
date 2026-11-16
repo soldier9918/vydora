@@ -199,8 +199,10 @@ export default function Autopilot() {
             {plans.length === 0 && <li className="text-sm text-muted-foreground">No planned videos yet.</li>}
             {plans.map((p) => (
               <li key={p.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-3 text-sm">
-                {p.video_id && thumbs[p.video_id] && (
+                {p.video_id && thumbs[p.video_id] ? (
                   <Link to={`/video/${p.video_id}`} className="shrink-0"><img src={thumbs[p.video_id]} alt={`Thumbnail for ${p.topic}`} className="h-12 w-20 rounded-md border border-border object-cover" loading="lazy" /></Link>
+                ) : (
+                  <div className="flex h-12 w-20 shrink-0 items-center justify-center rounded-md border border-dashed border-border bg-muted/40 text-[10px] text-muted-foreground" aria-label="No video yet">Not made yet</div>
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{p.topic}</p>
