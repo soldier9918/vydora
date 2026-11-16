@@ -77,6 +77,24 @@ export default function Autopilot() {
     queryKey: ["autopilot-uploads"], enabled: !!user,
     queryFn: async () => (await supabase.from("youtube_uploads").select("id, video_id, title, publish_at, youtube_video_id, status").not("publish_at", "is", null).order("publish_at")).data ?? [],
   });
+  const madeIds = plans.map((p) => p.video_id).filter(Boolean) as string[];
+  const { data: thumbs = {} } = useQuery({
+    queryKey: ["autopilot-thumbs", madeIds.join(",")], enabled: madeIds.length > 0,
+    queryFn: async () => {
+      const [{ data: vids }, { data: scenes }] = await Promise.all([
+        supabase.from("videos").select("id, thumbnail_path").in("id", madeIds),
+        supabase.from("video_scenes").select("video_id, image_path, position").in("video_id", madeIds).not("image_path", "is", null).order("position"),
+      ]);
+      const out: Record<string, string> = {};
+      for (const id of madeIds) {
+        const path = vids?.find((v) => v.id === id)?.thumbnail_path ?? scenes?.find((s) => s.video_id === id)?.image_path;
+        if (!path) continue;
+        const { data } = await supabase.storage.from("video-assets").createSignedUrl(path, 3600);
+        if (data) out[id] = data.signedUrl;
+      }
+      return out;
+    },
+  });
   const now = Date.now();
   const upcoming = uploads.filter((u) => u.status === "uploaded" && new Date(u.publish_at!).getTime() > now);
   const released = uploads.filter((u) => u.status === "uploaded" && new Date(u.publish_at!).getTime() <= now);
@@ -180,6 +198,9 @@ export default function Autopilot() {
             {plans.length === 0 && <li className="text-sm text-muted-foreground">No planned videos yet.</li>}
             {plans.map((p) => (
               <li key={p.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-3 text-sm">
+                {p.video_id && thumbs[p.video_id] && (
+                  <Link to={`/video/${p.video_id}`} className="shrink-0"><img src={thumbs[p.video_id]} alt={`Thumbnail for ${p.topic}`} className="h-12 w-20 rounded-md border border-border object-cover" loading="lazy" /></Link>
+                )}
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-semibold">{p.topic}</p>
                   <p className="text-xs text-muted-foreground">Make: {fmt(p.create_on)}{p.publish_on && ` · Go live: ${fmt(p.publish_on)}`}</p>

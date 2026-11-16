@@ -271,6 +271,7 @@ Deno.serve(async (req) => {
         const { error } = await db.from("render_jobs").update(patch).eq("id", job.id).eq("locked_by", worker);
         if (error) throw error;
         await log(db, job, "Completed");
+        if (job.kind === "autopilot") await db.from("autopilot_runs").update({ status: "completed", updated_at: new Date().toISOString() }).eq("render_job_id", job.id);
         return ok({ ok: true });
       }
       case "fail": {

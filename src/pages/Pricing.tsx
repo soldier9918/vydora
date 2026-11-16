@@ -15,7 +15,7 @@ const MENU = [
   { label: "Scene voiceover", credits: CREDIT_COSTS.voice, note: "Per scene, and per redo" },
   { label: "✨ Animate scene", credits: CREDIT_COSTS.animate, note: "Per scene — AI video is costly to make" },
   { label: "Thumbnail", credits: CREDIT_COSTS.thumbnail, note: "Per thumbnail or text redo" },
-  { label: "SEO titles, description & tags", credits: CREDIT_COSTS.seo, note: "Per generation" },
+  { label: "Title, description & tags", credits: CREDIT_COSTS.seo, note: "Per generation" },
   { label: "Music, sound effects, camera motion, transitions, captions, video exports & downloads (720p and 1080p)", credits: 0, note: "Always free — no watermark on any plan" },
 ];
 
@@ -64,7 +64,7 @@ export default function Pricing() {
               <label className="grid gap-2 text-sm font-semibold">Animated scenes: {animated} of {scenes}
                 <Slider min={0} max={MAX_SCENES} step={1} value={[animated]} onValueChange={([v]) => setAnimated(Math.min(v, scenes))} />
               </label>
-              {([["Use real facts", facts, setFacts], ["Thumbnail", thumb, setThumb], ["SEO titles & tags", seo, setSeo], ["1080p Full HD", hd, setHd]] as const).map(([l, v, set]) => (
+              {([["Use real facts", facts, setFacts], ["Thumbnail", thumb, setThumb], ["Title, description & tags", seo, setSeo], ["1080p Full HD", hd, setHd]] as const).map(([l, v, set]) => (
                 <label key={l} className="flex items-center justify-between text-sm font-semibold">{l}<Switch checked={v} onCheckedChange={set} /></label>
               ))}
             </div>
@@ -115,7 +115,7 @@ export default function Pricing() {
         <section className="mt-12 grid gap-4 md:grid-cols-2">
           {[
             ["Why does animating cost more?", "Each animated scene is a short AI-made video clip, which takes far more computing power than a still picture."],
-            ["Do redos cost credits?", "Yes — redoing an image, voiceover, script, thumbnail or SEO costs the same as making it the first time."],
+            ["Do redos cost credits?", "Yes — redoing an image, voiceover, script, thumbnail, or title, description and tags costs the same as making it the first time."],
             ["What happens if I run out?", "AI steps pause until you top up. You can still view and download your videos for free."],
             ["Are estimates exact?", "They're close guides based on your settings. Redos and extra scenes add to the total."],
             ["Do I own the videos I make?", "You can download and publish your videos on YouTube or anywhere else. Downloads never carry a watermark."],
