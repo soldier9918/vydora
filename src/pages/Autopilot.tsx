@@ -24,7 +24,7 @@ export default function Autopilot() {
   const qc = useQueryClient();
   const [createOn, setCreateOn] = useState("");
   const [publishOn, setPublishOn] = useState("");
-  const [cloud, setCloud] = useState(false);
+  const cloud = true;
   const { data: acct } = useAccount();
   const [meta, setMeta] = useState<"auto" | "manual">("auto");
   const [metaTitle, setMetaTitle] = useState("");
@@ -173,10 +173,6 @@ export default function Autopilot() {
                       </div>
                 {canCloud ? (
                   <div className="grid gap-3 rounded-lg border border-primary/40 bg-primary/5 p-3 text-sm">
-                    <label className="flex items-start gap-3">
-                      <Switch checked={cloud} onCheckedChange={setCloud} aria-label="Make it automatically" />
-                      <span><span className="font-semibold">Make it automatically</span><br /><span className="text-xs text-muted-foreground">At the chosen time Vydora writes, creates and renders the video for you, even with your browser closed.</span></span>
-                    </label>
                     {cloud && (<>
                       {publishOn && (
                         <label className="flex items-start gap-3">
