@@ -351,6 +351,13 @@
       "when": 1794866235068,
       "tag": "0049_autopilot_retry_rpc",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1794866857030,
+      "tag": "0050_autopilot_hardening",
+      "breakpoints": true
     }
   ]
 }

@@ -1061,6 +1061,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      heartbeat_autopilot_run: {
+        Args: { _lease_seconds?: number; _run: string; _worker: string }
+        Returns: boolean
+      }
       heartbeat_render_job: {
         Args: { _job: string; _lease_seconds?: number; _worker: string }
         Returns: boolean

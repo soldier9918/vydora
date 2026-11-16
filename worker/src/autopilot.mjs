@@ -18,7 +18,10 @@ export async function autopilotTick() {
   if (m.queued) { console.log("autopilot: render queued", m.queued); return true; }
   if (!m.run) return false;
   console.log(`autopilot run ${m.run.id}: ${m.tasks.length} task(s)`);
-  const results = await Promise.all(m.tasks.map((t) => call(t.fn, t.body, m.token)));
+  // Keep the lease alive while long script/asset steps run, so no other worker can take this run.
+  const beat = setInterval(() => api("autopilot_heartbeat", { run: m.run.id }).catch(() => {}), 60_000);
+  let results;
+  try { results = await Promise.all(m.tasks.map((t) => call(t.fn, t.body, m.token))); } finally { clearInterval(beat); }
   await api("autopilot_result", { run: m.run.id, results });
   return true;
 }

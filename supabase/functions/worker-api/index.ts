@@ -76,7 +76,7 @@ async function autopilotClaim(db: DB, worker: string) {
   if (!run) return { run: null };
   const { data: plan } = await db.from("autopilot_plans").select("*").eq("id", run.plan_id).maybeSingle();
   if (!plan) { await finishRun(db, run, "failed", "Plan was removed"); return { run: null }; }
-  if (run.attempts >= 30) { await finishRun(db, run, "failed", "Gave up after repeated errors"); return { run: null }; }
+  if (!plan.cloud || plan.status !== "queued") { await db.from("autopilot_runs").update({ status: "cancelled", locked_by: null, locked_until: null }).eq("id", run.id); return { run: null }; }
   const token = await signTask(run.user_id);
   if (!run.video_id) {
     const st = (plan.settings ?? {}) as Record<string, unknown>;
@@ -128,7 +128,9 @@ async function autopilotResult(db: DB, worker: string, body: Record<string, unkn
   const hard = results.find((r) => r.status && r.status >= 400 && r.status < 500 && r.status !== 429);
   if (hard) { await finishRun(db, run, "failed", String(hard.error ?? "Couldn't make this video").slice(0, 500)); return { ok: true }; }
   const soft = results.some((r) => !r.status || r.status >= 429);
-  await db.from("autopilot_runs").update({ locked_by: null, locked_until: null, updated_at: new Date().toISOString(),
+  if (soft && run.attempts >= 3) { await finishRun(db, run, "failed", "Stopped after 3 failed attempts: " + String(results.find((r) => r.error)?.error ?? "temporary error").slice(0, 300)); return { ok: true }; }
+  // A successful step resets the consecutive-failure counter (max 3 failed attempts in a row).
+  await db.from("autopilot_runs").update({ ...(soft ? {} : { attempts: 0 }), locked_by: null, locked_until: null, updated_at: new Date().toISOString(),
     run_after: new Date(Date.now() + (soft ? 120_000 : 0)).toISOString(), error: soft ? String(results.find((r) => r.error)?.error ?? "Temporary error, retrying").slice(0, 500) : null }).eq("id", run.id);
   return { ok: true };
 }
@@ -181,6 +183,11 @@ Deno.serve(async (req) => {
     }
 
     if (action === "autopilot_claim") return ok(await autopilotClaim(db, worker));
+    if (action === "autopilot_heartbeat") {
+      if (!isUuid(body.run)) return ok({ error: "bad run" }, 400);
+      const { data } = await db.rpc("heartbeat_autopilot_run", { _run: body.run, _worker: worker, _lease_seconds: 240 });
+      return ok({ ok: data === true });
+    }
     if (action === "autopilot_result") return ok(await autopilotResult(db, worker, body));
 
     const job = await heldJob(db, body.job, worker);
