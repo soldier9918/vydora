@@ -13,16 +13,19 @@ import { CREDIT_COSTS } from "@/lib/credits";
 import { estimateCredits } from "@/lib/credits";
 import { duplicateVideo, useAccount, isReadOnlyAccount } from "@/lib/account";
 
-type Kind = "normal" | "article" | "series";
+type Kind = "normal" | "article" | "series" | "autopilot";
 const GROUPS: { kind: Kind; label: string }[] = [
   { kind: "normal", label: "Videos" },
   { kind: "article", label: "Article to video" },
   { kind: "series", label: "Series" },
+  { kind: "autopilot", label: "Autopilot" },
 ];
 // Series episodes are titled "<Series> [Part n/N]: ..." by the Series page; articles keep their link.
-function videoKind(v: { title: string; source_url?: string | null }): Kind {
+// Autopilot videos are known from the plan that made them.
+function videoKind(v: { id: string; title: string; source_url?: string | null }, autopilotIds?: Set<string>): Kind {
   if (/\[Part \d+\/\d+\]/.test(v.title)) return "series";
   if (v.source_url) return "article";
+  if (autopilotIds?.has(v.id)) return "autopilot";
   return "normal";
 }
 
@@ -49,6 +52,13 @@ export default function MyVideos() {
       const m: Record<string, string> = {};
       (data ?? []).forEach((u) => { if (u.youtube_video_id) m[u.video_id] = u.youtube_video_id; });
       return m;
+    },
+  });
+  const { data: autopilotIds } = useQuery({
+    queryKey: ["autopilot-video-ids"],
+    queryFn: async () => {
+      const { data } = await supabase.from("autopilot_plans").select("video_id").not("video_id", "is", null);
+      return new Set((data ?? []).map((p) => p.video_id).filter(Boolean) as string[]);
     },
   });
   const [dupBusy, setDupBusy] = useState<string | null>(null);
@@ -163,17 +173,17 @@ export default function MyVideos() {
           {videos && videos.length > 0 && (() => {
             const term = q.trim().toLowerCase();
             const typeOf = (v: (typeof videos)[number]) => {
-              const kind = videoKind(v);
+              const kind = videoKind(v, autopilotIds);
               return kind === "series" ? (v.title.match(/\[Part \d+\/\d+\]/)?.[0].slice(1, -1) ?? "Series")
                 : v.aspect_ratio === "9:16" ? "9:16 Short" : "16:9 Video";
             };
             const list = videos
-              .filter((v) => (filter === "all" || videoKind(v) === filter) && (!term || v.title.toLowerCase().includes(term) || (v.topic ?? "").toLowerCase().includes(term)))
+              .filter((v) => (filter === "all" || videoKind(v, autopilotIds) === filter) && (!term || v.title.toLowerCase().includes(term) || (v.topic ?? "").toLowerCase().includes(term)))
               .sort((a, b) => {
                 const d = sort.dir;
                 switch (sort.key) {
                   case "name": return d * a.title.localeCompare(b.title);
-                  case "category": return d * videoKind(a).localeCompare(videoKind(b));
+                  case "category": return d * videoKind(a, autopilotIds).localeCompare(videoKind(b, autopilotIds));
                   case "type": return d * typeOf(a).localeCompare(typeOf(b));
                   case "credits": return d * (a.credits - b.credits);
                   case "youtube": return d * ((published?.[a.id] ? 1 : 0) - (published?.[b.id] ? 1 : 0));
@@ -199,7 +209,7 @@ export default function MyVideos() {
                   <tbody>
                     {list.length === 0 && <tr><td colSpan={9} className="px-3 py-6 text-center text-muted-foreground">No videos match.</td></tr>}
                     {list.map((v) => {
-                      const kind = videoKind(v);
+                      const kind = videoKind(v, autopilotIds);
                       const typeLabel = typeOf(v);
                       const yt = published?.[v.id];
                       return (
@@ -211,7 +221,7 @@ export default function MyVideos() {
                             </Link>
                           </td>
                           <td className="max-w-[220px] px-3 py-2"><Link to={`/video/${v.id}`} className="line-clamp-2 font-semibold hover:text-primary">{v.title}</Link></td>
-                          <td className="px-3 py-2"><span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ${kind === "series" ? "bg-primary/15 text-primary" : kind === "article" ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"}`}>{kind === "series" ? "Series" : kind === "article" ? "Article to video" : "Standard video"}</span></td>
+                          <td className="px-3 py-2"><span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ${kind === "series" ? "bg-primary/15 text-primary" : kind === "article" ? "bg-accent text-accent-foreground" : kind === "autopilot" ? "border border-primary/40 bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{kind === "series" ? "Series" : kind === "article" ? "Article to video" : kind === "autopilot" ? "Autopilot" : "Standard video"}</span></td>
                           <td className="px-3 py-2"><span className="whitespace-nowrap rounded-full border border-border px-2 py-0.5 text-xs">{typeLabel}</span></td>
                           <td className="max-w-[240px] px-3 py-2 text-muted-foreground"><span className="line-clamp-2" title={v.topic ?? ""}>{v.topic}</span></td>
                           <td className="whitespace-nowrap px-3 py-2 font-semibold text-primary">⚡ ~{v.credits}</td>
