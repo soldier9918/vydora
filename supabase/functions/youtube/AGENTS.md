@@ -1,3 +1,3 @@
 - Google OAuth redirect URI is this function's own URL; `state` is HMAC-signed with YOUTUBE_STATE_SECRET and return URLs are allow-listed.
 - YouTube: `youtube` fn keeps tokens. Why: server-side.
-- Autopilot: `autopilot_plans` is free planning only; YouTube scheduling uses native `publishAt`. Why: no unattended credit spend.
+- Autopilot: `autopilot_plans` are free to plan; cloud plans run on the worker and spend credits through the normal paid functions only for eligible accounts; YouTube scheduling uses native `publishAt`. Why: no unattended credit spend.
