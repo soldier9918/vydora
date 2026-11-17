@@ -23,7 +23,7 @@ import { MUSIC_MOODS } from "@/lib/music";
 import { estimateCredits } from "@/lib/credits";
 import { useAccount } from "@/lib/account";
 import { voiceAllowed, scenesAllowedForPlan, lengthAllowedForPlan, qualityAllowedForPlan, FREE_MAX_SCENES } from "@/lib/tiers";
-import { lengthPlanLabel } from "@/lib/tiers";
+import { lengthPlanLabel, LENGTH_PLAN_SUMMARY } from "@/lib/tiers";
 import { VIDEO_LENGTHS, formatSeconds, isLengthAllowed, secondsPerScene, minScenesForSeconds, maxScenesForSeconds } from "@/lib/durations";
 
 export type PlanSettings = Record<string, string | boolean>;
@@ -267,9 +267,10 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
               <Select value={length} onValueChange={setLength}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{VIDEO_LENGTHS.filter((s) => !onPlan || s <= AUTOPILOT_MAX_SECONDS).map((s) => (
-                  <SelectItem key={s} value={String(s)} disabled={!isLengthAllowed(s, Number(scenes)) || !lengthAllowedForTier(s, pro)}>{!lengthAllowedForTier(s, pro) ? "🔒 " : ""}{formatSeconds(s)}{!lengthAllowedForTier(s, pro) ? ` · ${lengthPlanLabel(s)}` : !isLengthAllowed(s, Number(scenes)) ? (Number(scenes) < minScenesForSeconds(s) ? ` · needs ${minScenesForSeconds(s)}+ scenes` : ` · max ${maxScenesForSeconds(s)} scenes`) : ""}</SelectItem>
+                  <SelectItem key={s} value={String(s)} disabled={!isLengthAllowed(s, Number(scenes)) || !lengthAllowedForTier(s, pro)}>{!lengthAllowedForTier(s, pro) ? "🔒 " : ""}{formatSeconds(s)} · {lengthPlanLabel(s)}{lengthAllowedForTier(s, pro) && !isLengthAllowed(s, Number(scenes)) ? (Number(scenes) < minScenesForSeconds(s) ? ` · needs ${minScenesForSeconds(s)}+ scenes` : ` · max ${maxScenesForSeconds(s)} scenes`) : ""}</SelectItem>
                 ))}</SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">{onPlan ? "Autopilot videos can be up to 20 Minutes long. " : ""}{LENGTH_PLAN_SUMMARY}.</p>
             </div>
             <div className="grid gap-2">
               <Label>Quality</Label>

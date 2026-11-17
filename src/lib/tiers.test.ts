@@ -23,8 +23,12 @@ describe("scene caps by plan", () => {
   it("pro allows 50 scenes", () => expect(scenesAllowedForPlan(50, "pro")).toBe(true));
   it("free capped at 6 scenes", () => expect(scenesAllowedForPlan(8, "free")).toBe(false));
 });
-import { lengthPlanLabel } from "./tiers";
+import { lengthPlanLabel, LENGTH_PLAN_SUMMARY } from "./tiers";
 describe("length lock labels", () => {
+  it("2 Minutes is Free", () => expect(lengthPlanLabel(120)).toBe("FREE"));
+  it("3 Minutes is Creator + Pro", () => expect(lengthPlanLabel(180)).toBe("CREATOR + PRO"));
   it("20 Minutes is Creator + Pro", () => expect(lengthPlanLabel(1200)).toBe("CREATOR + PRO"));
+  it("21 Minutes is Pro only", () => expect(lengthPlanLabel(1260)).toBe("PRO"));
   it("30 Minutes is Pro only", () => expect(lengthPlanLabel(1800)).toBe("PRO"));
+  it("summary names all three plans", () => expect(LENGTH_PLAN_SUMMARY).toBe("Free up to 2 Minutes · Creator up to 20 Minutes · Pro up to 60 Minutes"));
 });

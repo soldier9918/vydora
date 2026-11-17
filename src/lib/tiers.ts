@@ -38,5 +38,9 @@ export const nextFittingLength = (currentTarget: number | null | undefined, actu
   const cur = currentTarget || 120;
   return lengths.find((l) => l > cur && l >= Math.ceil(actualSecs) && l <= MAX_SECONDS_BY_TIER[tier]) ?? null;
 };
-/** Which plans unlock a video length: up to 20 Minutes Creator + Pro, longer Pro only. */
-export const lengthPlanLabel = (seconds: number) => (seconds <= MAX_SECONDS_BY_TIER.creator ? "CREATOR + PRO" : "PRO");
+/** Which plan unlocks a video length: up to 2 Minutes Free, up to 20 Minutes Creator + Pro, longer Pro only. */
+export const lengthPlanLabel = (seconds: number) =>
+  seconds <= MAX_SECONDS_BY_TIER.free ? "FREE" : seconds <= MAX_SECONDS_BY_TIER.creator ? "CREATOR + PRO" : "PRO";
+/** Plain-English summary of the length rule, shown beside every video length picker. */
+export const LENGTH_PLAN_SUMMARY =
+  `Free up to ${MAX_SECONDS_BY_TIER.free / 60} Minutes · Creator up to ${MAX_SECONDS_BY_TIER.creator / 60} Minutes · Pro up to ${MAX_SECONDS_BY_TIER.pro / 60} Minutes`;

@@ -15,7 +15,7 @@ import { STYLES, TONES, generateScript, generateSeries, type SeriesPlan } from "
 import { estimateCredits } from "@/lib/credits";
 import { useAccount } from "@/lib/account";
 import { MAX_SCENES_BY_TIER, lengthAllowedForPlan } from "@/lib/tiers";
-import { lengthPlanLabel } from "@/lib/tiers";
+import { lengthPlanLabel, LENGTH_PLAN_SUMMARY } from "@/lib/tiers";
 import { VIDEO_LENGTHS, formatSeconds, isLengthAllowed, minScenesForSeconds, maxScenesForSeconds } from "@/lib/durations";
 
 export default function Series() {
@@ -88,7 +88,7 @@ export default function Series() {
 
         <section className="mt-8 space-y-4 rounded-xl border border-border bg-card p-5">
           <div><Label>Series topic</Label><Textarea value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="e.g. The Cold War" maxLength={300} className="mt-1" /></div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div><Label>Episodes</Label>
               <Select value={String(parts)} onValueChange={(v) => setParts(v === "5" ? 5 : 3)}><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent><SelectItem value="3">3-part</SelectItem><SelectItem value="5">5-part</SelectItem></SelectContent></Select></div>
@@ -106,7 +106,8 @@ export default function Series() {
             <div><Label>Episode length</Label>
               <Select value={length} onValueChange={setLength}><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>{VIDEO_LENGTHS.map((s) => { const plan = lengthAllowedForPlan(s, tier); const fit = isLengthAllowed(s, Number(scenes)); return (
-                  <SelectItem key={s} value={String(s)} disabled={!plan || !fit}>{!plan ? "🔒 " : ""}{formatSeconds(s)}{!plan ? ` · ${lengthPlanLabel(s)}` : !fit ? (Number(scenes) < minScenesForSeconds(s) ? ` · needs ${minScenesForSeconds(s)}+ scenes` : ` · max ${maxScenesForSeconds(s)} scenes`) : ""}</SelectItem>); })}</SelectContent></Select></div>
+                  <SelectItem key={s} value={String(s)} disabled={!plan || !fit}>{!plan ? "🔒 " : ""}{formatSeconds(s)} · {lengthPlanLabel(s)}{plan && !fit ? (Number(scenes) < minScenesForSeconds(s) ? ` · needs ${minScenesForSeconds(s)}+ scenes` : ` · max ${maxScenesForSeconds(s)} scenes`) : ""}</SelectItem>); })}</SelectContent></Select>
+              <p className="mt-1 text-xs text-muted-foreground">{LENGTH_PLAN_SUMMARY}.</p></div>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">Planning the outline is free. Each episode costs about <b className="text-foreground">{perEpisode} credits</b> (≈{perEpisode * parts} for the full series).</p>
