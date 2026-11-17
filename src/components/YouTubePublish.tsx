@@ -168,7 +168,7 @@ export default function YouTubePublish({ videoId, title, description, tags, hasE
             <p className="text-sm text-muted-foreground">YouTube publishing is coming soon.</p>
           ) : !conn ? (
             <div className="grid gap-3">
-              <p className="text-sm text-muted-foreground">Connect your YouTube channel once. Vydora can only upload videos you choose to publish — it can't delete or change anything else.</p>
+              <p className="text-sm text-muted-foreground">Connect your YouTube channel once. Google will ask you to let Vydora see your channel name (so we can show which channel is connected) and upload videos you choose to publish. Vydora can't delete or change anything else, and you can disconnect any time.</p>
               <Button onClick={() => connectYouTube().catch((e) => toast.error((e as Error).message))}>Connect YouTube channel</Button>
             </div>
           ) : result ? (

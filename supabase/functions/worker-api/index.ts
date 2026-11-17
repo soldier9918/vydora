@@ -50,7 +50,11 @@ async function ytToken(db: DB, uid: string) {
   const r = await fetch("https://oauth2.googleapis.com/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ client_id: CID, client_secret: CSECRET, refresh_token: c.refresh_token, grant_type: "refresh_token" }) });
   const t = await r.json();
-  if (!r.ok || !t.access_token) return { error: "YouTube access expired; please reconnect", permanent: t.error === "invalid_grant" };
+  if (!r.ok || !t.access_token) {
+    // Access revoked in Google Account settings: delete the stored tokens straight away.
+    if (t.error === "invalid_grant") await db.from("youtube_connections").delete().eq("user_id", uid);
+    return { error: "YouTube access expired; please reconnect", permanent: t.error === "invalid_grant" };
+  }
   const expires_at = new Date(Date.now() + t.expires_in * 1000).toISOString();
   await db.from("youtube_connections").update({ access_token: t.access_token, expires_at }).eq("user_id", uid);
   return { token: t.access_token as string, expires_at };

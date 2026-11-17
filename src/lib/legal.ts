@@ -18,7 +18,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
     slug: "privacy",
     title: "Privacy Policy",
     blurb: "What we collect and how we use it",
-    updated: "5 November 2026",
+    updated: "17 November 2026",
     intro:
       "Vydora is an AI video maker for YouTube creators. This policy explains what information we collect when you sign up, make a video or download one, and what we do with it. We do not sell your data.",
     sections: [
@@ -58,7 +58,20 @@ export const LEGAL_DOCS: LegalDoc[] = [
         body: [
           "Every picture, voiceover and thumbnail is stored in private storage inside a folder keyed to your own account, separate from every other user's.",
           "Files are not public. When you view them in the editor, we hand your browser a short-lived link that only works for you and only for a short time.",
-          "Nothing is published anywhere by Vydora. Uploading your finished video to YouTube, TikTok or Instagram is always your own step.",
+          "Vydora only publishes to YouTube when you connect your channel and choose to publish a video, or give Autopilot permission to upload a planned video. Nothing is posted anywhere else.",
+        ],
+      },
+      {
+        id: "youtube",
+        heading: "YouTube API Services",
+        body: [
+          "Vydora uses YouTube API Services to let you publish videos to your own YouTube channel. By connecting YouTube you also agree to the YouTube Terms of Service (https://www.youtube.com/t/terms). Google's Privacy Policy (https://policies.google.com/privacy) explains how Google handles your data.",
+          "We ask for two permissions: 'youtube.readonly', used only to read your channel's ID, name and profile picture so we can show you which channel is connected; and 'youtube.upload', used only to upload videos you choose to publish (or that you allow Autopilot to publish), with the title, description, tags, visibility, thumbnail and release time you set.",
+          "We store: your channel ID, channel name and channel picture link; an access token and refresh token from Google; and, for each upload, the YouTube video ID, title, visibility, release time and upload status. We do not read, change or delete any other videos, comments, analytics or channel settings.",
+          "Your Google tokens are kept only on our servers in a database table that no user, browser or rendering worker can read directly. They are sent only to Google, never shown in your browser, and never written to our logs.",
+          "YouTube data is used only to provide the publishing feature. It is not sold, not used for advertising, not shared with AI providers and not used to train any AI model. It is shared only with our hosting provider, which stores it on our behalf.",
+          "Disconnecting: go to My profile and press Disconnect. We immediately ask Google to revoke Vydora's access and delete your stored tokens and channel details. You can also remove Vydora at any time from your Google Account's third-party access page (https://myaccount.google.com/connections); the next time Vydora tries to use the connection it detects the revoked access and deletes the stored tokens.",
+          "Deletion: you can ask us to delete all stored YouTube information (including upload records) by emailing contact@vydora.ai. We complete deletion within 7 days, and deleting your Vydora account removes it too.",
         ],
       },
       {
