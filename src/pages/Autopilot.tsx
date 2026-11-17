@@ -135,7 +135,7 @@ export default function Autopilot() {
     queryFn: async () => ((await supabase.rpc("autopilot_access")).data ?? {}) as { eligible?: boolean; launched?: boolean; subscribed?: boolean; admin?: boolean },
   });
   const canCloud = !!access?.eligible;
-  const isAdmin = !!acct?.adminAccess || !!access?.admin;
+  const isAdmin = !!acct?.isAdmin;
   const setLaunch = async (on: boolean) => {
     const { error } = await supabase.rpc("admin_set_autopilot_launch", { _enabled: on });
     if (error) toast.error("Couldn't change this."); else { toast.success(on ? "Automatic making is now on for Creator and Pro customers." : "Automatic making is now off for customers."); refetchAccess(); }
