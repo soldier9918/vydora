@@ -38,3 +38,5 @@ export const nextFittingLength = (currentTarget: number | null | undefined, actu
   const cur = currentTarget || 120;
   return lengths.find((l) => l > cur && l >= Math.ceil(actualSecs) && l <= MAX_SECONDS_BY_TIER[tier]) ?? null;
 };
+/** Which plans unlock a video length: up to 20 Minutes Creator + Pro, longer Pro only. */
+export const lengthPlanLabel = (seconds: number) => (seconds <= MAX_SECONDS_BY_TIER.creator ? "CREATOR + PRO" : "PRO");

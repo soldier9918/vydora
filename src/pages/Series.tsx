@@ -15,6 +15,7 @@ import { STYLES, TONES, generateScript, generateSeries, type SeriesPlan } from "
 import { estimateCredits } from "@/lib/credits";
 import { useAccount } from "@/lib/account";
 import { MAX_SCENES_BY_TIER, lengthAllowedForPlan } from "@/lib/tiers";
+import { lengthPlanLabel } from "@/lib/tiers";
 import { VIDEO_LENGTHS, formatSeconds, isLengthAllowed, minScenesForSeconds, maxScenesForSeconds } from "@/lib/durations";
 
 export default function Series() {
@@ -105,7 +106,7 @@ export default function Series() {
             <div><Label>Episode length</Label>
               <Select value={length} onValueChange={setLength}><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>{VIDEO_LENGTHS.map((s) => { const plan = lengthAllowedForPlan(s, tier); const fit = isLengthAllowed(s, Number(scenes)); return (
-                  <SelectItem key={s} value={String(s)} disabled={!plan || !fit}>{!plan ? "🔒 " : ""}{formatSeconds(s)}{!plan ? " · upgrade" : !fit ? (Number(scenes) < minScenesForSeconds(s) ? ` · needs ${minScenesForSeconds(s)}+ scenes` : ` · max ${maxScenesForSeconds(s)} scenes`) : ""}</SelectItem>); })}</SelectContent></Select></div>
+                  <SelectItem key={s} value={String(s)} disabled={!plan || !fit}>{!plan ? "🔒 " : ""}{formatSeconds(s)}{!plan ? ` · ${lengthPlanLabel(s)}` : !fit ? (Number(scenes) < minScenesForSeconds(s) ? ` · needs ${minScenesForSeconds(s)}+ scenes` : ` · max ${maxScenesForSeconds(s)} scenes`) : ""}</SelectItem>); })}</SelectContent></Select></div>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">Planning the outline is free. Each episode costs about <b className="text-foreground">{perEpisode} credits</b> (≈{perEpisode * parts} for the full series).</p>
