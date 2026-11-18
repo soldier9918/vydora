@@ -22,6 +22,14 @@ export default function GuideArticle({ guide }: { guide: Guide }) {
               {s.list && <ul className="mt-4 list-disc space-y-2 pl-6 text-muted-foreground">{s.list.map((l) => <li key={l}>{l}</li>)}</ul>}
             </section>
           ))}
+          {guide.sources && (
+            <section className="mt-10">
+              <h2 className="text-lg font-bold">Sources</h2>
+              <ul className="mt-3 list-disc space-y-1 pl-6 text-sm text-muted-foreground">
+                {guide.sources.map((s) => <li key={s.url}><a className="text-primary hover:underline" href={s.url} target="_blank" rel="noopener noreferrer">{s.label}</a></li>)}
+              </ul>
+            </section>
+          )}
         </article>
         <section className="mt-14 rounded-2xl border border-border bg-card p-8 text-center">
           <h2 className="text-2xl font-bold">Put this into practice</h2>

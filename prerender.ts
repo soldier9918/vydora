@@ -31,6 +31,7 @@ export function bodyFor(route: string): string {
   } else if (g) {
     main = `<article><h1>${esc(g.h1)}</h1><p>${esc(g.intro)}</p>` +
       g.sections.map((s) => `<h2>${esc(s.heading)}</h2>${s.paras.map((p) => `<p>${esc(p)}</p>`).join("")}${s.list ? `<ul>${s.list.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>` : ""}`).join("") +
+      (g.sources ? `<h2>Sources</h2><ul>${g.sources.map((s) => `<li><a href="${esc(s.url)}" rel="noopener">${esc(s.label)}</a></li>`).join("")}</ul>` : "") +
       `<p><a href="${esc(g.related.to)}">${esc(g.related.label)}</a> · <a href="/pricing">Compare plans and prices</a></p></article>`;
   } else if (route === "/guides") {
     main = `<h1>YouTube creator guides</h1><p>${esc(page.description)}</p><ul>${GUIDES.map((x) => `<li><a href="/guides/${x.slug}">${esc(x.h1)}</a> – ${esc(x.description)}</li>`).join("")}</ul>`;

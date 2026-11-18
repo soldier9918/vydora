@@ -6,7 +6,7 @@
 - [x] Task 5 – Sitemap & robots
 - [x] Task 6 – Structured data
 - [x] Task 7 – Internal linking
-- [ ] Task 8 – Content guides
+- [x] Task 8 – Content guides
 - [ ] Task 9 – Mobile performance
 - [ ] Task 10 – Canonicals & redirects
 - [ ] Task 11 – Social sharing

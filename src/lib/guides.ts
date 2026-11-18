@@ -2,6 +2,7 @@ export type Guide = {
   slug: string; title: string; description: string; h1: string; intro: string; readMins: number;
   sections: { heading: string; paras: string[]; list?: string[] }[];
   related: { label: string; to: string };
+  sources?: { label: string; url: string }[];
 };
 
 export const GUIDES: Guide[] = [
@@ -31,6 +32,11 @@ export const GUIDES: Guide[] = [
       ]},
     ],
     related: { label: "Start a faceless channel", to: "/faceless-youtube-channel" },
+    sources: [
+      { label: "YouTube Help: YouTube Partner Programme overview and eligibility", url: "https://support.google.com/youtube/answer/72851" },
+      { label: "YouTube Help: YouTube channel monetisation policies", url: "https://support.google.com/youtube/answer/1311392" },
+      { label: "YouTube Help: Disclosing the use of altered or synthetic content", url: "https://support.google.com/youtube/answer/14328491" },
+    ],
   },
   {
     slug: "best-faceless-youtube-niches", readMins: 6,
@@ -160,5 +166,67 @@ export const GUIDES: Guide[] = [
       ]},
     ],
     related: { label: "Make a product ad", to: "/ai-product-ads" },
+  },
+  {
+    slug: "make-ai-voiceover-videos-from-a-script", readMins: 5,
+    title: "How to Turn a Script into an AI Voiceover Video | Vydora",
+    description: "Write for the ear, split your script into scenes, choose a narrator and pace, then check every line. A practical guide to narrated AI videos.",
+    h1: "How to turn a script into an AI voiceover video",
+    intro: "A good narrated video starts with a script written to be heard, not read. This guide covers how to write it, how to break it into scenes and how to get a natural-sounding voiceover.",
+    sections: [
+      { heading: "Write for listening", paras: [
+        "Spoken scripts need shorter sentences than articles. Say one idea per sentence, open with the most interesting point, and read it out loud once: anything you stumble on, a voice will stumble on too.",
+      ], list: [
+        "Spell out numbers and abbreviations the way they should be said.",
+        "Cut brackets and long lists; they sound awkward when read aloud.",
+        "End with a clear closing line instead of fading out.",
+      ]},
+      { heading: "Split it into scenes", paras: [
+        "Each scene should carry one picture and one or two sentences. Scenes of a few seconds keep viewers watching; very long scenes on one still image feel slow.",
+        "In Vydora you can paste your own script or let it write one from an idea. Either way it is split into scenes you can edit, reorder or delete before anything is made.",
+      ]},
+      { heading: "Choose a narrator and pace", paras: [
+        "Pick a voice that suits the topic: calm for history and science, warmer for stories, brisk for Shorts. Listen to a few before deciding.",
+        "In Vydora every narrator has a free preview, you can ask for an accent, and narration speed can be changed afterwards without recording again or spending credits.",
+      ]},
+      { heading: "Check every line before you publish", paras: [
+        "AI voices sometimes mispronounce names or place stress oddly. Listen to the whole video once. In Vydora you can edit a single scene's text and redo just that voiceover, which uses credits for that scene only.",
+        "If the script states facts, check them. Vydora's “Use real facts” option lists the web sources it used so you can verify them.",
+      ]},
+    ],
+    related: { label: "Make a narrated video", to: "/ai-voiceover-video-maker" },
+  },
+  {
+    slug: "use-ai-video-tools-responsibly-on-youtube", readMins: 6,
+    title: "How to Use AI Video Tools Responsibly on YouTube | Vydora",
+    description: "Disclosure of realistic AI content, avoiding reused content, copyright, made-for-kids settings and fact-checking: what YouTube asks of creators using AI.",
+    h1: "How to use AI video tools responsibly on YouTube",
+    intro: "YouTube allows AI-made videos, but it has rules about labelling, originality and copyright. Following them protects your channel and your viewers' trust. This is general guidance, not legal advice; YouTube's own Help pages are the final word.",
+    sections: [
+      { heading: "Label realistic AI content", paras: [
+        "YouTube asks creators to disclose content that is meaningfully altered or synthetic and looks realistic, for example a real person appearing to say something they didn't, or a realistic depiction of an event that never happened. Clearly stylised, animated or illustrative visuals generally don't need a label.",
+        "When you publish from Vydora you can tick the altered or synthetic content option, and it is sent to YouTube with your upload.",
+      ]},
+      { heading: "Make each video original", paras: [
+        "YouTube's monetisation policies cover reused content and mass-produced, repetitive videos. The safest approach is to give every video its own research, structure and point of view rather than swapping one keyword between near-identical uploads.",
+      ]},
+      { heading: "Respect copyright", paras: [
+        "Only adapt articles, stories and scripts you wrote or have permission to use. Fair use is decided case by case and depends on factors such as how much you use and how much you transform it, so don't rely on it as a shortcut.",
+        "Vydora's built-in music is composed for you and stock clips come from Pixabay with the credit saved. Anything you upload yourself is your responsibility.",
+      ]},
+      { heading: "Set the audience correctly", paras: [
+        "If a video is made for children, YouTube requires you to mark it as made for kids, which changes features such as comments and personalised ads. Vydora's publish screen includes this setting.",
+      ]},
+      { heading: "Check facts and keep a human in charge", paras: [
+        "AI can state wrong facts confidently. Read every script, check important claims against reliable sources and correct mistakes before publishing. Automated tools such as Autopilot save time, but they never upload to your channel unless you give permission.",
+      ]},
+    ],
+    related: { label: "Start a faceless channel", to: "/faceless-youtube-channel" },
+    sources: [
+      { label: "YouTube Help: Disclosing the use of altered or synthetic content", url: "https://support.google.com/youtube/answer/14328491" },
+      { label: "YouTube Help: YouTube channel monetisation policies", url: "https://support.google.com/youtube/answer/1311392" },
+      { label: "YouTube Help: Fair use on YouTube", url: "https://support.google.com/youtube/answer/9783148" },
+      { label: "YouTube Help: Determining if your content is made for kids", url: "https://support.google.com/youtube/answer/9528076" },
+    ],
   },
 ];
