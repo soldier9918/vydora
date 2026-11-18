@@ -8,7 +8,7 @@
 - [x] Task 7 – Internal linking
 - [x] Task 8 – Content guides
 - [x] Task 9 – Mobile performance
-- [ ] Task 10 – Canonicals & redirects
+- [x] Task 10 – Canonicals & redirects
 - [ ] Task 11 – Social sharing
 - [ ] Task 12 – Conversion
 - [ ] Task 13 – Validation

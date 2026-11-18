@@ -1,31 +1,31 @@
 const imgs = import.meta.glob("@/assets/reel-*.jpg", { eager: true, import: "default" }) as Record<string, string>;
 const src = (n: string) => imgs[Object.keys(imgs).find((k) => k.endsWith(`reel-${n}.jpg`))!];
 
-type Card = { n: string; t: string; v: string };
+type Card = { n: string; t: string };
 const rows: Card[][] = [
   [
-    { n: "titanic", t: "Titanic's Secret", v: "264K views" },
-    { n: "egypt", t: "Egypt's Lost Pyramid", v: "119K views" },
-    { n: "ocean", t: "Deep Ocean Monsters", v: "342K views" },
-    { n: "vikings", t: "Viking Raids", v: "131K views" },
-    { n: "area51", t: "Area 51 Files", v: "407K views" },
-    { n: "meals", t: "10 Minute Meals", v: "58K views" },
+    { n: "titanic", t: "Titanic's Secret" },
+    { n: "egypt", t: "Egypt's Lost Pyramid" },
+    { n: "ocean", t: "Deep Ocean Monsters" },
+    { n: "vikings", t: "Viking Raids" },
+    { n: "area51", t: "Area 51 Files" },
+    { n: "meals", t: "10 Minute Meals" },
   ],
   [
-    { n: "hustle", t: "Side Hustle £10K", v: "73K views" },
-    { n: "haunted", t: "Haunted Asylum", v: "188K views" },
-    { n: "mars", t: "Mars Colony 2050", v: "205K views" },
-    { n: "ww2", t: "World War II in Colour", v: "296K views" },
-    { n: "sleep", t: "Sleep in 5 Minutes", v: "91K views" },
-    { n: "cars", t: "Supercar Showdown", v: "167K views" },
+    { n: "hustle", t: "Side Hustle £10K" },
+    { n: "haunted", t: "Haunted Asylum" },
+    { n: "mars", t: "Mars Colony 2050" },
+    { n: "ww2", t: "World War II in Colour" },
+    { n: "sleep", t: "Sleep in 5 Minutes" },
+    { n: "cars", t: "Supercar Showdown" },
   ],
   [
-    { n: "atlantis", t: "Atlantis Found?", v: "223K views" },
-    { n: "dino", t: "Dinosaur Extinction", v: "315K views" },
-    { n: "gym", t: "Gym Mistakes", v: "64K views" },
-    { n: "crime", t: "Serial Killer Case", v: "251K views" },
-    { n: "tokyo", t: "Tokyo at Night", v: "109K views" },
-    { n: "stocks", t: "Stock Market Crash", v: "142K views" },
+    { n: "atlantis", t: "Atlantis Found?" },
+    { n: "dino", t: "Dinosaur Extinction" },
+    { n: "gym", t: "Gym Mistakes" },
+    { n: "crime", t: "Serial Killer Case" },
+    { n: "tokyo", t: "Tokyo at Night" },
+    { n: "stocks", t: "Stock Market Crash" },
   ],
 ];
 
@@ -39,7 +39,6 @@ function Row({ items, dir }: { items: Card[]; dir: "left" | "right" }) {
               <img src={src(e.n)} alt="" width={1088} height={608} decoding="async" className="aspect-video w-full object-cover" />
               <div className="px-3 py-2 text-sm">
                 <p className="font-semibold">{e.t}</p>
-                <p className="text-xs text-muted-foreground">{e.v}</p>
               </div>
             </div>
           ))}

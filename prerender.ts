@@ -81,10 +81,16 @@ export default function prerender(): Plugin {
       const tplPath = path.join(dist, "index.html");
       if (!fs.existsSync(tplPath)) return;
       const template = fs.readFileSync(tplPath, "utf8");
+      // Pages served by the app fallback (private or unknown addresses) must not claim
+      // the homepage as their canonical address: drop it and mark them noindex.
+      const publicList = JSON.stringify(Object.keys(PUBLIC_PAGES));
+      const guard = `<script>(function(){var p=location.pathname.replace(/\\/+$/,"")||"/";if(${publicList}.indexOf(p)<0){var c=document.querySelector('link[rel="canonical"]');if(c)c.remove();var m=document.createElement("meta");m.name="robots";m.content="noindex, nofollow";document.head.appendChild(m);}})();</script>`;
+      const guarded = template.replace("</head>", `  ${guard}\n  </head>`);
+      fs.writeFileSync(path.join(dist, "404.html"), guarded.replace(/<link rel="canonical"[^>]*>\s*/, "").replace(/<title>[\s\S]*?<\/title>/, "<title>Page not found | Vydora</title>"));
       for (const route of Object.keys(PUBLIC_PAGES)) {
         const out = route === "/" ? tplPath : path.join(dist, route.slice(1), "index.html");
         fs.mkdirSync(path.dirname(out), { recursive: true });
-        fs.writeFileSync(out, htmlFor(template, route));
+        fs.writeFileSync(out, htmlFor(route === "/" ? guarded : template, route));
       }
     },
   };

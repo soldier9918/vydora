@@ -43,3 +43,13 @@ describe("structured data", () => {
     expect(art.publisher.name).toBe("Vydora");
   });
 });
+
+describe("canonical addresses", () => {
+  const tpl = readTpl("index.html", "utf8");
+  it("each public page points to its own https://vydora.ai address without a trailing slash", () => {
+    for (const r of ["/pricing", "/text-to-video", "/guides"]) {
+      expect(htmlForLd(tpl, r)).toContain(`<link rel="canonical" href="https://vydora.ai${r}" />`);
+    }
+    expect(htmlForLd(tpl, "/")).toContain('<link rel="canonical" href="https://vydora.ai/" />');
+  });
+});
