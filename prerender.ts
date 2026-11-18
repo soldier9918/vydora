@@ -61,7 +61,8 @@ export function htmlFor(template: string, route: string): string {
     .replace(/<div id="root">[\s\S]*?<\/div>\s*(?=<script|<\/body>)/, `<div id="root">${bodyFor(route)}</div>\n    `);
   if (g) {
     html = html.replace(/(<meta property="og:type" content=")[^"]*/, "$1article");
-    const ld = { "@context": "https://schema.org", "@type": "Article", headline: g.h1, description: g.description, url, publisher: { "@type": "Organization", name: "Vydora", url: SITE + "/" } };
+    const org = { "@type": "Organization", name: "Vydora", url: SITE + "/", logo: { "@type": "ImageObject", url: SITE + "/apple-touch-icon.png" } };
+    const ld = { "@context": "https://schema.org", "@type": "Article", headline: g.h1, description: g.description, url, mainEntityOfPage: url, inLanguage: "en-GB", author: org, publisher: org };
     html = html.replace("</head>", `  <script type="application/ld+json">${JSON.stringify(ld)}</script>\n  </head>`);
   }
   return html;

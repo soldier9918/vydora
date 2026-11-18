@@ -22,3 +22,24 @@ describe("prerendered public pages", () => {
     expect(htmlFor(tpl, "/guides/youtube-monetization-faceless-ai-channels")).toContain('"@type":"Article"');
   });
 });
+
+import { readFileSync as readTpl } from "node:fs";
+import { htmlFor as htmlForLd } from "../../prerender";
+import { GUIDES as GUIDES_LD } from "./guides";
+const ldOf = (html: string) => [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
+
+describe("structured data", () => {
+  const tpl = readTpl("index.html", "utf8");
+  it("site data uses real GBP plan prices and no ratings or reviews", () => {
+    const [site] = ldOf(tpl);
+    const app = site["@graph"].find((n: any) => n["@type"] === "SoftwareApplication");
+    expect(app.offers.map((o: any) => [o.name, o.price, o.priceCurrency])).toEqual([["Free", "0", "GBP"], ["Creator", "19", "GBP"], ["Pro", "49", "GBP"]]);
+    expect(tpl).not.toMatch(/aggregateRating|"review"|FAQPage/);
+  });
+  it("guides get an Article with headline and publisher", () => {
+    const g = GUIDES_LD[0];
+    const art = ldOf(htmlForLd(tpl, `/guides/${g.slug}`)).find((x) => x["@type"] === "Article");
+    expect(art.headline).toBe(g.h1);
+    expect(art.publisher.name).toBe("Vydora");
+  });
+});
