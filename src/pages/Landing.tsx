@@ -99,12 +99,12 @@ export default function Landing() {
           <div className={`absolute inset-0 transition-opacity duration-[1500ms] ${mode === 3 ? "opacity-100" : "opacity-0"}`}><HeroStudio active={mode === 3} /></div>
           <div className={`absolute inset-0 transition-opacity duration-[1500ms] ${mode === 4 ? "opacity-100" : "opacity-0"}`}><HeroDotGrid /></div>
           <div className="container relative py-20 md:py-32">
-            <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs uppercase tracking-widest text-muted-foreground">
-              <span className="h-2 w-2 rounded-full bg-accent animate-pulse-dot" /> Faceless YouTube, made easy
-            </p>
-            <div ref={headRef} className={`transition-opacity duration-700 ${mode === 0 ? "invisible opacity-0" : "opacity-100"}`}>{mode !== 0 && <TypedHeadline />}{mode === 0 && <h1 className="text-5xl md:text-8xl font-extrabold leading-[0.95]" aria-label="Vydora"><span className="block">&nbsp;</span><span className="block">&nbsp;</span></h1>}</div>
+            <h1 className="mb-6 inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs font-normal uppercase tracking-widest text-muted-foreground">
+              <span className="h-2 w-2 rounded-full bg-accent animate-pulse-dot" /> AI YouTube video generator &amp; faceless video maker
+            </h1>
+            <div ref={headRef} className={`transition-opacity duration-700 ${mode === 0 ? "invisible opacity-0" : "opacity-100"}`}>{mode !== 0 && <TypedHeadline />}{mode === 0 && <p className="text-5xl md:text-8xl font-extrabold leading-[0.95]" aria-hidden><span className="block">&nbsp;</span><span className="block">&nbsp;</span></p>}</div>
             <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-              Vydora turns a single sentence into a full YouTube video — script, scenes and voiceover — powered by AI.
+              Type an idea or paste an article link. Vydora writes the script, creates a picture for every scene and records the voiceover, then exports a video ready for YouTube. Start free with 30 credits every month.
             </p>
             <div className="mt-10 flex flex-wrap gap-3">
               <Button size="lg" className="h-12 px-8 text-base shadow-elevated" asChild><Link to={cta}>Create a video</Link></Button>
@@ -210,6 +210,29 @@ export default function Landing() {
               ))}
             </ul>
           </div>
+        </section>
+
+        <section className="container py-20">
+          <div className="mb-10 text-center">
+            <p className="text-sm uppercase tracking-widest text-accent">Simple plans</p>
+            <h2 className="mt-3 text-4xl font-extrabold md:text-5xl">Start free, upgrade when you grow</h2>
+          </div>
+          <div className="grid gap-5 md:grid-cols-3">
+            {[
+              { t: "Free", p: "£0", d: "30 credits every month, videos up to 2 Minutes. Perfect for beginners trying AI video." },
+              { t: "Creator", p: "£19/month", d: "600 credits a month, videos up to 20 Minutes and more narrators for growing channels." },
+              { t: "Pro", p: "£49/month", d: "2,000 credits a month, videos up to 60 Minutes and 1080p for full YouTube automation." },
+            ].map((pl) => (
+              <div key={pl.t} className="rounded-xl border border-border bg-card p-6">
+                <h3 className="text-xl font-semibold">{pl.t}</h3>
+                <p className="mt-1 text-2xl font-extrabold text-primary">{pl.p}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{pl.d}</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            <Link to="/pricing" className="text-primary underline">Compare plans</Link> · <Link to="/text-to-video" className="text-primary underline">Text to video AI</Link> · <Link to="/faceless-youtube-channel" className="text-primary underline">Faceless YouTube channels</Link> · <Link to="/youtube-autopilot" className="text-primary underline">YouTube automation</Link> · <Link to="/guides" className="text-primary underline">Creator guides</Link>
+          </p>
         </section>
 
         <section className="container max-w-3xl py-20">

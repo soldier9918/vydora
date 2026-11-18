@@ -32,7 +32,11 @@ export function bodyFor(route: string): string {
   } else if (route === "/guides") {
     main = `<h1>YouTube creator guides</h1><p>${esc(page.description)}</p><ul>${GUIDES.map((x) => `<li><a href="/guides/${x.slug}">${esc(x.h1)}</a> – ${esc(x.description)}</li>`).join("")}</ul>`;
   } else if (route === "/") {
-    main = `<h1>AI YouTube video maker for faceless channels</h1><p>Type an idea or paste an article link. Vydora writes the script, creates an image for every scene, records the voiceover and exports a YouTube-ready video.</p><p>Free plan with 30 credits every month. Creator £19/month with 600 credits. Pro £49/month with 2,000 credits.</p>`;
+    main = `<h1>AI YouTube video generator &amp; faceless video maker</h1><p>Type an idea or paste an article link. Vydora writes the script, creates a picture for every scene, records an AI voiceover and exports a YouTube-ready video. No camera, no editing skills needed.</p>` +
+      `<h2>How it works</h2><ol><li>Describe your video or paste a link.</li><li>Vydora writes the script and makes the scenes and narration.</li><li>Preview, tweak and export or publish to YouTube.</li></ol>` +
+      `<h2>Features</h2><ul><li><a href="/text-to-video">Text to video AI</a></li><li><a href="/article-to-video">Article to video</a></li><li><a href="/youtube-shorts-maker">YouTube Shorts maker</a></li><li><a href="/youtube-series-generator">Series generator</a></li><li><a href="/youtube-autopilot">YouTube automation with Autopilot</a></li><li><a href="/ai-product-ads">AI product ads</a></li></ul>` +
+      `<h2>Plans</h2><p>Free: 30 credits every month. Creator: £19/month with 600 credits. Pro: £49/month with 2,000 credits. <a href="/pricing">Compare plans</a>.</p>` +
+      `<h2>Who uses Vydora</h2><p>Beginners and faceless channels making history, true crime, science, finance, horror stories and explainer videos.</p>`;
   } else {
     main = `<h1>${esc(page.title.split(" – ")[0])}</h1><p>${esc(page.description)}</p>`;
   }

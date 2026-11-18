@@ -4,7 +4,7 @@ import { GUIDES } from "./guides";
 export const SITE = "https://vydora.ai";
 
 export const PUBLIC_PAGES: Record<string, { title: string; description: string }> = {
-  "/": { title: "Vydora – AI YouTube Video Maker", description: "Type an idea and Vydora writes the script, creates the scenes and records the voiceover for your next YouTube video." },
+  "/": { title: "AI YouTube Video Generator & Faceless Video Maker | Vydora", description: "Create YouTube videos with AI. Vydora writes the script, makes scene visuals and records the voiceover, then exports a YouTube-ready video. Free monthly credits." },
   "/pricing": { title: "Pricing – Vydora AI Video Maker", description: "Free plan with 30 credits a month, Creator at £19/month and Pro at £49/month. Top up from £5." },
   "/feedback": { title: "Feedback – Vydora", description: "Tell the Vydora team what you love, what's broken, or what the AI video maker should do next." },
   "/privacy": { title: "Privacy Policy – Vydora", description: "What Vydora collects, how it is used and how your private video files are kept safe." },
