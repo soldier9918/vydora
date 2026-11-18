@@ -63,7 +63,6 @@ export default function Admin() {
     (planFilter === "all" || (planFilter === "paid" ? u.paid_total > 0 : u.paid_total === 0))), [users.data, q, planFilter]);
   const paidRows = useMemo(() => (ledger.data ?? []).filter((l) => ["purchase", "topup", "subscription"].includes(l.reason) && l.amount > 0), [ledger.data]);
   const liveRows = useMemo(() => paidRows.filter((l) => l.livemode === true), [paidRows]);
-  const testRows = useMemo(() => paidRows.filter((l) => l.livemode !== true), [paidRows]);
 
   const money = useMemo(() => paidRows.reduce((m, l) => {
     const v = poundsFor(l.reason, l.amount);
@@ -132,7 +131,7 @@ export default function Admin() {
           <Stat label="Referrals" value={o?.referrals ?? "…"} sub="friends joined by invite" />
           <Stat label="Videos" value={o?.videos ?? "…"} sub={`+${o?.videos_7d ?? 0} this week`} />
           <Stat label="Scenes" value={o?.scenes ?? "…"} sub={`${o?.animated ?? 0} AI-animated`} />
-          <Stat label="Credits issued" value={o?.credits_issued ?? "…"} sub="excludes Sandbox tests" />
+          <Stat label="Credits issued" value={o?.credits_issued ?? "…"} />
           <Stat label="Credits spent" value={o?.credits_spent ?? "…"} />
           <Stat label="Real money in" value={ledger.data ? gbp(money.real) : "…"} sub="Live payments" />
         </div>
@@ -153,7 +152,6 @@ export default function Admin() {
             <TabsTrigger value="videos">Videos</TabsTrigger>
             <TabsTrigger value="ledger">Credit activity</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
-            <TabsTrigger value="sandbox">Sandbox</TabsTrigger>
             <TabsTrigger value="coupons">Coupons</TabsTrigger>
             <TabsTrigger value="golive">Go Live</TabsTrigger>
           </TabsList>
@@ -243,7 +241,7 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="payments">
-            <p className="mb-3 text-sm text-muted-foreground">Live payments only — real money from subscriptions and top-ups. £1 = 25 credits · Creator £19/mo = 600 credits · Pro £49/mo = 2,000 credits. £ amounts are worked out from credits, so check Stripe for exact totals (e.g. part-month upgrades). Test payments are on the Sandbox tab.</p>
+            <p className="mb-3 text-sm text-muted-foreground">Live payments only — real money from subscriptions and top-ups. £1 = 25 credits · Creator £19/mo = 600 credits · Pro £49/mo = 2,000 credits. £ amounts are worked out from credits, so check Stripe for exact totals (e.g. part-month upgrades).</p>
             <div className="overflow-x-auto rounded-xl border border-border">
               <table className="w-full text-sm">
                 <thead className="bg-muted/40 text-left text-xs uppercase text-muted-foreground">
@@ -259,34 +257,6 @@ export default function Admin() {
                     </tr>
                   ))}
                   {!liveRows.length && <tr><td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">No live payments yet.</td></tr>}
-                </tbody>
-              </table>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="sandbox">
-            <div className="mb-3 grid grid-cols-2 gap-3 md:grid-cols-3">
-              <Stat label="Test payments" value={ledger.data ? gbp(money.test) : "…"} sub="Sandbox, not real money" />
-              <Stat label="Test transactions" value={ledger.data ? testRows.length : "…"} sub="subscriptions and top-ups" />
-              <Stat label="Test paying users" value={o?.test_paying_users ?? "…"} sub={`${o?.test_subscribers ?? 0} active test subscriptions`} />
-              <Stat label="Test credits issued" value={ledger.data ? testRows.reduce((n, l) => n + l.amount, 0) : "…"} sub="from sandbox payments" />
-            </div>
-            <p className="mb-3 text-sm text-muted-foreground">Sandbox (Stripe test mode) activity. None of this is real money and it is kept out of the Live totals.</p>
-            <div className="overflow-x-auto rounded-xl border border-border">
-              <table className="w-full text-sm">
-                <thead className="bg-muted/40 text-left text-xs uppercase text-muted-foreground">
-                  <tr>{["When", "User", "Type", "Credits", "Value"].map((h) => <th key={h} className="px-3 py-2">{h}</th>)}</tr>
-                </thead>
-                <tbody>
-                  {testRows.map((l) => (
-                    <tr key={l.id} className="border-t border-border">
-                      <td className="px-3 py-2 whitespace-nowrap">{fmt(l.created_at)}</td><td className="px-3 py-2">{l.email}</td>
-                      <td className="px-3 py-2 capitalize">{l.reason.replace(/_/g, " ")}</td>
-                      <td className="px-3 py-2 font-semibold text-accent">+{l.amount}</td>
-                      <td className="px-3 py-2 font-semibold">{gbp(poundsFor(l.reason, l.amount))}</td>
-                    </tr>
-                  ))}
-                  {!testRows.length && <tr><td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">No sandbox payments yet.</td></tr>}
                 </tbody>
               </table>
             </div>

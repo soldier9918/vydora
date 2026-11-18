@@ -386,6 +386,20 @@
       "when": 1794968882338,
       "tag": "0054_admin_stats_live_only",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1794969109803,
+      "tag": "0055_admin_hidden_test_accounts",
+      "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1794969120698,
+      "tag": "0056_hide_kamyrussain_test_account",
+      "breakpoints": true
     }
   ]
 }

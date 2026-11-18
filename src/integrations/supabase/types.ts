@@ -14,6 +14,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_hidden_users: {
+        Row: {
+          hidden_at: string
+          user_id: string
+        }
+        Insert: {
+          hidden_at?: string
+          user_id: string
+        }
+        Update: {
+          hidden_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_test_accounts: {
         Row: {
           balance: number
@@ -999,6 +1014,10 @@ export type Database = {
         Returns: undefined
       }
       admin_set_test_mode: { Args: { _mode: string }; Returns: undefined }
+      admin_set_user_hidden: {
+        Args: { _hidden: boolean; _user: string }
+        Returns: undefined
+      }
       admin_users: {
         Args: never
         Returns: {
