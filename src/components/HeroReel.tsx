@@ -36,7 +36,7 @@ function Row({ items, dir }: { items: Card[]; dir: "left" | "right" }) {
         <div key={c} className="flex">
           {items.map((e) => (
             <div key={e.n} className="mr-5 w-[320px] shrink-0 overflow-hidden rounded-xl border border-border bg-card">
-              <img src={src(e.n)} alt="" width={1088} height={608} className="aspect-video w-full object-cover" />
+              <img src={src(e.n)} alt="" width={1088} height={608} decoding="async" className="aspect-video w-full object-cover" />
               <div className="px-3 py-2 text-sm">
                 <p className="font-semibold">{e.t}</p>
                 <p className="text-xs text-muted-foreground">{e.v}</p>

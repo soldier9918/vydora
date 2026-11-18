@@ -7,7 +7,7 @@
 - [x] Task 6 – Structured data
 - [x] Task 7 – Internal linking
 - [x] Task 8 – Content guides
-- [ ] Task 9 – Mobile performance
+- [x] Task 9 – Mobile performance
 - [ ] Task 10 – Canonicals & redirects
 - [ ] Task 11 – Social sharing
 - [ ] Task 12 – Conversion

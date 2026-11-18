@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { ConfirmDialogHost } from "@/components/ConfirmDialog";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,22 +7,22 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ScrollToTop from "@/components/ScrollToTop";
 import RouteSeo from "@/components/RouteSeo";
 import { AuthProvider } from "@/hooks/useAuth";
-import Autopilot from "@/pages/Autopilot";
+const Autopilot = lazy(() => import("@/pages/Autopilot"));
 import Feedback from "@/pages/Feedback";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
-import ResetPassword from "./pages/ResetPassword";
-import MyVideos from "./pages/MyVideos";
-import Create from "./pages/Create";
-import VideoEditor from "./pages/VideoEditor";
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const MyVideos = lazy(() => import("./pages/MyVideos"));
+const Create = lazy(() => import("./pages/Create"));
+const VideoEditor = lazy(() => import("./pages/VideoEditor"));
 import Legal from "./pages/Legal";
 import Pricing from "./pages/Pricing";
-import Billing from "./pages/Billing";
-import Library from "./pages/Library";
-import Profile from "./pages/Profile";
-import Series from "./pages/Series";
-import Admin from "./pages/Admin";
+const Billing = lazy(() => import("./pages/Billing"));
+const Library = lazy(() => import("./pages/Library"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Series = lazy(() => import("./pages/Series"));
+const Admin = lazy(() => import("./pages/Admin"));
 import NotFound from "./pages/NotFound";
 import FeatureLanding from "./pages/FeatureLanding";
 import Guides from "./pages/Guides";
@@ -43,6 +44,7 @@ const App = () => (
           <ReferralCatcher />
           <ScrollToTop />
           <RouteSeo />
+          <Suspense fallback={<div className="min-h-screen" />}>
           <Routes>
             <Route path="/" element={<Landing />} />
             {FEATURE_PAGES.map((p) => <Route key={p.slug} path={`/${p.slug}`} element={<FeatureLanding page={p} />} />)}
@@ -69,6 +71,7 @@ const App = () => (
             ))}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>
