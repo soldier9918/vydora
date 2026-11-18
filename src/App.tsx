@@ -30,6 +30,7 @@ import GuideArticle from "./pages/GuideArticle";
 import { GUIDES } from "@/lib/guides";
 import { FEATURE_PAGES } from "@/lib/featurePages";
 import { ReferralCatcher } from "@/lib/account";
+import PostLoginRedirect from "@/components/PostLoginRedirect";
 import { LEGAL_DOCS } from "@/lib/legal";
 
 import { queryClient } from "@/lib/queryClient";
@@ -42,6 +43,7 @@ const App = () => (
         <ConfirmDialogHost />
         <BrowserRouter>
           <ReferralCatcher />
+          <PostLoginRedirect />
           <ScrollToTop />
           <RouteSeo />
           <Suspense fallback={<div className="min-h-screen" />}>

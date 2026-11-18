@@ -10,5 +10,5 @@
 - [x] Task 9 – Mobile performance
 - [x] Task 10 – Canonicals & redirects
 - [x] Task 11 – Social sharing
-- [ ] Task 12 – Conversion
+- [x] Task 12 – Conversion
 - [ ] Task 13 – Validation

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/SiteHeader";
+import { rememberNext, takeNext } from "@/lib/nextPath";
 
 type Mode = "signin" | "signup" | "forgot";
 
@@ -49,7 +50,8 @@ export default function Auth() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => { if (user) navigate("/dashboard", { replace: true }); }, [user, navigate]);
+  useEffect(() => { rememberNext(params.get("next")); }, [params]);
+  useEffect(() => { if (user) navigate(takeNext() ?? "/dashboard", { replace: true }); }, [user, navigate]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();

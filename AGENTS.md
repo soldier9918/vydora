@@ -30,3 +30,4 @@
 - Product Ads: `/ads` = Create `adMode` + `ad` brief to `generate-script`. Why: one pipeline.
 - `voice-sample`: free previews cached in `samples/`. Why: previews cost nothing to replay.
 - Public pages prerendered by `prerender.ts` from `PUBLIC_PAGES`. Why: crawler HTML.
+- After sign-in, visitors return to the page they wanted via a validated same-site `next` path (`src/lib/nextPath.ts`, kept in sessionStorage across Google sign-in). Why: feature-page buttons must not dump new users on a generic page or allow open redirects.

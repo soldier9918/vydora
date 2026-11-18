@@ -222,7 +222,7 @@ export default function Landing() {
             {[
               { t: "Free", p: "£0", d: "30 credits every month, videos up to 2 Minutes. Perfect for beginners trying AI video." },
               { t: "Creator", p: "£19/month", d: "600 credits a month, videos up to 20 Minutes and more narrators for growing channels." },
-              { t: "Pro", p: "£49/month", d: "2,000 credits a month, videos up to 60 Minutes and 1080p for full YouTube automation." },
+              { t: "Pro", p: "£49/month", d: "2,000 credits a month, videos up to 60 Minutes and 1080p exports for long-form channels." },
             ].map((pl) => (
               <div key={pl.t} className="rounded-xl border border-border bg-card p-6">
                 <h3 className="text-xl font-semibold">{pl.t}</h3>
@@ -231,8 +231,13 @@ export default function Landing() {
               </div>
             ))}
           </div>
+          <p className="mt-6 text-center text-sm text-muted-foreground">Credits are used for each AI step (script, images, voiceover), so how many videos you can make depends on their length. Top-ups add credits but don't unlock plan features.</p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Button size="lg" asChild><Link to={cta}>{user ? "Create a video" : "Start free"}</Link></Button>
+            <Button size="lg" variant="outline" asChild><Link to="/pricing">See what things cost</Link></Button>
+          </div>
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            <Link to="/pricing" className="text-primary underline">Compare plans</Link> · <Link to="/guides" className="text-primary underline">Creator guides</Link>
+            <Link to="/guides" className="text-primary underline">Free creator guides</Link>
           </p>
           <nav aria-label="Features" className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm">
             {FEATURE_PAGES.map((f) => <Link key={f.slug} to={`/${f.slug}`} className="text-muted-foreground hover:text-primary">{f.eyebrow}</Link>)}
