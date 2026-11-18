@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import GoLivePanel from "@/components/GoLivePanel";
+import { FeedbackPanel, AutopilotQueuePanel, UserDetailSheet, HealthBar, HiddenAccountsPanel, hideUser } from "@/components/AdminTools";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }) : "—");
@@ -39,6 +40,7 @@ export default function Admin() {
   const [q, setQ] = useState("");
   const [planFilter, setPlanFilter] = useState("all");
   const [adjust, setAdjust] = useState<Record<string, string>>({});
+  const [detail, setDetail] = useState<string | null>(null);
   const [coupon, setCoupon] = useState({ code: "", credits: "100", uses: "1", expires: "" });
 
   const allowed = !!user;
@@ -136,6 +138,8 @@ export default function Admin() {
           <Stat label="Real money in" value={ledger.data ? gbp(money.real) : "…"} sub="Live payments" />
         </div>
 
+        <HealthBar />
+
         <div className="mt-6 rounded-xl border border-border bg-card p-4">
           <p className="text-sm font-semibold">Sign-ups, last 30 days</p>
           <div className="mt-3 flex h-28 items-end gap-1">
@@ -147,12 +151,15 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="users" className="mt-6">
-          <TabsList>
+          <TabsList className="h-auto flex-wrap">
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="videos">Videos</TabsTrigger>
             <TabsTrigger value="ledger">Credit activity</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="coupons">Coupons</TabsTrigger>
+            <TabsTrigger value="feedback">Feedback</TabsTrigger>
+            <TabsTrigger value="queue">Autopilot queue</TabsTrigger>
+            <TabsTrigger value="hidden">Hidden accounts</TabsTrigger>
             <TabsTrigger value="golive">Go Live</TabsTrigger>
           </TabsList>
 
@@ -174,7 +181,8 @@ export default function Admin() {
                   {filtered.map((u) => (
                     <tr key={u.user_id} className="border-t border-border align-top">
                       <td className="px-3 py-2">
-                        <p className="font-medium">{u.email}</p>
+                        <button type="button" className="font-medium text-left hover:text-primary hover:underline" onClick={() => setDetail(u.user_id)}>{u.email}</button>
+                        {!u.is_admin && <button type="button" className="ml-2 text-xs text-muted-foreground underline" onClick={async () => { try { await hideUser(u.user_id); toast.success("Hidden from admin stats"); refresh(); } catch (e) { toast.error((e as Error).message); } }}>Hide</button>}
                         <p className="text-xs text-muted-foreground">{u.referral_code} {u.is_admin && <span className="text-accent">· admin</span>} {!u.confirmed && <span className="text-destructive">· unconfirmed</span>}</p>
                       </td>
                       <td className="px-3 py-2 whitespace-nowrap">{fmt(u.created_at)}</td>
@@ -263,6 +271,9 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="golive"><GoLivePanel /></TabsContent>
+          <TabsContent value="feedback"><FeedbackPanel /></TabsContent>
+          <TabsContent value="queue"><AutopilotQueuePanel /></TabsContent>
+          <TabsContent value="hidden"><HiddenAccountsPanel /></TabsContent>
 
           <TabsContent value="coupons">
             <div className="rounded-xl border border-border bg-card p-5">
@@ -298,6 +309,7 @@ export default function Admin() {
           </TabsContent>
         </Tabs>
       </main>
+      <UserDetailSheet userId={detail} onClose={() => setDetail(null)} />
     </div>
   );
 }

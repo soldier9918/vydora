@@ -325,6 +325,7 @@ export type Database = {
           email: string | null
           id: string
           message: string
+          status: string
           user_id: string | null
         }
         Insert: {
@@ -333,6 +334,7 @@ export type Database = {
           email?: string | null
           id?: string
           message: string
+          status?: string
           user_id?: string | null
         }
         Update: {
@@ -341,6 +343,7 @@ export type Database = {
           email?: string | null
           id?: string
           message?: string
+          status?: string
           user_id?: string | null
         }
         Relationships: []
@@ -972,6 +975,7 @@ export type Database = {
         Returns: undefined
       }
       admin_adjust_test_credits: { Args: { _amount: number }; Returns: number }
+      admin_autopilot_queue: { Args: never; Returns: Json }
       admin_coupons: {
         Args: never
         Returns: {
@@ -993,6 +997,27 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_feedback: {
+        Args: never
+        Returns: {
+          account_email: string
+          category: string
+          created_at: string
+          email: string
+          id: string
+          message: string
+          status: string
+        }[]
+      }
+      admin_health: { Args: never; Returns: Json }
+      admin_hidden_list: {
+        Args: never
+        Returns: {
+          email: string
+          hidden_at: string
+          user_id: string
+        }[]
+      }
       admin_ledger: {
         Args: { _limit?: number }
         Returns: {
@@ -1005,6 +1030,7 @@ export type Database = {
         }[]
       }
       admin_overview: { Args: never; Returns: Json }
+      admin_retry_autopilot_plan: { Args: { _plan: string }; Returns: boolean }
       admin_set_autopilot_launch: {
         Args: { _enabled: boolean }
         Returns: boolean
@@ -1013,11 +1039,16 @@ export type Database = {
         Args: { _active: boolean; _code: string }
         Returns: undefined
       }
+      admin_set_feedback_status: {
+        Args: { _id: string; _status: string }
+        Returns: undefined
+      }
       admin_set_test_mode: { Args: { _mode: string }; Returns: undefined }
       admin_set_user_hidden: {
         Args: { _hidden: boolean; _user: string }
         Returns: undefined
       }
+      admin_user_detail: { Args: { _user: string }; Returns: Json }
       admin_users: {
         Args: never
         Returns: {
