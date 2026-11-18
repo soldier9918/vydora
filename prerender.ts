@@ -38,7 +38,7 @@ export function bodyFor(route: string): string {
       `<h2>Plans</h2><p>Free: 30 credits every month. Creator: £19/month with 600 credits. Pro: £49/month with 2,000 credits. <a href="/pricing">Compare plans</a>.</p>` +
       `<h2>Who uses Vydora</h2><p>Beginners and faceless channels making history, true crime, science, finance, horror stories and explainer videos.</p>`;
   } else {
-    main = `<h1>${esc(page.title.split(" – ")[0])}</h1><p>${esc(page.description)}</p>`;
+    main = `<h1>${esc(page.title.split(/ [–|] /)[0])}</h1><p>${esc(page.description)}</p>`;
   }
   const nav = `<nav><ul>${NAV.map(([h, l]) => `<li><a href="${h}">${esc(l)}</a></li>`).join("")}</ul></nav>`;
   return `<main style="max-width:720px;margin:0 auto;padding:48px 16px;font-family:sans-serif;color:#eee">${main}${nav}</main>`;

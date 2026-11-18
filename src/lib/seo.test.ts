@@ -10,3 +10,13 @@ describe("seo", () => {
     expect(seoFor("/").canonical).toBe("https://vydora.ai/");
   });
 });
+
+import { PUBLIC_PAGES as ALL } from "./seo";
+describe("unique page metadata", () => {
+  it("no two public pages share a title or description, and all are Vydora-branded", () => {
+    const v = Object.values(ALL);
+    expect(new Set(v.map((p) => p.title)).size).toBe(v.length);
+    expect(new Set(v.map((p) => p.description)).size).toBe(v.length);
+    for (const p of v) expect(p.title).toMatch(/Vydora/);
+  });
+});

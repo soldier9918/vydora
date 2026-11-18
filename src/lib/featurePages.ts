@@ -9,7 +9,7 @@ export type FeaturePage = {
 export const FEATURE_PAGES: FeaturePage[] = [
   {
     slug: "faceless-youtube-channel", eyebrow: "Faceless channels",
-    title: "AI Faceless YouTube Channel Maker – Vydora",
+    title: "AI Faceless YouTube Channel Maker | Vydora",
     description: "Make faceless YouTube videos with AI: script, scene images, voiceover, captions and music from one idea. No camera, no editing.",
     h1: "Run a faceless YouTube channel without filming a thing",
     intro: "Vydora writes the script, makes an image for every scene, records a natural voiceover and puts it together with captions and music. You never appear on camera, and you never open an editor.",
@@ -40,7 +40,7 @@ export const FEATURE_PAGES: FeaturePage[] = [
   },
   {
     slug: "article-to-video", eyebrow: "Article to video",
-    title: "Turn Any Article or Blog Post into a Video – Vydora",
+    title: "Article to Video AI – Turn Blog Posts into Videos | Vydora",
     description: "Paste a link to an article, blog post or news story and Vydora turns it into a narrated YouTube video with scenes, captions and sources.",
     h1: "Turn any article or blog post into a YouTube video",
     intro: "Paste a link and Vydora reads the page, writes a video script from it, and builds the scenes, voiceover and captions. The original link is saved with your video so you can credit it.",
@@ -122,7 +122,7 @@ export const FEATURE_PAGES: FeaturePage[] = [
   },
   {
     slug: "youtube-series-generator", eyebrow: "Series generator",
-    title: "AI YouTube Series Generator – Plan Episodes | Vydora",
+    title: "AI YouTube Series Generator – Plan Connected Episodes | Vydora",
     description: "Plan a full YouTube series with AI: episode titles, hooks and a shared visual style, then turn each episode into a finished video.",
     h1: "Plan and make a whole YouTube series in one go",
     intro: "Give Vydora a theme and it plans a run of connected episodes, each with its own title and angle. Every episode shares the same visual style, so your channel looks like one brand.",
@@ -145,7 +145,7 @@ export const FEATURE_PAGES: FeaturePage[] = [
   },
   {
     slug: "history-documentary-video-maker", eyebrow: "History & documentary",
-    title: "AI History & Documentary Video Maker – Vydora",
+    title: "AI History & Documentary Video Maker | Vydora",
     description: "Make history, mystery and documentary-style YouTube videos with AI. Real-facts mode searches the web and lists sources you can check.",
     h1: "Make history and documentary videos with sources you can check",
     intro: "Documentary channels live or die on accuracy. Turn on “Use real facts” and Vydora searches the web while it writes, then saves the sources with your video so you can check every claim.",
@@ -168,26 +168,26 @@ export const FEATURE_PAGES: FeaturePage[] = [
   },
   {
     slug: "youtube-autopilot", eyebrow: "YouTube autopilot",
-    title: "YouTube Autopilot – Plan & Schedule AI Videos | Vydora",
-    description: "Plan AI YouTube videos ahead with saved settings and schedule releases with YouTube's own scheduled publishing. Planning is free.",
+    title: "YouTube Autopilot – Automatic AI Video Creation & Scheduling | Vydora",
+    description: "Plan YouTube videos ahead and Vydora makes each one automatically at its scheduled time, then uploads it to your channel if you allow it. Planning is free.",
     h1: "Put your YouTube channel on autopilot, keep full control",
-    intro: "Plan a month of videos in one sitting, make them when they're due and schedule each release on YouTube. You never miss an upload day, and no credits are spent without you pressing the button.",
+    intro: "Plan a month of videos in one sitting. At each scheduled time Vydora makes the video for you in the background, even with your browser closed, and can upload it to YouTube when you give permission.",
     steps: [
       { title: "Plan your topics", text: "Add topics with a make-it date, an optional go-live date and all your usual video settings." },
-      { title: "Make the video", text: "On the day, press Make video. Your saved settings open ready to go." },
-      { title: "Schedule on YouTube", text: "Choose Schedule for later and YouTube publishes it at your chosen time." },
+      { title: "Vydora makes it", text: "At the scheduled time the script, scenes, voiceover and video are made automatically using your saved settings." },
+      { title: "Goes live on YouTube", text: "If you allowed uploads, it goes to your channel and YouTube publishes it at your chosen time." },
     ],
     sections: [
       { heading: "Scheduling that works while you sleep", paras: [
         "Scheduled releases use YouTube's own scheduled publishing. The video uploads as private, then YouTube makes it public on time, even if Vydora and your browser are closed.",
       ]},
       { heading: "No surprise credit spend", paras: [
-        "Plans are free. Credits are only used when you choose to make a video, so your balance never drains unattended.",
+        "Planning is free. Each video uses the usual credits only when it is made, and if you run out the video is skipped and you are told, never charged twice.",
       ]},
     ],
     faqs: [
-      ["Does Autopilot cost credits?", "Planning and scheduling are free. Making a video costs the usual credits."],
-      ["Do I need to keep my computer on?", "No. Once scheduled, YouTube publishes the video itself."],
+      ["Does Autopilot cost credits?", "Planning is free. Each video costs the usual credits when it is made. Autopilot videos can be up to 20 Minutes long."],
+      ["Do I need to keep my computer on?", "No. Videos are made on Vydora's servers and YouTube publishes them at your chosen time."],
       ["How far ahead can I schedule?", "From a few minutes up to six months ahead."],
     ],
     cta: { label: "Open Autopilot", to: "/autopilot" },
