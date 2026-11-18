@@ -29,5 +29,5 @@
 - Live activation: one-time admin `activate-live-billing` (checks, typed confirm, audited); owner sets STRIPE_MODE. Why: both switches must agree.
 - Product Ads: `/ads` = Create `adMode` + `ad` brief to `generate-script`. Why: one pipeline.
 - `voice-sample`: free previews cached in `samples/`. Why: previews cost nothing to replay.
-- Public pages prerendered by `prerender.ts` from `PUBLIC_PAGES`. Why: crawler HTML.
+- Public pages prerendered from `PUBLIC_PAGES`. Why: crawler HTML.
 - Post-sign-in return uses validated `next` path (`nextPath.ts`). Why: no open redirects.
