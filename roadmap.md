@@ -3,7 +3,7 @@
 - [x] Task 2 – Homepage SEO
 - [x] Task 3 – Titles & descriptions
 - [x] Task 4 – Landing pages
-- [ ] Task 5 – Sitemap & robots
+- [x] Task 5 – Sitemap & robots
 - [ ] Task 6 – Structured data
 - [ ] Task 7 – Internal linking
 - [ ] Task 8 – Content guides

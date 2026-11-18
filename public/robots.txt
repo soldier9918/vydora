@@ -1,5 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /auth
+Disallow: /reset-password
 Disallow: /dashboard
 Disallow: /my-videos
 Disallow: /video/
@@ -7,7 +9,9 @@ Disallow: /library
 Disallow: /create
 Disallow: /from-url
 Disallow: /series
+Disallow: /ads
+Disallow: /autopilot
+Disallow: /profile
 Disallow: /billing
-Disallow: /reset-password
 
 Sitemap: https://vydora.ai/sitemap.xml
