@@ -18,7 +18,7 @@
 - Admin access uses the `user_roles` table + `has_role()`; admin data comes only from SECURITY DEFINER `admin_*` RPCs that check the role. Admins skip the export watermark. Why: never trust client-side checks for privileges.
 - Tiers (`planTierOf`): Free/Creator/Pro length and 1080p caps enforced in generate-script, video-export and DB trigger; tier = active `user_subscriptions` plan_tier, admin = Pro; top-ups never unlock. Why: drives upgrades, server is the source of truth.
 - Stripe (own account; Live needs STRIPE_MODE=live + 4 valid Live settings + DB `billing_config.live`, else 503; subs keyed per `livemode`) via `create-checkout`, `customer-portal`, signed `stripe-webhook`; only the webhook writes `user_subscriptions` and grants credits on `invoice.paid`, deduped by `stripe_invoice_id` + `processed_stripe_events`. Price map in `_shared/stripe.ts`. Why: clients can't mint credits.
-- Coupon codes live in `coupon_codes` (service-role only, no user policies) and are redeemed once per account by the SECURITY DEFINER `redeem_coupon` RPC, which logs the use in `coupon_redemptions` and writes the ledger row; admins manage codes from the Coupons tab via `admin_coupons` / `admin_create_coupon` / `admin_set_coupon_active`. Why: codes can't be read, edited or double-redeemed from the client.
+- Coupons: `coupon_codes` (service-role only), redeemed once per account via SECURITY DEFINER `redeem_coupon` (logs `coupon_redemptions`, writes ledger); admins use `admin_*coupon*` RPCs. Why: no client reads/edits/double-redeems.
 - Series generator (`/series`) plans episodes via the `generate-series` edge function (free), then creates each episode through the normal `generate-script` pipeline with a brief that carries the shared visual motif. Why: one script/credit pipeline.
 - Intro/outro cards are saved per account in `user_brand_cards` (jsonb, owner-only RLS; localStorage is just a cache) and drawn by `exportVideo` before/after scenes. Why: settings follow the user across devices.
 - Billing history is read live from Stripe (`billing-history`) via the server-stored customer id; records carry `ledger_keys` to match credit lines. Why: invoices stay authoritative, owner-scoped.
@@ -30,4 +30,4 @@
 - Product Ads: `/ads` = Create `adMode` + `ad` brief to `generate-script`. Why: one pipeline.
 - `voice-sample`: free previews cached in `samples/`. Why: previews cost nothing to replay.
 - Public pages prerendered by `prerender.ts` from `PUBLIC_PAGES`. Why: crawler HTML.
-- After sign-in, visitors return to the page they wanted via a validated same-site `next` path (`src/lib/nextPath.ts`, kept in sessionStorage across Google sign-in). Why: feature-page buttons must not dump new users on a generic page or allow open redirects.
+- Post-sign-in return uses validated `next` path (`nextPath.ts`). Why: no open redirects.
