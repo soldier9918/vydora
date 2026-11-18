@@ -218,6 +218,62 @@ export const FEATURE_PAGES: FeaturePage[] = [
     ],
     cta: { label: "Make a product ad", to: "/ads" },
   },
+  {
+    slug: "ai-voiceover-video-maker", eyebrow: "AI voiceover",
+    title: "AI Voiceover Video Maker – Narrated Videos from Text | Vydora",
+    description: "Turn a script or idea into a narrated video with natural AI voices, accents, adjustable speed and captions that follow the narration.",
+    h1: "Add a natural AI voiceover to every scene",
+    intro: "Choose a narrator, pick an accent and set the speed. Vydora records a voiceover for each scene, times the scene to the narration and adds captions that match what is said.",
+    steps: [
+      { title: "Write or generate a script", text: "Type your own narration or let Vydora write it from one idea." },
+      { title: "Choose the voice", text: "Play a free sample of each narrator, then pick an accent and narration speed." },
+      { title: "Fix any line", text: "Edit a scene's text and redo just that voiceover, without remaking the rest." },
+    ],
+    sections: [
+      { heading: "Who it helps", paras: [
+        "Creators who don't want to record their own voice, people making videos in a second language, and teams who need clear explainer narration fast.",
+      ]},
+      { heading: "Speed changes without re-recording", paras: [
+        "Narration speed is applied when the video plays and exports, so you can make it faster or slower with no extra credits and the voice keeps its natural pitch.",
+      ]},
+      { heading: "Things to know", paras: [
+        "Each voiceover uses credits when it's made; voice samples are free. Accents are guidance for the narrator, so results can vary slightly between scenes. Some narrators are only on paid plans.",
+      ]},
+    ],
+    faqs: [
+      ["Can I hear voices before choosing?", "Yes. Every narrator has a free preview button."],
+      ["Can I change one line?", "Yes. Redo a single scene's voiceover without remaking the whole video."],
+      ["Are captions included?", "Yes. Captions follow the narration and can be turned off."],
+    ],
+    cta: { label: "Make a narrated video free", to: "/auth?mode=signup" },
+  },
+  {
+    slug: "ai-story-video-generator", eyebrow: "Story videos",
+    title: "AI Story Video Generator – Narrated Story Videos | Vydora",
+    description: "Turn a story idea into a narrated video with scene-by-scene images, mood music and captions. Good for scary stories, fables, kids' tales and true stories.",
+    h1: "Turn a story idea into a narrated story video",
+    intro: "Describe a story in a sentence or paste your own. Vydora splits it into scenes, makes a distinct image for each moment, narrates it and adds music that fits the mood.",
+    steps: [
+      { title: "Describe the story", text: "For example “a lighthouse keeper who hears knocking from the sea”, or paste a story you wrote." },
+      { title: "Set the mood", text: "Choose tone, narrator and music mood, such as eerie, calm or adventurous." },
+      { title: "Review scene by scene", text: "Change any line or image, then preview and download." },
+    ],
+    sections: [
+      { heading: "Story formats that suit narration", paras: [
+        "Scary and campfire stories, bedtime stories, myths and legends, fables with a moral, and short fiction all work well as narrated videos.",
+        "Each scene gets its own image so the story moves forward visually rather than repeating the same picture.",
+      ]},
+      { heading: "Things to know", paras: [
+        "Characters can look a little different between scenes because each image is made separately; regenerate any scene that doesn't fit. Only use stories you wrote or have the right to adapt.",
+      ]},
+    ],
+    faqs: [
+      ["Can I use my own story?", "Yes. Paste your text and edit how it's split into scenes."],
+      ["How long can a story be?", "It depends on your plan: Free up to 2 Minutes, Creator up to 20 Minutes, Pro up to 60 Minutes."],
+      ["Can I turn it into a Short?", "Yes. Remix the finished video into a vertical Short at no extra cost."],
+    ],
+    cta: { label: "Make a story video free", to: "/auth?mode=signup" },
+  },
 ];
 
 export const findFeaturePage = (slug: string) => FEATURE_PAGES.find((p) => p.slug === slug);

@@ -12,7 +12,7 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 const NAV: [string, string][] = [
   ["/", "AI YouTube video maker"], ["/pricing", "Pricing"], ["/faceless-youtube-channel", "Faceless YouTube channels"],
   ["/article-to-video", "Article to video"], ["/youtube-shorts-maker", "YouTube Shorts maker"], ["/text-to-video", "Text to video"],
-  ["/youtube-series-generator", "Series generator"], ["/youtube-autopilot", "YouTube Autopilot"], ["/ai-product-ads", "AI product ads"],
+  ["/youtube-series-generator", "Series generator"], ["/youtube-autopilot", "YouTube Autopilot"], ["/ai-product-ads", "AI product ads"], ["/ai-voiceover-video-maker", "AI voiceover"], ["/ai-story-video-generator", "Story videos"],
   ["/guides", "Creator guides"],
 ];
 

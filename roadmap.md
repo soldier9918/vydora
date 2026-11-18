@@ -1,8 +1,8 @@
 # SEO roadmap (from uploaded brief)
 - [x] Task 1 – Crawler-readable pages (prerender)
-- [ ] Task 2 – Homepage SEO
-- [ ] Task 3 – Titles & descriptions
-- [ ] Task 4 – Landing pages
+- [x] Task 2 – Homepage SEO
+- [x] Task 3 – Titles & descriptions
+- [x] Task 4 – Landing pages
 - [ ] Task 5 – Sitemap & robots
 - [ ] Task 6 – Structured data
 - [ ] Task 7 – Internal linking
