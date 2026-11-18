@@ -379,6 +379,13 @@
       "when": 1794872970662,
       "tag": "0053_feedback_table",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1794968882338,
+      "tag": "0054_admin_stats_live_only",
+      "breakpoints": true
     }
   ]
 }

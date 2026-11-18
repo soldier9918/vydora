@@ -76,7 +76,6 @@ export default function Admin() {
 
   const o = overview.data;
   const maxDay = Math.max(1, ...(o?.signups_by_day ?? []).map((d) => d.n));
-  const revenueCredits = (users.data ?? []).reduce((n, u) => n + Number(u.paid_total), 0);
 
   const doAdjust = async (id: string) => {
     const amt = parseInt(adjust[id] ?? "", 10);
@@ -129,11 +128,11 @@ export default function Admin() {
         <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <Stat label="Users" value={o?.users ?? "…"} sub={`+${o?.users_7d ?? 0} this week · +${o?.users_30d ?? 0} in 30 days`} />
           <Stat label="Active this week" value={o?.active_7d ?? "…"} sub="signed in last 7 days" />
-          <Stat label="Paying users" value={o?.paying_users ?? "…"} sub={`${revenueCredits} paid credits`} />
+          <Stat label="Paying users" value={o?.paying_users ?? "…"} sub={`${o?.paid_credits ?? 0} paid credits · ${o?.live_subscribers ?? 0} live subscribers`} />
           <Stat label="Referrals" value={o?.referrals ?? "…"} sub="friends joined by invite" />
           <Stat label="Videos" value={o?.videos ?? "…"} sub={`+${o?.videos_7d ?? 0} this week`} />
           <Stat label="Scenes" value={o?.scenes ?? "…"} sub={`${o?.animated ?? 0} AI-animated`} />
-          <Stat label="Credits issued" value={o?.credits_issued ?? "…"} />
+          <Stat label="Credits issued" value={o?.credits_issued ?? "…"} sub="excludes Sandbox tests" />
           <Stat label="Credits spent" value={o?.credits_spent ?? "…"} />
           <Stat label="Real money in" value={ledger.data ? gbp(money.real) : "…"} sub="Live payments" />
         </div>
@@ -269,6 +268,7 @@ export default function Admin() {
             <div className="mb-3 grid grid-cols-2 gap-3 md:grid-cols-3">
               <Stat label="Test payments" value={ledger.data ? gbp(money.test) : "…"} sub="Sandbox, not real money" />
               <Stat label="Test transactions" value={ledger.data ? testRows.length : "…"} sub="subscriptions and top-ups" />
+              <Stat label="Test paying users" value={o?.test_paying_users ?? "…"} sub={`${o?.test_subscribers ?? 0} active test subscriptions`} />
               <Stat label="Test credits issued" value={ledger.data ? testRows.reduce((n, l) => n + l.amount, 0) : "…"} sub="from sandbox payments" />
             </div>
             <p className="mb-3 text-sm text-muted-foreground">Sandbox (Stripe test mode) activity. None of this is real money and it is kept out of the Live totals.</p>
