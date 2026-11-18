@@ -75,7 +75,7 @@ export default function ProfileMenu({ onSignOut }: { onSignOut: () => void }) {
         </DropdownMenuItem>
         <DropdownMenuItem asChild><Link to="/profile" className="cursor-pointer"><UserRound className="mr-2 h-4 w-4" />My profile &amp; YouTube</Link></DropdownMenuItem>
         <DropdownMenuItem asChild><Link to="/billing" className="cursor-pointer"><CreditCard className="mr-2 h-4 w-4" />Plans &amp; Billing</Link></DropdownMenuItem>
-        {acct?.isAdmin && <DropdownMenuItem asChild><Link to="/admin-kb20" className="cursor-pointer"><Shield className="mr-2 h-4 w-4" />Admin</Link></DropdownMenuItem>}
+        {acct?.isAdmin && <DropdownMenuItem asChild><Link to="/admin-kb20" className="cursor-pointer"><Shield className="mr-2 h-4 w-4" />Admin dashboard</Link></DropdownMenuItem>}
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={onSignOut} className="cursor-pointer"><LogOut className="mr-2 h-4 w-4" />Sign out</DropdownMenuItem>
       </DropdownMenuContent>
