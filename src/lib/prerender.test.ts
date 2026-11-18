@@ -53,3 +53,17 @@ describe("canonical addresses", () => {
     expect(htmlForLd(tpl, "/")).toContain('<link rel="canonical" href="https://vydora.ai/" />');
   });
 });
+
+describe("social sharing", () => {
+  const tpl = readTpl("index.html", "utf8");
+  it("every page shares the branded image, its own address and title", () => {
+    const html = htmlForLd(tpl, "/text-to-video");
+    expect(html).toContain('<meta property="og:image" content="https://vydora.ai/og-image.jpg" />');
+    expect(html).toContain('<meta property="og:url" content="https://vydora.ai/text-to-video" />');
+    expect(html).toMatch(/<meta name="twitter:title" content="[^"]*Vydora" \/>/);
+  });
+  it("guides share as articles, other pages as websites", () => {
+    expect(htmlForLd(tpl, `/guides/${GUIDES_LD[0].slug}`)).toContain('og:type" content="article"');
+    expect(htmlForLd(tpl, "/pricing")).toContain('og:type" content="website"');
+  });
+});

@@ -9,6 +9,6 @@
 - [x] Task 8 – Content guides
 - [x] Task 9 – Mobile performance
 - [x] Task 10 – Canonicals & redirects
-- [ ] Task 11 – Social sharing
+- [x] Task 11 – Social sharing
 - [ ] Task 12 – Conversion
 - [ ] Task 13 – Validation
