@@ -11,4 +11,4 @@
 - [x] Task 10 – Canonicals & redirects
 - [x] Task 11 – Social sharing
 - [x] Task 12 – Conversion
-- [ ] Task 13 – Validation
+- [x] Task 13 – Validation
