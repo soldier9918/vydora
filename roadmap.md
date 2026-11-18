@@ -1,3 +1,14 @@
-- [x] Add admin-only Free / Creator / Pro / ADMIN testing controls with separate adjustable credits.
-- [x] Apply effective test access to frontend, database write limits and AI/export authorization.
-- [x] Verify signed-in plan switching, zero-credit restrictions, restoration, and server enforcement.
+# SEO roadmap (from uploaded brief)
+- [x] Task 1 – Crawler-readable pages (prerender)
+- [ ] Task 2 – Homepage SEO
+- [ ] Task 3 – Titles & descriptions
+- [ ] Task 4 – Landing pages
+- [ ] Task 5 – Sitemap & robots
+- [ ] Task 6 – Structured data
+- [ ] Task 7 – Internal linking
+- [ ] Task 8 – Content guides
+- [ ] Task 9 – Mobile performance
+- [ ] Task 10 – Canonicals & redirects
+- [ ] Task 11 – Social sharing
+- [ ] Task 12 – Conversion
+- [ ] Task 13 – Validation
