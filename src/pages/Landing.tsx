@@ -10,6 +10,7 @@ import HeroStudio from "@/components/HeroStudio";
 import HeroDotGrid from "@/components/HeroDotGrid";
 import { useEffect, useRef, useState } from "react";
 import CreationTimelapse from "@/components/CreationTimelapse";
+import { FEATURE_PAGES } from "@/lib/featurePages";
 import TypedHeadline from "@/components/TypedHeadline";
 import { Play, Link2, Layers, Search, Film, Smartphone, Music, ArrowRight } from "lucide-react";
 import thumbMh370 from "@/assets/example-thumb-mh370.jpg";
@@ -231,8 +232,11 @@ export default function Landing() {
             ))}
           </div>
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            <Link to="/pricing" className="text-primary underline">Compare plans</Link> · <Link to="/text-to-video" className="text-primary underline">Text to video AI</Link> · <Link to="/faceless-youtube-channel" className="text-primary underline">Faceless YouTube channels</Link> · <Link to="/youtube-autopilot" className="text-primary underline">YouTube automation</Link> · <Link to="/guides" className="text-primary underline">Creator guides</Link>
+            <Link to="/pricing" className="text-primary underline">Compare plans</Link> · <Link to="/guides" className="text-primary underline">Creator guides</Link>
           </p>
+          <nav aria-label="Features" className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm">
+            {FEATURE_PAGES.map((f) => <Link key={f.slug} to={`/${f.slug}`} className="text-muted-foreground hover:text-primary">{f.eyebrow}</Link>)}
+          </nav>
         </section>
 
         <section className="container max-w-3xl py-20">

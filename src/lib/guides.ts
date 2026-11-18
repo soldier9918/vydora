@@ -113,13 +113,14 @@ export const GUIDES: Guide[] = [
       ]},
       { heading: "Step 1: Build a content plan", paras: [
         "Write down a month of topics at once. Batch planning gives you a clearer channel direction and means you never sit in front of a blank page on upload day.",
-        "In Vydora's Autopilot page you add each topic with a date to make it and an optional date to go live. Every Create setting, such as voice, style, length and music, is saved with the plan. Planning is free and uses no credits.",
+        "In Vydora's Autopilot page you add each topic with a date to make it and an optional date to go live. Your video settings, such as voice, style, length and music, are saved with the plan. Planning is free and uses no credits.",
       ]},
-      { heading: "Step 2: Batch-produce your videos", paras: [
-        "When a plan's date arrives, press Make video. The Create page opens with your saved settings filled in, so you review the script and generate. Credits are only spent at this point, never automatically.",
+      { heading: "Step 2: Let the videos make themselves", paras: [
+        "When a plan's date arrives, Vydora makes the video automatically on its servers using your saved settings, even if your browser is closed. You can watch its progress on the Autopilot page.",
+        "Credits are spent only when each video is made. If you don't have enough, that video is skipped and you are told, so you are never charged twice. Autopilot videos can be up to 20 Minutes long.",
       ]},
       { heading: "Step 3: Schedule your YouTube releases", paras: [
-        "Publish to YouTube from the editor and choose Schedule for later. The video uploads as private straight away and YouTube makes it public at the time you picked, even if your computer is off.",
+        "If you give Autopilot permission, it uploads the finished video to your own channel as private and YouTube makes it public at the time you picked. Without permission nothing is uploaded, and you can publish from the editor yourself.",
       ], list: [
         "Pick a regular slot, for example every Tuesday and Friday at 6 pm in your audience's time zone.",
         "Schedule at least a few days ahead so you have a buffer.",

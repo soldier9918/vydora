@@ -3,6 +3,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { FEATURE_PAGES, type FeaturePage } from "@/lib/featurePages";
+import { guidesForFeature } from "@/lib/related";
 
 export default function FeatureLanding({ page }: { page: FeaturePage }) {
   const others = FEATURE_PAGES.filter((p) => p.slug !== page.slug);
@@ -43,6 +44,17 @@ export default function FeatureLanding({ page }: { page: FeaturePage }) {
             ))}
           </div>
         </section>
+
+        {guidesForFeature(page.slug).length > 0 && (
+          <section className="mt-14">
+            <h2 className="text-2xl font-bold">Helpful guides</h2>
+            <ul className="mt-4 space-y-2">
+              {guidesForFeature(page.slug).map((g) => (
+                <li key={g.slug}><Link className="text-primary hover:underline" to={`/guides/${g.slug}`}>{g.h1}</Link></li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <section className="mt-14 rounded-2xl border border-border bg-card p-8 text-center">
           <h2 className="text-2xl font-bold">Ready to make your first video?</h2>
