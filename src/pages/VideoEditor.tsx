@@ -415,7 +415,7 @@ export default function VideoEditor() {
     };
     raf = requestAnimationFrame(tick);
     const cleanupRaf = () => cancelAnimationFrame(raf);
-    const next = () => setPlaying((p) => (!soloRef.current && p !== null && p + 1 < (dataRef.current?.scenes.length ?? 0) ? p + 1 : null));
+    const next = () => { setProgress(0); setPlaying((p) => (!soloRef.current && p !== null && p + 1 < (dataRef.current?.scenes.length ?? 0) ? p + 1 : null)); };
     const url = scene.audio_path ? data.urls[scene.audio_path] : null;
     if (url) {
       audio.src = url;
@@ -762,6 +762,9 @@ export default function VideoEditor() {
               className="relative mx-auto w-full overflow-hidden rounded-xl border border-border bg-muted [container-type:inline-size]"
               style={{ aspectRatio: ratio.css, maxWidth: full ? `min(100%, calc((100dvh - 7rem) * ${ratio.w / ratio.h}))` : previewMaxPx(ratio.value) }}
             >
+              {playing !== null && scenes[playing + 1]?.image_path && urls[scenes[playing + 1].image_path!] && (
+                <img src={urls[scenes[playing + 1].image_path!]} alt="" aria-hidden className="pointer-events-none absolute h-px w-px opacity-0" />
+              )}
               {currentImg ? (
                 <>
                 {trans?.prev && prevImg && (
