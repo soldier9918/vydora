@@ -110,7 +110,20 @@ export function duckSchedule(sceneDurations, speechDurations, volume, ducking) {
 }
 
 const PLAYABLE = ["whoosh", "soft-whoosh", "swoosh-up", "reverse", "page", "typewriter", "ding", "shutter", "click", "pop", "bubble", "chime", "bell", "sparkle", "riser", "impact", "thud", "drum", "cymbal", "heartbeat", "glitch", "laser", "coin", "wind", "scratch", "notify"];
-export const sfxFor = (type, i) => (type !== "random" ? type : PLAYABLE[(i * 7 + 3) % PLAYABLE.length]);
+// Keep in sync with MOOD_SFX in src/lib/sfx.ts.
+const MOOD_SFX = {
+  cinematic: ["riser", "impact", "whoosh"], epic: ["impact", "riser", "drum"], adventure: ["whoosh", "riser", "drum"],
+  dark: ["reverse", "impact", "heartbeat"], horror: ["heartbeat", "reverse", "thud"], mystery: ["reverse", "soft-whoosh", "page"],
+  upbeat: ["swoosh-up", "pop", "whoosh"], funky: ["scratch", "pop", "swoosh-up"], synthwave: ["glitch", "laser", "swoosh-up"], space: ["laser", "sparkle", "reverse"],
+  documentary: ["page", "soft-whoosh", "shutter"], corporate: ["soft-whoosh", "click", "swoosh-up"],
+  lofi: ["soft-whoosh", "page", "click"], chill: ["soft-whoosh", "bubble", "page"], ambient: ["wind", "soft-whoosh", "chime"],
+  piano: ["soft-whoosh", "chime", "page"], sad: ["soft-whoosh", "wind", "page"], hopeful: ["chime", "sparkle", "soft-whoosh"], dreamy: ["sparkle", "chime", "soft-whoosh"],
+};
+export const sfxFor = (type, i, mood) => {
+  const base = String(type || "whoosh").replace(/\+pop$/, "") || "whoosh";
+  if (base === "auto") { const set = MOOD_SFX[mood] ?? ["whoosh", "soft-whoosh", "page"]; return set[i % set.length]; }
+  return base !== "random" ? base : PLAYABLE[(i * 7 + 3) % PLAYABLE.length];
+};
 let seed = 1; const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
 
 /** Adds one transition sound at time `at` (volume 0-100) into buf. */

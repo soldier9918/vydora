@@ -6,13 +6,13 @@ import { typedLine, typedPair, typedWords, type CaptionStyle } from "./typewrite
 import { fontCss, safeColor, sizePx } from "./captionLook";
 import { captionWrapPx, ratioOf } from "./aspectRatio";
 import { qualityOf } from "./quality";
-import { playSfx, sfxFor } from "./sfx";
+import { TEXT_POP_SOUND, TEXT_POP_VOLUME, parseSfx, playSfx, sfxFor } from "./sfx";
 import { logoBox } from "./voiceStyle";
 import { duckSchedule, shouldPlayMusic, startMusic, type MusicPlayer } from "./music";
 
 export type ExportMusic = { mood: string; volume: number; ducking: boolean; enabled?: boolean; customUrl?: string | null };
 
-export type ExportSfx = { enabled: boolean; type: string; volume: number };
+export type ExportSfx = { enabled: boolean; type: string; volume: number; mood?: string | null };
 
 /** Intro/outro bumper: a branded title card, or a saved clip. */
 export type ExportCard = { title: string; subtitle: string; clipUrl?: string | null; seconds: number };
@@ -206,7 +206,8 @@ export async function exportVideo(scenes: ExportScene[], onProgress: (p: number)
   for (let i = 0; i < loaded.length; i++) {
     const { img, buffer, caption } = loaded[i];
     const dur = durations[i];
-    if (i > 0 && sfx?.enabled) playSfx(audioCtx, dest, sfxFor(sfx.type, i - 1), audioCtx.currentTime, sfx.volume);
+    if (i > 0 && sfx?.enabled) playSfx(audioCtx, dest, sfxFor(sfx.type, i - 1, sfx.mood), audioCtx.currentTime, sfx.volume);
+    let popKey = "";
     if (buffer && speed !== 1 && scenes[i].audioUrl) {
       // Faster narration without the chipmunk effect: the browser keeps the pitch.
       const el = new Audio();
@@ -256,6 +257,15 @@ export async function exportVideo(scenes: ExportScene[], onProgress: (p: number)
             // Typewriter: one line at a time, in step with the voiceover.
             const line = typedLine(lines, t / speak);
             if (line) draw = [line];
+          }
+          // Caption pop sound: a soft click each time a new caption line appears.
+          if (sfx?.enabled && parseSfx(sfx.type).textPop && draw.length) {
+            const first = draw[0].trim();
+            const key = `${draw.length}:${lines.findIndex((l) => l.trim().startsWith(first))}`;
+            if (key !== popKey) {
+              popKey = key;
+              playSfx(audioCtx, dest, TEXT_POP_SOUND, audioCtx.currentTime, sfx.volume * TEXT_POP_VOLUME);
+            }
           }
           const lineHeight = Math.round(px * 1.2);
           // Never draw more lines than the frame can hold.

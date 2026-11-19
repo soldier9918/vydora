@@ -146,7 +146,7 @@ export async function renderVideo(scenes, v, opts) {
   if (moodOn || sfxOn) {
     const buf = moodOn ? renderMood(v.music_mood, total) : new Float32Array(Math.ceil((total + 1) * SR));
     if (moodOn) applyGainSchedule(buf, [{ t: -pre, level: Math.max(0, Math.min(1, Number(v.music_volume ?? 30) / 100)) }, ...duckSchedule(durs, audioSecs.map((a) => (a > 0 ? a / speed : null)), Number(v.music_volume ?? 30), v.music_ducking !== false)], pre);
-    if (sfxOn) for (let i = 1; i < scenes.length; i++) addSfx(buf, sfxFor(v.sfx_type ?? "whoosh", i - 1), pre + tl.offsets[i - 1], Number(v.sfx_volume ?? 50));
+    if (sfxOn) for (let i = 1; i < scenes.length; i++) addSfx(buf, sfxFor(v.sfx_type ?? "whoosh", i - 1, v.music_mood), pre + tl.offsets[i - 1], Number(v.sfx_volume ?? 50));
     bed = path.join(workDir, "bed.wav");
     await writeWav(bed, buf);
   }

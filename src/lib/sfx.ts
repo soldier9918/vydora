@@ -1,4 +1,5 @@
 export const SFX_TYPES = [
+  { value: "auto", label: "Smart match to the music mood" },
   { value: "whoosh", label: "Whoosh" },
   { value: "soft-whoosh", label: "Soft whoosh" },
   { value: "swoosh-up", label: "Swoosh up" },
@@ -28,13 +29,37 @@ export const SFX_TYPES = [
   { value: "random", label: "Random mix" },
 ] as const;
 
-const PLAYABLE = SFX_TYPES.map((s) => s.value).filter((v) => v !== "random");
+const PLAYABLE: string[] = SFX_TYPES.map((s) => s.value).filter((v) => v !== "random" && v !== "auto");
 
-/** Which sound plays at a given transition ("random" picks a varied, repeatable one). */
-export function sfxFor(type: string, index: number): string {
-  if (type !== "random") return type;
+/** Sounds that suit each music mood, used by the "Smart match" option. */
+export const MOOD_SFX: Record<string, string[]> = {
+  cinematic: ["riser", "impact", "whoosh"], epic: ["impact", "riser", "drum"], adventure: ["whoosh", "riser", "drum"],
+  dark: ["reverse", "impact", "heartbeat"], horror: ["heartbeat", "reverse", "thud"], mystery: ["reverse", "soft-whoosh", "page"],
+  upbeat: ["swoosh-up", "pop", "whoosh"], funky: ["scratch", "pop", "swoosh-up"], synthwave: ["glitch", "laser", "swoosh-up"], space: ["laser", "sparkle", "reverse"],
+  documentary: ["page", "soft-whoosh", "shutter"], corporate: ["soft-whoosh", "click", "swoosh-up"],
+  lofi: ["soft-whoosh", "page", "click"], chill: ["soft-whoosh", "bubble", "page"], ambient: ["wind", "soft-whoosh", "chime"],
+  piano: ["soft-whoosh", "chime", "page"], sad: ["soft-whoosh", "wind", "page"], hopeful: ["chime", "sparkle", "soft-whoosh"], dreamy: ["sparkle", "chime", "soft-whoosh"],
+};
+const DEFAULT_SMART = ["whoosh", "soft-whoosh", "page"];
+
+/** The saved sound setting is "<sound>" plus "+pop" when caption pop sounds are on. */
+export function parseSfx(saved: string | null | undefined): { type: string; textPop: boolean } {
+  const v = saved || "whoosh";
+  return { type: v.replace(/\+pop$/, "") || "whoosh", textPop: v.endsWith("+pop") };
+}
+export const joinSfx = (type: string, textPop: boolean) => (textPop ? `${type}+pop` : type);
+
+/** Which sound plays at a given transition ("random" varies, "auto" follows the music mood). */
+export function sfxFor(type: string, index: number, mood?: string | null): string {
+  const base = parseSfx(type).type;
+  if (base === "auto") { const set = MOOD_SFX[mood ?? ""] ?? DEFAULT_SMART; return set[index % set.length]; }
+  if (base !== "random") return base;
   return PLAYABLE[(index * 7 + 3) % PLAYABLE.length];
 }
+
+/** Soft sound played when a new caption line appears. */
+export const TEXT_POP_SOUND = "click";
+export const TEXT_POP_VOLUME = 0.35;
 
 /** Times (seconds from start) where a transition sound plays: at the start of every scene after the first. */
 export function transitionTimes(sceneDurations: number[]): number[] {

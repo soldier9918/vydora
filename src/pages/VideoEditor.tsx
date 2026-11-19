@@ -25,7 +25,7 @@ import RatioSelect from "@/components/RatioSelect";
 import YouTubePublishedBanner from "@/components/YouTubePublishedBanner";
 import YouTubePublish, { youtubeDefaults } from "@/components/YouTubePublish";
 import { Switch } from "@/components/ui/switch";
-import { SFX_TYPES, playSfx, sfxFor } from "@/lib/sfx";
+import { SFX_TYPES, joinSfx, parseSfx, playSfx, sfxFor } from "@/lib/sfx";
 import { MUSIC_MOODS, DUCK_RATIO, shouldPlayMusic, startMusic, rampTo, type MusicPlayer } from "@/lib/music";
 import { estimateCredits, costBreakdown, CREDIT_COSTS } from "@/lib/credits";
 import StockFootagePicker from "@/components/StockFootagePicker";
@@ -216,10 +216,10 @@ export default function VideoEditor() {
   // Transition sound effects when the preview moves to the next scene.
   const prevScene = useRef<number | null>(null);
   const sfxCtx = useRef<AudioContext | null>(null);
-  const previewSfx = async (type: string, volume: number, index = 0) => {
+  const previewSfx = async (type: string, volume: number, index = 0, mood?: string | null) => {
     const ctx = sfxCtx.current ?? (sfxCtx.current = new AudioContext());
     if (ctx.state === "suspended") await ctx.resume().catch(() => {});
-    playSfx(ctx, ctx.destination, sfxFor(type, index), ctx.currentTime, volume);
+    playSfx(ctx, ctx.destination, sfxFor(type, index, mood ?? data?.video?.music_mood), ctx.currentTime, volume);
   };
   useEffect(() => {
     const v = data?.video, prev = prevScene.current;
@@ -496,7 +496,7 @@ export default function VideoEditor() {
           ducking: data.video?.music_ducking ?? true,
           customUrl: data.video?.music_path ? data.urls[data.video.music_path] : null,
         },
-        { enabled: data.video?.sfx_enabled ?? false, type: data.video?.sfx_type ?? "whoosh", volume: data.video?.sfx_volume ?? 50 },
+        { enabled: data.video?.sfx_enabled ?? false, type: data.video?.sfx_type ?? "whoosh", volume: data.video?.sfx_volume ?? 50, mood: data.video?.music_enabled === false ? null : data.video?.music_mood },
         { enabled: data.video?.motion_enabled ?? true, type: data.video?.motion_type ?? "zoom-in" },
         { enabled: data.video?.transition_enabled ?? false, type: data.video?.transition_type ?? "crossfade" },
         {
@@ -1140,8 +1140,14 @@ export default function VideoEditor() {
                 onChange={(v) => saveLook({ motion_type: v })}
               />
             </SettingsCard>
-            <SettingsCard title="Scene transitions" hint="Blends one scene into the next instead of a hard cut."
-              headerRight={<Switch checked={video.transition_enabled} onCheckedChange={(v) => saveLook({ transition_enabled: v })} />}>
+            <SettingsCard title="Transitions & sound effects" hint="How one scene moves into the next, and the sounds that play with it.">
+              <label className="flex items-center justify-between gap-3 text-sm">
+                <span>
+                  <span className="font-semibold">Scene transition</span>
+                  <span className="block text-xs text-muted-foreground">Blends one scene into the next instead of a hard cut.</span>
+                </span>
+                <Switch checked={video.transition_enabled} onCheckedChange={(v) => saveLook({ transition_enabled: v })} />
+              </label>
               <LookSelect
                 label="Style"
                 value={video.transition_type}
@@ -1149,21 +1155,35 @@ export default function VideoEditor() {
                 disabled={!video.transition_enabled}
                 onChange={(v) => saveLook({ transition_type: v })}
               />
-            </SettingsCard>
-            <SettingsCard title="Transition sound effects" hint="A short sound as each new scene begins."
-              headerRight={<Switch checked={video.sfx_enabled} onCheckedChange={(v) => saveLook({ sfx_enabled: v })} />}>
+              <label className="mt-2 flex items-center justify-between gap-3 border-t border-border pt-3 text-sm">
+                <span>
+                  <span className="font-semibold">Scene change sound</span>
+                  <span className="block text-xs text-muted-foreground">A whoosh, page turn or riser as each new scene begins.</span>
+                </span>
+                <Switch checked={video.sfx_enabled} onCheckedChange={(v) => saveLook({ sfx_enabled: v })} />
+              </label>
               <div className="flex flex-wrap items-end gap-2">
                 <div className="min-w-[180px] flex-1">
                   <LookSelect
                     label="Sound"
-                    value={video.sfx_type}
+                    value={parseSfx(video.sfx_type).type}
                     options={SFX_TYPES}
                     disabled={!video.sfx_enabled}
-                    onChange={(v) => { saveLook({ sfx_type: v }); previewSfx(v, video.sfx_volume); }}
+                    onChange={(v) => { saveLook({ sfx_type: joinSfx(v, parseSfx(video.sfx_type).textPop) }); previewSfx(v, video.sfx_volume, 0); }}
                   />
                 </div>
                 <Button size="sm" variant="outline" disabled={!video.sfx_enabled} onClick={() => previewSfx(video.sfx_type, video.sfx_volume, Math.floor(Math.random() * 30))}>▶ Listen</Button>
               </div>
+              {parseSfx(video.sfx_type).type === "auto" && (
+                <p className="text-xs text-muted-foreground">Picks sounds that suit your music mood{video.music_enabled === false ? " (music is off, so gentle whooshes and page turns are used)" : ""}.</p>
+              )}
+              <label className="flex items-center justify-between gap-3 text-sm">
+                <span>
+                  <span className="font-semibold">Caption pop sound</span>
+                  <span className="block text-xs text-muted-foreground">A soft click each time a new line of captions appears.</span>
+                </span>
+                <Switch checked={parseSfx(video.sfx_type).textPop} disabled={!video.sfx_enabled || video.caption_style === "none"} onCheckedChange={(v) => saveLook({ sfx_type: joinSfx(parseSfx(video.sfx_type).type, v) })} />
+              </label>
               <div className="grid gap-1 text-xs font-semibold text-muted-foreground">
                 Effects volume: {video.sfx_volume}%
                 <Slider

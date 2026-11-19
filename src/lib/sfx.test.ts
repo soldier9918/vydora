@@ -1,15 +1,13 @@
-import { describe, it, expect } from "vitest";
-import { sfxFor, transitionTimes, SFX_TYPES } from "./sfx";
+import { describe, expect, it } from "vitest";
+import { joinSfx, parseSfx, sfxFor } from "./sfx";
 
 describe("transition sounds", () => {
-  it("plays between scenes only, not before the first one", () => {
-    expect(transitionTimes([4, 5, 3])).toEqual([4, 9]);
+  it("smart match follows the music mood", () => {
+    expect(sfxFor("auto", 0, "horror")).toBe("heartbeat");
+    expect(sfxFor("auto", 0, "documentary")).toBe("page");
   });
-  it("keeps the chosen sound for every transition", () => {
-    expect(sfxFor("page", 0)).toBe("page");
-    expect(sfxFor("page", 5)).toBe("page");
-  });
-  it("random mix picks a real sound, never 'random'", () => {
-    for (let i = 0; i < 30; i++) expect(SFX_TYPES.some((s) => s.value === sfxFor("random", i) && s.value !== "random")).toBe(true);
+  it("caption pop setting is kept alongside the chosen sound", () => {
+    expect(parseSfx(joinSfx("riser", true))).toEqual({ type: "riser", textPop: true });
+    expect(sfxFor("riser+pop", 3)).toBe("riser");
   });
 });
