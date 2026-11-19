@@ -384,8 +384,7 @@ export default function VideoEditor() {
     if (!data || resumed.current) return;
     resumed.current = true;
     data.scenes.filter((s) => s.clip_job_id).forEach((s) => pollClip(s));
-    const v = data.video as { kind?: string | null };
-    if (v.kind === "ad") data.scenes.filter((s) => s.image_path?.includes("-website-") && !s.clip_job_id).forEach((s) => {
+    if ((data.video as { kind?: string | null } | null)?.kind === "ad") data.scenes.filter((s) => s.image_path?.includes("-website-") && !s.clip_job_id).forEach((s) => {
       webRecord(s.id, "status").then((r) => { if (r.status === "queued" || r.status === "recording") pollRecord(s); }).catch(() => {});
     });
   }, [data, pollClip, pollRecord]);
