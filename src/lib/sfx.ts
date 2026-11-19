@@ -44,7 +44,7 @@ const DEFAULT_SMART = ["whoosh", "soft-whoosh", "page"];
 
 /**
  * The saved sound setting is "<sound>", then optional per-cut choices "@<cut>=<sound>,..."
- * (cut 0 = into scene 2; "none" = silent), then "+pop" when caption pop sounds are on.
+ * (cut 0 = into scene 2; "main" = use the main sound; cuts with no choice are silent), then "+pop" when caption pop sounds are on.
  */
 export function parseSfx(saved: string | null | undefined): { type: string; textPop: boolean; overrides: Record<number, string> } {
   const v = saved || "whoosh";
@@ -63,11 +63,17 @@ export const joinSfx = (type: string, textPop: boolean, overrides: Record<number
   return `${type}${list ? `@${list}` : ""}${textPop ? "+pop" : ""}`;
 };
 
-/** Which sound plays at a given cut: a per-cut choice wins, then "random" varies and "auto" follows the music mood. "none" = silent. */
+/** Which sound plays at a given cut: silent unless that cut has a choice; "main" uses the main sound, "random" varies and "auto" follows the music mood. */
 export function sfxFor(type: string, index: number, mood?: string | null): string {
   const { type: base, overrides } = parseSfx(type);
   const own = overrides[index];
-  if (own) return own === "random" || own === "auto" ? sfxFor(own, index, mood) : own;
+  if (!own || own === "none") return "none";
+  if (own !== "main") return own === "random" || own === "auto" ? sfxFor(own, index, mood) : own;
+  return mainSfx(base, index, mood);
+}
+
+/** The main sound for a cut, ignoring per-cut choices. */
+export function mainSfx(base: string, index: number, mood?: string | null): string {
   if (base === "auto") { const set = MOOD_SFX[mood ?? ""] ?? DEFAULT_SMART; return set[index % set.length]; }
   if (base !== "random") return base;
   return PLAYABLE[(index * 7 + 3) % PLAYABLE.length];

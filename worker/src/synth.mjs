@@ -124,7 +124,8 @@ export const sfxFor = (type, i, mood) => {
   const [rawBase, list] = String(type || "whoosh").replace(/\+pop$/, "").split("@");
   const base = rawBase || "whoosh";
   const own = (list ?? "").split(",").map((p) => p.split("=")).find(([k, s]) => s && Number(k) === i)?.[1];
-  if (own) return own === "random" || own === "auto" ? sfxFor(own, i, mood) : own;
+  if (!own || own === "none") return "none";
+  if (own !== "main") return own === "random" || own === "auto" ? sfxFor(`${own}@${i}=main`, i, mood) : own;
   if (base === "auto") { const set = MOOD_SFX[mood] ?? ["whoosh", "soft-whoosh", "page"]; return set[i % set.length]; }
   return base !== "random" ? base : PLAYABLE[(i * 7 + 3) % PLAYABLE.length];
 };
