@@ -722,6 +722,7 @@ export type Database = {
           user_id: string
           video_id: string
           visual_prompt: string
+          web_url: string | null
         }
         Insert: {
           audio_path?: string | null
@@ -738,6 +739,7 @@ export type Database = {
           user_id: string
           video_id: string
           visual_prompt: string
+          web_url?: string | null
         }
         Update: {
           audio_path?: string | null
@@ -754,6 +756,7 @@ export type Database = {
           user_id?: string
           video_id?: string
           visual_prompt?: string
+          web_url?: string | null
         }
         Relationships: [
           {
@@ -888,6 +891,63 @@ export type Database = {
           updated_at?: string
           user_id?: string
           voice?: string
+        }
+        Relationships: []
+      }
+      web_recordings: {
+        Row: {
+          aspect: string
+          attempts: number
+          charged: number
+          clip_path: string | null
+          created_at: string
+          error: string | null
+          id: string
+          locked_by: string | null
+          locked_until: string | null
+          scene_id: string
+          seconds: number
+          status: string
+          updated_at: string
+          url: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          aspect?: string
+          attempts?: number
+          charged?: number
+          clip_path?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          locked_by?: string | null
+          locked_until?: string | null
+          scene_id: string
+          seconds?: number
+          status?: string
+          updated_at?: string
+          url: string
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          aspect?: string
+          attempts?: number
+          charged?: number
+          clip_path?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          locked_by?: string | null
+          locked_until?: string | null
+          scene_id?: string
+          seconds?: number
+          status?: string
+          updated_at?: string
+          url?: string
+          user_id?: string
+          video_id?: string
         }
         Relationships: []
       }
@@ -1149,6 +1209,33 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "render_jobs"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      claim_web_recording: {
+        Args: { _lease_seconds: number; _worker: string }
+        Returns: {
+          aspect: string
+          attempts: number
+          charged: number
+          clip_path: string | null
+          created_at: string
+          error: string | null
+          id: string
+          locked_by: string | null
+          locked_until: string | null
+          scene_id: string
+          seconds: number
+          status: string
+          updated_at: string
+          url: string
+          user_id: string
+          video_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "web_recordings"
           isOneToOne: false
           isSetofReturn: true
         }
