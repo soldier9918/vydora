@@ -415,7 +415,7 @@ export default function VideoEditor() {
     };
     raf = requestAnimationFrame(tick);
     const cleanupRaf = () => cancelAnimationFrame(raf);
-    const next = () => { setProgress(0); setPlaying((p) => (!soloRef.current && p !== null && p + 1 < (dataRef.current?.scenes.length ?? 0) ? p + 1 : null)); };
+    const next = () => { cleanupRaf(); setProgress(0); setPlaying((p) => (!soloRef.current && p !== null && p + 1 < (dataRef.current?.scenes.length ?? 0) ? p + 1 : null)); };
     const url = scene.audio_path ? data.urls[scene.audio_path] : null;
     if (url) {
       audio.src = url;
