@@ -103,7 +103,7 @@ export default function Landing() {
             <h1 className="mb-6 inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs font-normal uppercase tracking-widest text-muted-foreground">
               <span className="h-2 w-2 rounded-full bg-accent animate-pulse-dot" /> AI YouTube video generator &amp; faceless video maker
             </h1>
-            <div ref={headRef} className={`transition-opacity duration-700 ${mode === 0 ? "invisible opacity-0" : "opacity-100"}`}>{mode !== 0 && <TypedHeadline />}{mode === 0 && <p className="text-5xl md:text-8xl font-extrabold leading-[0.95]" aria-hidden><span className="block">&nbsp;</span><span className="block">&nbsp;</span></p>}</div>
+            <div ref={headRef} className={`transition-opacity duration-700 ${mode === 0 ? "invisible opacity-0" : "opacity-100"}`}>{mode !== 0 && <TypedHeadline />}{mode === 0 && <p className="font-display text-5xl md:text-8xl font-extrabold leading-[0.95] tracking-tight" aria-hidden><span className="block">&nbsp;</span><span className="block">&nbsp;</span></p>}</div>
             <p className="mt-6 max-w-xl text-lg text-muted-foreground">
               Type an idea or paste an article link. Vydora writes the script, creates a picture for every scene and records the voiceover, then exports a video ready for YouTube. Start free with 30 credits every month.
             </p>

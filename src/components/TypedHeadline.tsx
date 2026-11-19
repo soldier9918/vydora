@@ -45,7 +45,7 @@ export default function TypedHeadline() {
 
   let left = n;
   return (
-    <p className="relative max-w-4xl text-5xl font-extrabold leading-[0.95] md:text-8xl">
+    <p className="relative max-w-4xl font-display text-5xl font-extrabold leading-[0.95] tracking-tight md:text-8xl">
       <span className="invisible" aria-hidden>
         {textOf(LONGEST)}
       </span>
