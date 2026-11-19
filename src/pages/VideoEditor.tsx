@@ -963,12 +963,16 @@ export default function VideoEditor() {
             )}
             <SettingsCard title="Look, format & captions" hint="Captions, picture shape, quality and scenes." defaultOpen contentClassName="grid-cols-2 sm:grid-cols-3">
               <div className="col-span-full grid gap-1.5">
-                <span className="text-xs font-semibold text-muted-foreground">Caption presets</span>
+                {(() => { const active = CAPTION_PRESETS.some((p) => captionStyle === p.style && video.caption_font === p.font && safeColor(video.caption_color) === p.color); return (
+                <label className="flex items-center justify-between gap-3">
+                  <span className="text-xs font-semibold text-muted-foreground">Caption presets</span>
+                  <Switch aria-label="Caption presets" checked={active} onCheckedChange={(v) => { const p = CAPTION_PRESETS[0]; saveLook(v ? { caption_style: p.style, caption_font: p.font, caption_color: p.color } : { caption_style: "typewriter" }); }} />
+                </label>); })()}
                 <div className="flex flex-wrap gap-1.5">
                   {CAPTION_PRESETS.map((p) => {
                     const on = captionStyle === p.style && video.caption_font === p.font && safeColor(video.caption_color) === p.color;
                     return (
-                      <Button key={p.id} type="button" size="sm" variant={on ? "default" : "outline"} className="h-8 text-xs" onClick={() => saveLook({ caption_style: p.style, caption_font: p.font, caption_color: p.color })}>
+                      <Button key={p.id} type="button" size="sm" variant={on ? "default" : "outline"} className="h-8 text-xs" onClick={() => saveLook(on ? { caption_style: "typewriter" } : { caption_style: p.style, caption_font: p.font, caption_color: p.color })}>
                         {p.label}
                       </Button>
                     );
