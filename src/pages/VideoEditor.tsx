@@ -961,7 +961,7 @@ export default function VideoEditor() {
                 ); })()}
               </div>
             )}
-            <SettingsCard title="Look, format & voice" hint="Captions, picture shape, quality, scenes, narrator and tone." defaultOpen contentClassName="grid-cols-2 sm:grid-cols-3">
+            <SettingsCard title="Look, format & captions" hint="Captions, picture shape, quality and scenes." defaultOpen contentClassName="grid-cols-2 sm:grid-cols-3">
               <div className="col-span-full grid gap-1.5">
                 <span className="text-xs font-semibold text-muted-foreground">Caption presets</span>
                 <div className="flex flex-wrap gap-1.5">
@@ -999,6 +999,16 @@ export default function VideoEditor() {
                 options={sceneCountOptions(scenes.length).filter((n) => n === scenes.length || scenesAllowedForPlan(n, account?.tier ?? "free")).map((n) => ({ value: String(n), label: n > scenes.length ? `${n} scenes · ${CREDIT_COSTS.script + (n - scenes.length) * (CREDIT_COSTS.image + CREDIT_COSTS.voice)} cr` : `${n} scenes` }))}
                 onChange={(v) => changeScenes(Number(v))}
               />
+              <label className="col-span-full flex items-center justify-between gap-3 text-sm">
+                <span>
+                  <span className="font-semibold">Caption pop sound</span>
+                  <span className="block text-xs text-muted-foreground">A soft click each time a new line of captions appears. Needs Scene change sound turned on below.</span>
+                </span>
+                <Switch checked={parseSfx(video.sfx_type).textPop} disabled={!video.sfx_enabled || video.caption_style === "none"} onCheckedChange={(v) => saveLook({ sfx_type: joinSfx(parseSfx(video.sfx_type).type, v, parseSfx(video.sfx_type).overrides) })} />
+              </label>
+              />
+            </SettingsCard>
+            <SettingsCard title="Narration speed & accent" hint="Pick the narrator and tone, speed up the voice or change how it sounds.">
               <label className="grid gap-1 text-xs font-semibold text-muted-foreground">
                 {`Narrator · ${rerecordCost} cr`}
                 <VoiceSelect
@@ -1034,9 +1044,6 @@ export default function VideoEditor() {
                   }
                   toast.success("All voiceovers now use the new tone.");
                 }}
-              />
-            </SettingsCard>
-            <SettingsCard title="Narration speed & accent" hint="Speed up the voice or change how it sounds.">
               <div className="grid gap-1 text-xs font-semibold text-muted-foreground">
                 Speed: {speed}×
                 <div className="flex gap-2">
@@ -1164,9 +1171,14 @@ export default function VideoEditor() {
                 </span>
                 <Switch checked={video.music_ducking} disabled={video.music_enabled === false} onCheckedChange={(v) => saveLook({ music_ducking: v })} />
               </label>
-            </SettingsCard>
-            <SettingsCard title="Camera motion (pan & zoom)" hint="Gently moves each picture so scenes feel alive."
-              headerRight={<Switch checked={video.motion_enabled} onCheckedChange={(v) => saveLook({ motion_enabled: v })} />}>
+            <SettingsCard title="Camera motion, transitions & sound effects" hint="How pictures move, how one scene moves into the next, and the sounds that play with it.">
+              <label className="flex items-center justify-between gap-3 text-sm">
+                <span>
+                  <span className="font-semibold">Camera motion (pan & zoom)</span>
+                  <span className="block text-xs text-muted-foreground">Gently moves each picture so scenes feel alive.</span>
+                </span>
+                <Switch checked={video.motion_enabled} onCheckedChange={(v) => saveLook({ motion_enabled: v })} />
+              </label>
               <LookSelect
                 label="Movement"
                 value={video.motion_type}
@@ -1174,9 +1186,7 @@ export default function VideoEditor() {
                 disabled={!video.motion_enabled}
                 onChange={(v) => saveLook({ motion_type: v })}
               />
-            </SettingsCard>
-            <SettingsCard title="Transitions & sound effects" hint="How one scene moves into the next, and the sounds that play with it.">
-              <label className="flex items-center justify-between gap-3 text-sm">
+              <label className="mt-2 flex border-t border-border pt-3 items-center justify-between gap-3 text-sm">
                 <span>
                   <span className="font-semibold">Scene transition</span>
                   <span className="block text-xs text-muted-foreground">Blends one scene into the next instead of a hard cut.</span>
@@ -1247,13 +1257,6 @@ export default function VideoEditor() {
               {parseSfx(video.sfx_type).type === "auto" && (
                 <p className="text-xs text-muted-foreground">Picks sounds that suit your music mood{video.music_enabled === false ? " (music is off, so gentle whooshes and page turns are used)" : ""}.</p>
               )}
-              <label className="flex items-center justify-between gap-3 text-sm">
-                <span>
-                  <span className="font-semibold">Caption pop sound</span>
-                  <span className="block text-xs text-muted-foreground">A soft click each time a new line of captions appears.</span>
-                </span>
-                <Switch checked={parseSfx(video.sfx_type).textPop} disabled={!video.sfx_enabled || video.caption_style === "none"} onCheckedChange={(v) => saveLook({ sfx_type: joinSfx(parseSfx(video.sfx_type).type, v, parseSfx(video.sfx_type).overrides) })} />
-              </label>
               <div className="grid gap-1 text-xs font-semibold text-muted-foreground">
                 Effects volume: {video.sfx_volume}%
                 <Slider
