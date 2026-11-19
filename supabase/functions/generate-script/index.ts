@@ -262,7 +262,7 @@ Deno.serve(async (req) => {
     if (sErr) throw sErr;
 
     if (webIdx.length) {
-      const failed = await captureWebsite(srcUrl!, user.id, video.id, webIdx, apiKey);
+      const failed = await captureWebsite(srcUrl!, user.id, video.id, webIdx, apiKey, webIdx.map((p) => scenes[p] ? `${scenes[p].heading} ${scenes[p].narration}` : ""));
       if (failed) await refund(user.id, failed * (COSTS.image + COSTS.webCapture), "refund_web_capture");
     }
 
@@ -278,15 +278,30 @@ Deno.serve(async (req) => {
   }
 });
 
-// Screenshots the product site (home page plus key sub-pages) and puts them on the chosen scenes. Returns how many scenes failed.
-async function captureWebsite(site: string, userId: string, videoId: string, idx: number[], apiKey: string): Promise<number> {
+// Pages that never belong in an ad (company, contact, legal, account).
+export const BLOCKED_PAGE = /about|contact|team|career|job|press|investor|support|help|faq|privacy|terms|cookie|legal|disclaimer|gdpr|policy|sitemap|accessib|login|log-in|signin|sign-in|signup|sign-up|register|cart|checkout|account|billing|password|status|feedback|report/i;
+const STOP = new Set("the and for you your our with this that from are can will all into here there what when where which their they them have has its it's more most just get let lets see now about any how who why use using also been each like make than then very".split(" "));
+const tokens = (t: string) => t.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 2 && !STOP.has(w)).map((w) => w.replace(/(ies)$/, "y").replace(/s$/, ""));
+// Scores how well a page (its path, title, description) matches what a scene talks about.
+export function pageScore(sceneText: string, page: { url: string; title?: string; description?: string }): number {
+  const want = new Set(tokens(sceneText));
+  let path = ""; try { path = new URL(page.url).pathname; } catch { return 0; }
+  let score = 0;
+  for (const w of new Set(tokens(path))) if (want.has(w)) score += 3;
+  for (const w of new Set(tokens(`${page.title ?? ""} ${page.description ?? ""}`))) if (want.has(w)) score += 1;
+  return score;
+}
+
+// Screenshots real pages of the product site that match each website scene; the home page goes on the final call to action. Returns how many scenes failed (they keep an AI image and are refunded).
+async function captureWebsite(site: string, userId: string, videoId: string, idx: number[], apiKey: string, sceneTexts: string[]): Promise<number> {
   const fcKey = Deno.env.get("FIRECRAWL_API_KEY");
   if (!fcKey) return idx.length;
+  const hideBanners = `document.querySelectorAll('[id*=cookie i],[class*=cookie i],[id*=consent i],[class*=consent i],[class*=gdpr i],[id*=onetrust i],[class*=cmp i],.fc-consent-root,.cc-window').forEach(e=>e.remove());document.body.style.overflow='auto';`;
   const shot = async (url: string, links = false) => {
     const r = await fetch("https://connector-gateway.lovable.dev/firecrawl/v2/scrape", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}`, "X-Connection-Api-Key": fcKey },
-      body: JSON.stringify({ url, formats: links ? ["screenshot", "links"] : ["screenshot"], waitFor: 1500 }),
+      body: JSON.stringify({ url, formats: links ? ["screenshot", "links"] : ["screenshot"], actions: [{ type: "wait", milliseconds: 1500 }, { type: "executeJavascript", script: hideBanners }, { type: "wait", milliseconds: 300 }] }),
     });
     if (!r.ok) return null;
     const b = await r.json();
@@ -294,33 +309,39 @@ async function captureWebsite(site: string, userId: string, videoId: string, idx
   };
   const host = new URL(site).hostname.replace(/^www\./, "");
   const norm = (l: string) => { try { const u = new URL(l); u.hash = ""; u.search = ""; return u.toString().replace(/\/$/, ""); } catch { return ""; } };
-  const sameSite = (l: string) => { try { const u = new URL(l); return u.hostname.replace(/^www\./, "") === host && /^https?:$/.test(u.protocol) && !isPrivateHost(u.hostname) && !/\.(pdf|jpe?g|png|gif|svg|zip|xml|webp)$/i.test(u.pathname) && !/login|signin|sign-in|signup|register|cart|checkout|account|privacy|terms|cookie|legal/i.test(u.pathname); } catch { return false; } };
+  const sameSite = (l: string) => { try { const u = new URL(l); return u.hostname.replace(/^www\./, "") === host && /^https?:$/.test(u.protocol) && !isPrivateHost(u.hostname) && !/\.(pdf|jpe?g|png|gif|svg|zip|xml|webp)$/i.test(u.pathname) && !BLOCKED_PAGE.test(u.pathname); } catch { return false; } };
   const home = await shot(site, true).catch(() => null);
-  // Find more real pages: links on the home page plus the site map.
-  let mapped: string[] = [];
+  const info = new Map<string, { url: string; title?: string; description?: string }>();
   try {
     const r = await fetch("https://connector-gateway.lovable.dev/firecrawl/v2/map", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}`, "X-Connection-Api-Key": fcKey },
-      body: JSON.stringify({ url: site, limit: 100 }),
+      body: JSON.stringify({ url: site, limit: 200 }),
     });
-    if (r.ok) mapped = ((await r.json())?.links ?? []).map((l: any) => typeof l === "string" ? l : l?.url).filter(Boolean);
+    if (r.ok) for (const l of ((await r.json())?.links ?? [])) {
+      const url = typeof l === "string" ? l : l?.url;
+      if (url) info.set(norm(url), { url, title: l?.title, description: l?.description });
+    }
   } catch { /* home links only */ }
+  for (const l of home?.links ?? []) if (!info.has(norm(l))) info.set(norm(l), { url: l });
   const homeKey = norm(site);
-  const words = /feature|product|pricing|how-it-works|solution|tour|about|review|demo|use-case|template|integration|service|shop|collection|blog/i;
-  const candidates = [...new Set([...(home?.links ?? []), ...mapped].filter(sameSite).map(norm))].filter((l) => l && l !== homeKey);
-  candidates.sort((x, y) => Number(words.test(new URL(y).pathname)) - Number(words.test(new URL(x).pathname)) || new URL(x).pathname.length - new URL(y).pathname.length);
-  // Screenshot different pages until each website scene has its own one.
-  const need = idx.length - (home?.img ? 1 : 0);
-  const subImgs: string[] = [];
-  for (let i = 0; i < candidates.length && subImgs.length < need && i < need * 3; i += need) {
-    const batch = candidates.slice(i, i + need);
-    const got = await Promise.all(batch.map((p) => shot(p).catch(() => null)));
-    for (const g of got) if (g?.img && subImgs.length < need) subImgs.push(g.img);
-  }
-  // Sub-pages on the reveal and feature scenes, home page on the final call to action. Never reuse a page.
-  const imgs: (string | undefined)[] = idx.map((_, i) => i === idx.length - 1 ? (home?.img ?? subImgs[i]) : subImgs[i]);
-  if (!home?.img && !subImgs.length) return idx.length;
+  const pages = [...info.entries()].filter(([k, v]) => k && k !== homeKey && sameSite(v.url) && !BLOCKED_PAGE.test(`${v.title ?? ""}`)).map(([, v]) => v);
+  // Match each scene (except the final call to action) to its best page; no match means an AI image instead.
+  const used = new Set<string>();
+  const picks: (string | null)[] = idx.map((_, i) => {
+    if (i === idx.length - 1) return null;
+    let best: string | null = null, bestScore = 0;
+    for (const p of pages) {
+      if (used.has(norm(p.url))) continue;
+      const sc = pageScore(sceneTexts[i] ?? "", p);
+      if (sc > bestScore || (sc === bestScore && sc > 0 && best && p.url.length < best.length)) { best = p.url; bestScore = sc; }
+    }
+    if (best && bestScore >= 3) { used.add(norm(best)); return best; }
+    return null;
+  });
+  const got = await Promise.all(picks.map((u) => u ? shot(u).catch(() => null) : Promise.resolve(null)));
+  const imgs: (string | undefined)[] = idx.map((_, i) => i === idx.length - 1 ? home?.img : got[i]?.img);
+  if (!imgs.some(Boolean)) return idx.length;
   const { data: rows } = await adminClient().from("video_scenes").select("id, position").eq("video_id", videoId);
   let failed = 0;
   await Promise.all(idx.map(async (pos, i) => {
