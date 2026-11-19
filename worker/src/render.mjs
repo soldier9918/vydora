@@ -103,7 +103,7 @@ export async function renderVideo(scenes, v, opts) {
   for (let i = 0; i < scenes.length; i++) {
     const s = scenes[i], len = tl.seg[i], frames = Math.ceil(len * FPS);
     const ass = path.join(workDir, `cap-${i}.ass`);
-    await writeFile(ass, captionsAss(s.caption, durs[i], { W, H, color: v.caption_color, size: v.caption_size, style: v.caption_style ?? "typewriter", font: v.caption_font ?? "mono", scale, wrapPx: baseW * 0.85 * scale, speak: audioSecs[i] > 0 ? audioSecs[i] / speed : durs[i] }));
+    await writeFile(ass, captionsAss(s.caption, durs[i], { W, H, color: v.caption_color, size: v.caption_size, style: v.caption_style ?? "typewriter", font: v.caption_font ?? "mono", scale, wrapPx: baseW * (v.aspect_ratio === "9:16" ? 0.7 : 0.85) * scale, aspect: v.aspect_ratio, speak: audioSecs[i] > 0 ? audioSecs[i] / speed : durs[i] }));
     const seg = path.join(workDir, `seg-${i}.mp4`);
     const assArg = ass.replace(/\\/g, "/").replace(/:/g, "\\:");
     const motion = motionFor(v.motion_type ?? "zoom-in", i);

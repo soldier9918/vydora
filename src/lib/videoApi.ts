@@ -82,6 +82,8 @@ export const CAPTION_STYLES = [
   { id: "pop", label: "Word pop — words pile up on screen" },
   { id: "sentence", label: "Sentence — two lines at a time" },
   { id: "full", label: "Full text — the whole caption at once" },
+  { id: "karaoke", label: "Karaoke — the spoken word lights up" },
+  { id: "cinematic", label: "Cinematic bar — two lines on a dark strip" },
   { id: "none", label: "None — no captions" },
 ] as const;
 

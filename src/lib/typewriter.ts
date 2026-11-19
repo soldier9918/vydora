@@ -23,7 +23,7 @@ export function wrapByChars(text: string, maxChars: number): string[] {
 export const CAPTION_LEAD = 1;
 
 /** The caption looks a video can use. */
-export type CaptionStyle = "typewriter" | "pop" | "sentence" | "full" | "none";
+export type CaptionStyle = "typewriter" | "pop" | "sentence" | "full" | "karaoke" | "cinematic" | "none";
 
 /** How many words are showing when narration is `fraction` (0–1) of the way through. */
 function wordCountAt(flat: string[], fraction: number): number {
@@ -100,4 +100,19 @@ export function typedPair(lines: string[], fraction: number): string[] {
     if (n <= seen || p + 2 >= words.length) return page.map((w) => w.join(" "));
   }
   return [];
+}
+
+/**
+ * Karaoke: the whole current line stays on screen and the word being spoken is
+ * highlighted. Returns the line's words and the index of the spoken word.
+ */
+export function karaokeAt(lines: string[], fraction: number): { words: string[]; active: number } {
+  const words = lines.map((l) => l.split(/\s+/).filter(Boolean)).filter((w) => w.length);
+  let n = wordCountAt(words.flat(), fraction);
+  if (!n) return { words: [], active: -1 };
+  for (let i = 0; i < words.length; i++) {
+    if (n <= words[i].length || i === words.length - 1) return { words: words[i], active: Math.min(n, words[i].length) - 1 };
+    n -= words[i].length;
+  }
+  return { words: [], active: -1 };
 }

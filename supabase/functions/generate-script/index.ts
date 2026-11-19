@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
     const tone = typeof toneIn === "string" && TONES[toneIn] ? toneIn : "engaging";
     if (!qualityAllowedForPlan(String(quality), tier)) return json({ error: "1080p Full HD is a Pro feature. Upgrade to Pro to unlock it." }, 403);
     const qual = ["720p", "1080p"].includes(quality) ? quality : "720p";
-    const caption = ["typewriter", "pop", "sentence", "full", "none"].includes(captionStyle) ? captionStyle : "typewriter";
+    const caption = ["typewriter", "pop", "sentence", "full", "karaoke", "cinematic", "none"].includes(captionStyle) ? captionStyle : "typewriter";
     const ratio = ["16:9", "9:16", "1:1", "4:5", "21:9"].includes(aspectRatio) ? aspectRatio : "16:9";
     const framing = ({
       "16:9": "wide 16:9 landscape",

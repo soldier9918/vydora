@@ -2,8 +2,8 @@ import { drawFx, motionAt, type Motion } from "./motion";
 import { TRANSITION_SECS, transitionAt, type Layer } from "./transition";
 import fixWebmDuration from "fix-webm-duration";
 import { clipRate } from "./durations";
-import { typedLine, typedPair, typedWords, type CaptionStyle } from "./typewriter";
-import { fontCss, safeColor, sizePx } from "./captionLook";
+import { karaokeAt, typedLine, typedPair, typedWords, type CaptionStyle } from "./typewriter";
+import { captionBox, fontCss, highlightColor, safeColor, sizePx } from "./captionLook";
 import { captionWrapPx, ratioOf } from "./aspectRatio";
 import { qualityOf } from "./quality";
 import { TEXT_POP_SOUND, TEXT_POP_VOLUME, parseSfx, playSfx, sfxFor } from "./sfx";
@@ -252,7 +252,8 @@ export async function exportVideo(scenes: ExportScene[], onProgress: (p: number)
           let draw: string[] = [];
           if (captionStyle === "full") draw = lines;
           else if (captionStyle === "pop") draw = typedWords(lines, t / speak);
-          else if (captionStyle === "sentence") draw = typedPair(lines, t / speak);
+          else if (captionStyle === "sentence" || captionStyle === "cinematic") draw = typedPair(lines, t / speak);
+          else if (captionStyle === "karaoke") draw = karaokeAt(lines, t / speak).words.length ? [karaokeAt(lines, t / speak).words.join(" ")] : [];
           else {
             // Typewriter: one line at a time, in step with the voiceover.
             const line = typedLine(lines, t / speak);
@@ -277,8 +278,23 @@ export async function exportVideo(scenes: ExportScene[], onProgress: (p: number)
             ctx.shadowBlur = 8;
             ctx.shadowOffsetY = 2;
             ctx.textAlign = "center";
-            const y0 = H - Math.round(Math.min(W, H) * 0.09) - (draw.length - 1) * lineHeight;
-            draw.forEach((l, i) => ctx.fillText(l, W / 2, y0 + i * lineHeight));
+            const box = captionBox(aspect);
+            const cx = Math.round(W * box.centre);
+            const y0 = H - Math.round(Math.min(W, H) * 0.09 + H * box.bottom) - (draw.length - 1) * lineHeight;
+            if (captionStyle === "cinematic") {
+              // Subtle dark strip behind the text, full width.
+              ctx.save(); ctx.shadowColor = "transparent"; ctx.fillStyle = "rgba(0,0,0,0.55)";
+              ctx.fillRect(0, y0 - px * 1.05, W, draw.length * lineHeight + px * 0.6); ctx.restore();
+            }
+            if (captionStyle === "karaoke") {
+              // Whole line in the caption colour, spoken word in the highlight colour.
+              const k = karaokeAt(lines, t / speak);
+              const sp = ctx.measureText(" ").width;
+              const widths = k.words.map((w) => ctx.measureText(w).width);
+              let x = cx - (widths.reduce((a, b) => a + b, 0) + sp * (k.words.length - 1)) / 2;
+              ctx.textAlign = "left";
+              k.words.forEach((w, i) => { ctx.fillStyle = i === k.active ? highlightColor(color) : color; ctx.fillText(w, x, y0); x += widths[i] + sp; });
+            } else draw.forEach((l, i) => ctx.fillText(l, cx, y0 + i * lineHeight));
             ctx.shadowColor = "transparent";
             ctx.shadowBlur = 0;
             ctx.shadowOffsetY = 0;

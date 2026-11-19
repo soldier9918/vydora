@@ -49,3 +49,10 @@ export function typedPair(lines, fraction) {
   for (let p = 0; p < words.length; p += 2) { const page = words.slice(p, p + 2); seen += page.reduce((a, w) => a + w.length, 0); if (n <= seen || p + 2 >= words.length) return page.map((w) => w.join(" ")); }
   return [];
 }
+export function karaokeAt(lines, fraction) {
+  const words = lines.map((l) => l.split(/\s+/).filter(Boolean)).filter((w) => w.length);
+  let n = wordCountAt(words.flat(), fraction);
+  if (!n) return { words: [], active: -1 };
+  for (let i = 0; i < words.length; i++) { if (n <= words[i].length || i === words.length - 1) return { words: words[i], active: Math.min(n, words[i].length) - 1 }; n -= words[i].length; }
+  return { words: [], active: -1 };
+}

@@ -26,7 +26,7 @@ describe("aspectRatio", () => {
 
   it("sizes caption lines from the canvas width", () => {
     expect(captionWrapPx("16:9")).toBe(1088);
-    expect(captionWrapPx("9:16")).toBe(612);
+    expect(captionWrapPx("9:16")).toBe(504);
     expect(captionWrapPx(null)).toBe(1088);
   });
 

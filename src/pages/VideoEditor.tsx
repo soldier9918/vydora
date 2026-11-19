@@ -15,10 +15,10 @@ import { generateSceneAsset, generateThumbnail, signedUrls, TONES, editScenes, r
 import { Input } from "@/components/ui/input";
 import { exportVideo, canRecordMp4 } from "@/lib/exportVideo";
 import { fetchCards, isActive, type BrandCard } from "@/lib/brandCards";
-import { typedLine, typedPair, typedWords, wrapByChars, type CaptionStyle } from "@/lib/typewriter";
+import { karaokeAt, typedLine, typedPair, typedWords, wrapByChars, type CaptionStyle } from "@/lib/typewriter";
 import { elapsedSeconds, locateTime, formatSeconds, formatClock, formatSecsBadge, sceneSeconds, clipRate } from "@/lib/durations";
 import { planSceneChange, sceneCountOptions } from "@/lib/sceneCount";
-import { CAPTION_COLORS, CAPTION_FONTS, CAPTION_SIZES, CAPTION_STYLES, fontCss, safeColor, sizePx } from "@/lib/captionLook";
+import { CAPTION_COLORS, CAPTION_FONTS, CAPTION_PRESETS, CAPTION_SIZES, CAPTION_STYLES, captionBox, fontCss, highlightColor, safeColor, sizePx } from "@/lib/captionLook";
 import { captionWrapPx, previewMaxPx, ratioOf } from "@/lib/aspectRatio";
 import { QUALITIES, qualityOf } from "@/lib/quality";
 import RatioSelect from "@/components/RatioSelect";
@@ -96,6 +96,7 @@ export default function VideoEditor() {
   const [working, setWorking] = useState<Record<string, boolean>>({});
   const [assetErr, setAssetErr] = useState<Record<string, string>>({});
   const [playing, setPlaying] = useState<number | null>(null);
+  const [safeGuide, setSafeGuide] = useState(true);
   const [progress, setProgress] = useState(0);
   const [exportPct, setExportPct] = useState<number | null>(null);
   const [exportFormat, setExportFormat] = useState<"mp4" | "webm">(() => (localStorage.getItem("vydora-export-format") as "mp4" | "webm") || "mp4");
@@ -657,6 +658,7 @@ export default function VideoEditor() {
   };
   const captionStyle = (video.caption_style ?? "typewriter") as CaptionStyle;
   const ratio = ratioOf(video.aspect_ratio);
+  const capBox = captionBox(ratio.value);
   const capPx = sizePx(video.caption_size);
   // Same canvas px as the export, so lines break alike.
   const capChars = Math.max(8, Math.floor(captionWrapPx(ratio.value) / (capPx * 0.6)));
@@ -828,17 +830,28 @@ export default function VideoEditor() {
               )}
               {playing !== null && current && captionStyle !== "none" && (
                 <p
-                  className="absolute inset-x-[7.5%] bottom-[5%] max-h-[70%] overflow-hidden whitespace-pre-line text-center font-bold leading-[1.2] drop-shadow-[0_2px_4px_hsl(var(--background))]"
-                  style={{ fontFamily: fontCss(video.caption_font), color: safeColor(video.caption_color), fontSize: `${(capPx / ratio.w) * 100}cqw` }}
+                  className={`absolute max-h-[70%] overflow-hidden whitespace-pre-line text-center font-bold leading-[1.2] drop-shadow-[0_2px_4px_hsl(var(--background))] ${captionStyle === "cinematic" ? "bg-background/60 py-[1.5%]" : ""}`}
+                  style={{ fontFamily: fontCss(video.caption_font), color: safeColor(video.caption_color), fontSize: `${(capPx / ratio.w) * 100}cqw`, bottom: `${5 + capBox.bottom * 100}%`, ...(captionStyle === "cinematic" ? { left: 0, right: 0, paddingLeft: `${(capBox.centre - capBox.width / 2) * 100}%`, paddingRight: `${(1 - capBox.centre - capBox.width / 2) * 100}%` } : { left: `${(capBox.centre - capBox.width / 2) * 100}%`, right: `${(1 - capBox.centre - capBox.width / 2) * 100}%` }) }}
                 >
-                  {captionStyle === "full"
+                  {captionStyle === "karaoke"
+                    ? (() => { const k = karaokeAt(wrapByChars(current.narration, capChars), progress); return k.words.map((w, i) => <span key={i} style={i === k.active ? { color: highlightColor(video.caption_color) } : undefined}>{i ? " " : ""}{w}</span>); })()
+                    : captionStyle === "full"
                     ? wrapByChars(current.narration, capChars).join("\n")
                     : captionStyle === "pop"
                       ? typedWords(wrapByChars(current.narration, capChars), progress).join("\n")
-                      : captionStyle === "sentence"
+                      : captionStyle === "sentence" || captionStyle === "cinematic"
                         ? typedPair(wrapByChars(current.narration, capChars), progress).join("\n")
                         : typedLine(wrapByChars(current.narration, capChars), progress)}
                 </p>
+              )}
+              {safeGuide && ratio.value === "9:16" && (
+                <div aria-hidden className="pointer-events-none absolute inset-0">
+                  <div className="absolute inset-x-0 bottom-0 h-[25%] border-t-2 border-dashed border-destructive/80 bg-destructive/15" />
+                  <div className="absolute bottom-[25%] right-0 top-[45%] w-[12%] border-l-2 border-dashed border-destructive/80 bg-destructive/15" />
+                  <div className="absolute inset-x-0 top-0 h-[8%] border-b-2 border-dashed border-destructive/80 bg-destructive/15" />
+                  <span className="absolute bottom-[1%] left-[3%] rounded bg-background/80 px-1.5 py-0.5 text-[10px] font-semibold text-foreground">Covered by title & channel</span>
+                  <span className="absolute right-[1%] top-[46%] rounded bg-background/80 px-1 py-0.5 text-[10px] font-semibold text-foreground [writing-mode:vertical-rl]">Like & comment buttons</span>
+                </div>
               )}
             </div>
             {scenes.length > 0 && (
@@ -949,6 +962,27 @@ export default function VideoEditor() {
               </div>
             )}
             <SettingsCard title="Look, format & voice" hint="Captions, picture shape, quality, scenes, narrator and tone." defaultOpen contentClassName="grid-cols-2 sm:grid-cols-3">
+              <div className="col-span-full grid gap-1.5">
+                <span className="text-xs font-semibold text-muted-foreground">Caption presets</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {CAPTION_PRESETS.map((p) => {
+                    const on = captionStyle === p.style && video.caption_font === p.font && safeColor(video.caption_color) === p.color;
+                    return (
+                      <Button key={p.id} type="button" size="sm" variant={on ? "default" : "outline"} className="h-8 text-xs" onClick={() => saveLook({ caption_style: p.style, caption_font: p.font, caption_color: p.color })}>
+                        {p.label}
+                      </Button>
+                    );
+                  })}
+                </div>
+                {ratio.value === "9:16" ? (
+                  <label className="mt-1 flex items-center justify-between gap-3 text-xs">
+                    <span><span className="font-semibold text-foreground">Show Shorts safe zone</span><span className="block text-muted-foreground">Captions stay clear of YouTube's like/comment buttons and title. Shaded areas show what gets covered.</span></span>
+                    <Switch checked={safeGuide} onCheckedChange={setSafeGuide} />
+                  </label>
+                ) : (
+                  <p className="text-xs text-muted-foreground">Switch Format to Portrait 9:16 to see the Shorts safe zone guide.</p>
+                )}
+              </div>
               <LookSelect label="Caption" value={captionStyle} options={CAPTION_STYLES} onChange={(v) => saveLook({ caption_style: v })} />
               <LookSelect label="Font" value={video.caption_font} options={CAPTION_FONTS} onChange={(v) => saveLook({ caption_font: v })} />
               <LookSelect label="Colour" value={safeColor(video.caption_color)} options={CAPTION_COLORS} onChange={(v) => saveLook({ caption_color: v })} swatch />

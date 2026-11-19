@@ -85,3 +85,24 @@ describe("typedPair", () => {
 
   it("handles a single line", () => expect(typedPair(["Only line"], 1)).toEqual(["Only line"]));
 });
+
+import { karaokeAt } from "./typewriter";
+import { captionBox, highlightColor } from "./captionLook";
+describe("karaoke and Shorts safe zone", () => {
+  it("shows the whole line with the spoken word highlighted", () => {
+    const k = karaokeAt(["one two three"], 0.01);
+    expect(k.words).toEqual(["one", "two", "three"]);
+    expect(k.active).toBe(0);
+    expect(karaokeAt(["one two three"], 1).active).toBe(2);
+  });
+  it("highlights in lime when the text is already yellow", () => {
+    expect(highlightColor("#ffffff")).toBe("#ffe14d");
+    expect(highlightColor("#ffe14d")).toBe("#c6ff3d");
+  });
+  it("lifts 9:16 captions above the bottom quarter and away from the right buttons", () => {
+    const b = captionBox("9:16");
+    expect(b.bottom).toBe(0.25);
+    expect(b.centre + b.width / 2).toBeLessThanOrEqual(0.88);
+    expect(captionBox("16:9").bottom).toBe(0);
+  });
+});

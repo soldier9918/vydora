@@ -29,7 +29,7 @@ export const isRatio = (v: string) => ASPECT_RATIOS.some((r) => r.value === v);
 export const ratioOf = (v?: string | null): AspectRatio => ASPECT_RATIOS.find((r) => r.value === v) ?? ASPECT_RATIOS[0];
 
 /** Width in canvas px a caption line may use — the preview box matches this. */
-export const captionWrapPx = (v?: string | null) => Math.round(ratioOf(v).w * 0.85);
+export const captionWrapPx = (v?: string | null) => Math.round(ratioOf(v).w * (ratioOf(v).value === "9:16" ? 0.7 : 0.85));
 
 /** Portrait formats are capped in width so the preview stays a sensible size on screen. */
 export const previewMaxPx = (v?: string | null) => (ratioOf(v).w >= ratioOf(v).h ? undefined : 420);

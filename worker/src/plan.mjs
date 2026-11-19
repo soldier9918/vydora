@@ -1,5 +1,5 @@
 // Pure timeline + FFmpeg plan, mirroring src/lib/exportVideo.ts timing rules.
-import { wrapByChars, typedLine, typedWords, typedPair } from "./typewriter.mjs";
+import { wrapByChars, typedLine, typedWords, typedPair, karaokeAt } from "./typewriter.mjs";
 export const TRANSITION_SECS = 0.8;
 const RATIOS = { "16:9": [1280, 720], "9:16": [720, 1280], "1:1": [1080, 1080], "4:5": [864, 1080], "21:9": [1680, 720] };
 const QUALITY = { "720p": { scale: 1, bitrate: "5M" }, "1080p": { scale: 1.5, bitrate: "8M" } };
@@ -68,17 +68,24 @@ export function captionAt(lines, style, t, speak) {
   const f = t / Math.max(0.001, speak);
   if (style === "full") return lines;
   if (style === "pop") return typedWords(lines, f);
-  if (style === "sentence") return typedPair(lines, f);
+  if (style === "sentence" || style === "cinematic") return typedPair(lines, f);
+  if (style === "karaoke") { const k = karaokeAt(lines, f); return k.words.length ? [k.words.join(" ")] : []; }
   const l = typedLine(lines, f); return l ? [l] : [];
 }
 /** Captions as ASS events that follow the narration exactly like the browser (typewriter, word pop, sentence, full). */
-export function captionsAss(caption, dur, { W, H, color = "#ffffff", size = "medium", style = "typewriter", font = "mono", scale = 1, wrapPx, speak }) {
+export function captionsAss(caption, dur, { W, H, color = "#ffffff", size = "medium", style = "typewriter", font = "mono", scale = 1, wrapPx, speak, aspect }) {
   const px = Math.round((SIZE_PX[size] ?? 60) * scale);
   const [fontName, cw] = FONT[font] ?? FONT.mono;
   const hex = /^#[0-9a-f]{6}$/i.test(color) ? color.slice(1) : "ffffff";
   const bgr = hex.slice(4, 6) + hex.slice(2, 4) + hex.slice(0, 2);
-  const marginV = Math.max(0, Math.round(Math.min(W, H) * 0.09 - px * 0.22));
-  const head = `[Script Info]\nScriptType: v4.00+\nPlayResX: ${W}\nPlayResY: ${H}\nWrapStyle: 2\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV\nStyle: Cap,${fontName},${px},&H00${bgr},&H40000000,&H30000000,1,0,1,1.5,2,2,0,0,${marginV}\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n`;
+  // Vertical videos keep captions in the Shorts safe zone (same as src/lib/captionLook.ts captionBox).
+  const portrait = aspect === "9:16";
+  const marginV = Math.max(0, Math.round(Math.min(W, H) * 0.09 + (portrait ? H * 0.25 : 0) - px * 0.22));
+  const marginR = portrait ? Math.round(W * 0.12) : 0;
+  const cine = style === "cinematic";
+  const hl = (hex.toLowerCase() === "ffe14d" ? "c6ff3d" : "ffe14d");
+  const hlBgr = hl.slice(4, 6) + hl.slice(2, 4) + hl.slice(0, 2);
+  const head = `[Script Info]\nScriptType: v4.00+\nPlayResX: ${W}\nPlayResY: ${H}\nWrapStyle: 2\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV\nStyle: Cap,${fontName},${px},&H00${bgr},${cine ? "&H70000000" : "&H40000000"},${cine ? "&H70000000" : "&H30000000"},1,0,${cine ? 3 : 1},${cine ? Math.round(px * 0.3) : 1.5},${cine ? 0 : 2},2,0,${marginR},${marginV}\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n`;
   if (style === "none" || !caption?.trim()) return head;
   const lines = wrapByChars(caption, (wrapPx ?? W * 0.85) / (px * cw));
   const maxLines = Math.max(1, Math.floor((H * 0.7) / Math.round(px * 1.2)));
@@ -87,7 +94,9 @@ export function captionsAss(caption, dur, { W, H, color = "#ffffff", size = "med
   const step = 1 / 30;
   for (let t = 0; t <= dur + 1e-6; t += step) {
     let d = captionAt(lines, style, t, sp); if (d.length > maxLines) d = d.slice(-maxLines);
-    const txt = d.map(assEscape).join("\\N");
+    const txt = style === "karaoke"
+      ? (() => { const k = karaokeAt(lines, t / Math.max(0.001, sp)); return k.words.map((w, i) => i === k.active ? `{\\c&H${hlBgr}&}${assEscape(w)}{\\c&H${bgr}&}` : assEscape(w)).join(" "); })()
+      : d.map(assEscape).join("\\N");
     if (txt !== cur) { if (cur) out.push(`Dialogue: 0,${ts(start)},${ts(t)},Cap,,0,0,0,,${cur}`); cur = txt; start = t; }
   }
   if (cur) out.push(`Dialogue: 0,${ts(start)},${ts(dur)},Cap,,0,0,0,,${cur}`);
