@@ -5,7 +5,7 @@
 - Generated media is stored in the private `video-assets` bucket under `<user_id>/<video_id>/` and shown via signed URLs. Why: users only see their own files.
 - Exports render in-browser; `video-export` authorises: server hash, free (no credits, no watermark), signed upload to `exports/`, identical versions re-download free. Why: untrusted client.
 - "Use real facts" scripts search the web via the Firecrawl connector inside `generate-script` and store cited URLs in `videos.sources`. Why: grounds real-event scripts in sources users can check.
-- Background music is composed in the browser (Web Audio) per mood, with uploads stored in `video-assets`; ducking is a per-video toggle. Why: no licensing risk and no AI credits.
+- Background music is composed in-browser (Web Audio) per mood; uploads in `video-assets`. Why: no licensing risk or credits.
 - Per-scene "Animate scene" uses image-to-video via the `animate-scene` edge function (start job, client polls status, MP4 saved to `video-assets`, path in `video_scenes.clip_path`). Why: video jobs take minutes and gateway URLs expire.
 - One-time top-ups charge through `create-checkout` (Stripe payment mode) and credit the ledger from the webhook at 25 credits per £1; auto top-up preferences stay device-local drafts only and are never billing authorization. Why: only real, verified payments may add credits.
 - Free monthly credits: daily cron `grant_monthly_free_credits_all` + `claim_monthly_free_credits` on load; once/month, subscribers/admins skipped. Why: works without login.
