@@ -292,20 +292,39 @@ async function captureWebsite(site: string, userId: string, videoId: string, idx
     const b = await r.json();
     return { img: (b?.data?.screenshot ?? b?.screenshot) as string | undefined, links: (b?.data?.links ?? []) as string[] };
   };
-  const host = new URL(site).hostname;
+  const host = new URL(site).hostname.replace(/^www\./, "");
+  const norm = (l: string) => { try { const u = new URL(l); u.hash = ""; u.search = ""; return u.toString().replace(/\/$/, ""); } catch { return ""; } };
+  const sameSite = (l: string) => { try { const u = new URL(l); return u.hostname.replace(/^www\./, "") === host && /^https?:$/.test(u.protocol) && !isPrivateHost(u.hostname) && !/\.(pdf|jpe?g|png|gif|svg|zip|xml|webp)$/i.test(u.pathname) && !/login|signin|sign-in|signup|register|cart|checkout|account|privacy|terms|cookie|legal/i.test(u.pathname); } catch { return false; } };
   const home = await shot(site, true).catch(() => null);
-  const words = /feature|product|pricing|how-it-works|solution|tour|about|review/i;
-  const pages = [...new Set((home?.links ?? []).filter((l) => {
-    try { const u = new URL(l); return u.hostname === host && /^https?:$/.test(u.protocol) && !isPrivateHost(u.hostname) && words.test(u.pathname); } catch { return false; }
-  }).map((l) => l.split("#")[0]))].slice(0, Math.max(0, idx.length - 2));
-  const rest = await Promise.all(pages.map((p) => shot(p).catch(() => null)));
-  // Home page on the product reveal and the call to action; sub-pages on the feature scenes.
-  const imgs = [home?.img, ...rest.map((r) => r?.img)].filter(Boolean) as string[];
-  if (!imgs.length) return idx.length;
+  // Find more real pages: links on the home page plus the site map.
+  let mapped: string[] = [];
+  try {
+    const r = await fetch("https://connector-gateway.lovable.dev/firecrawl/v2/map", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}`, "X-Connection-Api-Key": fcKey },
+      body: JSON.stringify({ url: site, limit: 100 }),
+    });
+    if (r.ok) mapped = ((await r.json())?.links ?? []).map((l: any) => typeof l === "string" ? l : l?.url).filter(Boolean);
+  } catch { /* home links only */ }
+  const homeKey = norm(site);
+  const words = /feature|product|pricing|how-it-works|solution|tour|about|review|demo|use-case|template|integration|service|shop|collection|blog/i;
+  const candidates = [...new Set([...(home?.links ?? []), ...mapped].filter(sameSite).map(norm))].filter((l) => l && l !== homeKey);
+  candidates.sort((x, y) => Number(words.test(new URL(y).pathname)) - Number(words.test(new URL(x).pathname)) || new URL(x).pathname.length - new URL(y).pathname.length);
+  // Screenshot different pages until each website scene has its own one.
+  const need = idx.length - (home?.img ? 1 : 0);
+  const subImgs: string[] = [];
+  for (let i = 0; i < candidates.length && subImgs.length < need && i < need * 3; i += need) {
+    const batch = candidates.slice(i, i + need);
+    const got = await Promise.all(batch.map((p) => shot(p).catch(() => null)));
+    for (const g of got) if (g?.img && subImgs.length < need) subImgs.push(g.img);
+  }
+  // Sub-pages on the reveal and feature scenes, home page on the final call to action. Never reuse a page.
+  const imgs: (string | undefined)[] = idx.map((_, i) => i === idx.length - 1 ? (home?.img ?? subImgs[i]) : subImgs[i]);
+  if (!home?.img && !subImgs.length) return idx.length;
   const { data: rows } = await adminClient().from("video_scenes").select("id, position").eq("video_id", videoId);
   let failed = 0;
   await Promise.all(idx.map(async (pos, i) => {
-    const src = i === idx.length - 1 ? imgs[0] : imgs[i % imgs.length];
+    const src = imgs[i];
     const row = rows?.find((r) => r.position === pos);
     try {
       if (!row || !src?.startsWith("https://")) throw new Error();
