@@ -52,6 +52,7 @@ Deno.serve(async (req) => {
     if (mode === "text" || custom) {
       // Keep the picture, redo only the lettering.
       if (!video.thumbnail_path) return json({ error: "Make a thumbnail first." }, 400);
+      if (!video.thumbnail_path.startsWith(`${auth.user.id}/`) || video.thumbnail_path.includes("..")) return json({ error: "Make a thumbnail first." }, 400);
       const { data: file, error: dlErr } = await adminClient().storage.from("video-assets").download(video.thumbnail_path);
       if (dlErr || !file) throw dlErr ?? new Error("thumbnail missing");
       const looks = ["chunky 3D extruded letters", "brush-stroke hand-painted letters", "neon glowing tube letters", "condensed all-caps with thick outline", "grunge distressed stencil letters", "sleek metallic chrome letters", "comic-book pop letters with halftone", "elegant serif with drop shadow", "glitchy digital letters", "bold sticker-style letters with white border"];

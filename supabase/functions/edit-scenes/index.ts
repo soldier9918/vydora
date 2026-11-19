@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
       const drop = scenes.slice(target);
       const { error: dErr } = await client.from("video_scenes").delete().in("id", drop.map((s) => s.id));
       if (dErr) throw dErr;
-      const paths = drop.flatMap((s) => [s.image_path, s.audio_path]).filter((p): p is string => !!p);
+      const paths = drop.flatMap((s) => [s.image_path, s.audio_path]).filter((p): p is string => !!p && p.startsWith(`${user.id}/`) && !p.includes(".."));
       if (paths.length) await adminClient().storage.from("video-assets").remove(paths);
       return json({ count: target, added: 0, removed: drop.length });
     }
