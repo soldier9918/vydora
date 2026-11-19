@@ -60,7 +60,8 @@ Deno.serve(async (req) => {
     if (action !== "check" && action !== "start") return json({ error: "Invalid request." }, 400);
     const videoId = typeof body.videoId === "string" ? body.videoId : "";
     const { data: video } = await auth.client.from("videos").select("*").eq("id", videoId).maybeSingle();
-    if (!video) return json({ error: "Video not found." }, 404);
+    // A quiet "check" for a video this account can't see (signed out, switched account, deleted) is not an error.
+    if (!video) return action === "check" ? json({ decision: "missing" }) : json({ error: "Video not found." }, 404);
     const [{ data: scenes }, { data: cardRow }, account] = await Promise.all([
       db.from("video_scenes").select("id, position, narration, initial_narration, image_path, audio_path, clip_path").eq("video_id", video.id).order("position"),
       db.from("user_brand_cards").select("cards").eq("user_id", uid).maybeSingle(),

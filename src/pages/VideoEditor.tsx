@@ -448,7 +448,7 @@ export default function VideoEditor() {
       // Don't ask the server until the sign-in has loaded, or it answers "Please sign in first".
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return null;
-      return checkExport(id!, exportFormat).catch(() => null);
+      return checkExport(id!, exportFormat).then((r) => ((r as { decision: string }).decision === "missing" ? null : r)).catch(() => null);
     },
     retry: false,
     enabled: !!id && !!data?.scenes?.length && data.scenes.every((s) => !!s.image_path),
