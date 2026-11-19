@@ -240,7 +240,7 @@ Deno.serve(async (req) => {
     const { client, user } = auth;
     const { data: video, error: vErr } = await adminClient()
       .from("videos")
-      .insert({ user_id: user.id, title: output.title.slice(0, 120), description: output.description, topic: topic.trim(), style, voice, tone, caption_style: caption, aspect_ratio: ratio, quality: qual, target_seconds: total, sources, source_url: srcUrl, narration_speed: speed, accent })
+      .insert({ user_id: user.id, title: output.title.slice(0, 120), description: output.description, topic: topic.trim(), style, voice, tone, caption_style: caption, aspect_ratio: ratio, quality: qual, target_seconds: total, sources, source_url: srcUrl, narration_speed: speed, accent, kind: adMode ? "ad" : "normal" })
       .select("id")
       .single();
     if (vErr) throw vErr;

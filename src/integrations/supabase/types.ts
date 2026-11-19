@@ -776,6 +776,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          kind: string
           logo_opacity: number
           logo_path: string | null
           logo_position: string
@@ -816,6 +817,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          kind?: string
           logo_opacity?: number
           logo_path?: string | null
           logo_position?: string
@@ -856,6 +858,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          kind?: string
           logo_opacity?: number
           logo_path?: string | null
           logo_position?: string

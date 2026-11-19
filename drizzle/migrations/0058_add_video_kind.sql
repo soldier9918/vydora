@@ -1,0 +1,1 @@
+ALTER TABLE public.videos ADD COLUMN IF NOT EXISTS kind text NOT NULL DEFAULT 'normal';

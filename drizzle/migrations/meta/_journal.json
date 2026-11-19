@@ -407,6 +407,13 @@
       "when": 1794969599300,
       "tag": "0057_admin_panel_tools",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1795114363375,
+      "tag": "0058_add_video_kind",
+      "breakpoints": true
     }
   ]
 }

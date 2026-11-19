@@ -12,22 +12,7 @@ import { generateThumbnail, signedUrls } from "@/lib/videoApi";
 import { CREDIT_COSTS } from "@/lib/credits";
 import { estimateCredits } from "@/lib/credits";
 import { duplicateVideo, useAccount, isReadOnlyAccount } from "@/lib/account";
-
-type Kind = "normal" | "article" | "series" | "autopilot";
-const GROUPS: { kind: Kind; label: string }[] = [
-  { kind: "normal", label: "Videos" },
-  { kind: "article", label: "Article to video" },
-  { kind: "series", label: "Series" },
-  { kind: "autopilot", label: "Autopilot" },
-];
-// Series episodes are titled "<Series> [Part n/N]: ..." by the Series page; articles keep their link.
-// Autopilot videos are known from the plan that made them.
-function videoKind(v: { id: string; title: string; source_url?: string | null }, autopilotIds?: Set<string>): Kind {
-  if (/\[Part \d+\/\d+\]/.test(v.title)) return "series";
-  if (v.source_url) return "article";
-  if (autopilotIds?.has(v.id)) return "autopilot";
-  return "normal";
-}
+import { KIND_GROUPS as GROUPS, KIND_LABELS, videoKind, type Kind } from "@/lib/videoKind";
 
 export default function MyVideos() {
   const [thumbBusy, setThumbBusy] = useState<string | null>(null);
@@ -89,7 +74,7 @@ export default function MyVideos() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("videos")
-        .select("id, title, topic, style, aspect_ratio, thumbnail_path, created_at, sources, seo, quality, source_url")
+        .select("id, title, topic, style, aspect_ratio, thumbnail_path, created_at, sources, seo, quality, source_url, kind")
         .order("created_at", { ascending: false });
       if (error) throw error;
       type VideoRow = (typeof data)[number] & { thumb: string | null; credits: number };
@@ -221,7 +206,7 @@ export default function MyVideos() {
                             </Link>
                           </td>
                           <td className="max-w-[220px] px-3 py-2"><Link to={`/video/${v.id}`} className="line-clamp-2 font-semibold hover:text-primary">{v.title}</Link></td>
-                          <td className="px-3 py-2"><span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ${kind === "series" ? "bg-primary/15 text-primary" : kind === "article" ? "bg-accent text-accent-foreground" : kind === "autopilot" ? "border border-primary/40 bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{kind === "series" ? "Series" : kind === "article" ? "Article to video" : kind === "autopilot" ? "Autopilot" : "Standard video"}</span></td>
+                          <td className="px-3 py-2"><span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ${kind === "series" ? "bg-primary/15 text-primary" : kind === "article" ? "bg-accent text-accent-foreground" : kind === "ad" ? "bg-primary text-primary-foreground" : kind === "autopilot" ? "border border-primary/40 bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{KIND_LABELS[kind]}</span></td>
                           <td className="px-3 py-2"><span className="whitespace-nowrap rounded-full border border-border px-2 py-0.5 text-xs">{typeLabel}</span></td>
                           <td className="max-w-[240px] px-3 py-2 text-muted-foreground"><span className="line-clamp-2" title={v.topic ?? ""}>{v.topic}</span></td>
                           <td className="whitespace-nowrap px-3 py-2 font-semibold text-primary">⚡ ~{v.credits}</td>
