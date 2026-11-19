@@ -210,10 +210,14 @@ export const FEATURE_PAGES: FeaturePage[] = [
       { heading: "Copy based on your own page", paras: [
         "The script uses the features and prices from your page or description and is told not to make up reviews or prices. You can edit every line before anything is generated.",
       ]},
+      { heading: "Up to 5 Minutes and 20 scenes", paras: [
+        "Product ads can run up to 5 Minutes with up to 20 scenes. They start at 16 scenes, paced as hook, problem, solution, key features, proof, then your offer and call to action. Free accounts can make ads up to 2 Minutes with up to 6 scenes.",
+      ]},
     ],
     faqs: [
       ["How much does an ad cost?", "The same credits as a normal video of the same length."],
       ["Which formats are supported?", "16:9 for YouTube and websites, and 9:16 for Shorts, TikTok and Reels."],
+      ["How long can a product ad be?", "Up to 5 Minutes and 20 scenes on Creator and Pro, or up to 2 Minutes and 6 scenes on the Free plan."],
       ["Can I use my own photos?", "Yes, upload product photos or website screenshots and they're used in your scenes."],
     ],
     cta: { label: "Make a product ad", to: "/ads" },

@@ -156,7 +156,7 @@ export const GUIDES: Guide[] = [
         "Before & after: show the change your customer experiences.",
       ]},
       { heading: "Choose the right shape and length", paras: [
-        "Use 9:16 for YouTube Shorts, TikTok and Reels, and 16:9 for YouTube in-stream ads and websites. Short ads of 15 to 45 seconds usually hold attention best; longer explainers suit warmer audiences.",
+        "Use 9:16 for YouTube Shorts, TikTok and Reels, and 16:9 for YouTube in-stream ads and websites. Short ads of 15 to 45 seconds usually hold attention best; longer explainers suit warmer audiences. In Vydora, product ads can be up to 5 Minutes long with up to 20 scenes (Free accounts: up to 2 Minutes and 6 scenes).",
       ]},
       { heading: "Hook fast, end with one clear action", paras: [
         "The first three seconds decide whether people keep watching, so open with a benefit or a question. End on one call to action, such as visiting your site or starting a free trial.",
