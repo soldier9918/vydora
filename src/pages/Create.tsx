@@ -277,7 +277,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
                   <SelectItem key={s} value={String(s)} disabled={!isLengthAllowed(s, Number(scenes)) || !lengthAllowedForTier(s, pro)}>{!lengthAllowedForTier(s, pro) ? "🔒 " : ""}{formatSeconds(s)} · {lengthPlanLabel(s)}{lengthAllowedForTier(s, pro) && !isLengthAllowed(s, Number(scenes)) ? (Number(scenes) < minScenesForSeconds(s) ? ` · needs ${minScenesForSeconds(s)}+ scenes` : ` · max ${maxScenesForSeconds(s)} scenes`) : ""}</SelectItem>
                 ))}</SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">{onPlan ? "Autopilot videos can be up to 20 Minutes long. " : ""}{adMode ? "Product ads can be up to 5 Minutes long. " : ""}{LENGTH_PLAN_SUMMARY}.</p>
+              <p className="text-xs text-muted-foreground">{onPlan ? "Autopilot videos can be up to 20 Minutes long. " : ""}{adMode ? "Product ads: Free up to 2 Minutes and 6 scenes · Creator and Pro up to 5 Minutes and 20 scenes." : `${LENGTH_PLAN_SUMMARY}.`}</p>
             </div>
             <div className="grid gap-2">
               <Label>Quality</Label>
@@ -316,7 +316,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
             <span className="text-muted-foreground">Estimated cost (script, images, voiceovers, quality)</span>
             <Link to="/pricing" className="font-display font-bold text-primary hover:underline">⚡ {estimateCredits({ scenes: Number(scenes), useFacts: useFacts || fromUrl || (adMode && !!url.trim()), quality })} credits</Link>
           </p>
-          {!pro && <p className="text-xs text-muted-foreground">Free plan: 4 narrators, up to {FREE_MAX_SCENES} scenes, 2-minute videos and 720p. <Link to="/billing" className="text-primary underline">Subscribe to a plan</Link> to unlock every narrator and longer videos (Creator: 20 minutes, Pro: 60 minutes + 1080p).</p>}
+          {!pro && <p className="text-xs text-muted-foreground">Free plan: 4 narrators, up to {FREE_MAX_SCENES} scenes, 2 Minute videos and 720p. <Link to="/billing" className="text-primary underline">Subscribe to a plan</Link> to unlock every narrator and longer videos ({adMode ? "product ads up to 5 Minutes and 20 scenes" : "Creator: 20 Minutes, Pro: 60 Minutes"}, plus 1080p on Pro).</p>}
           <Button type="submit" size="lg" disabled={busy || !lengthOk || !tierOk}>{onPlan ? (busy ? "Adding…" : "Add to plan") : busy ? "Writing your script…" : "Generate video"}</Button>
         </form>
   );
