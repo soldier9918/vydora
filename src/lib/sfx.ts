@@ -42,16 +42,32 @@ export const MOOD_SFX: Record<string, string[]> = {
 };
 const DEFAULT_SMART = ["whoosh", "soft-whoosh", "page"];
 
-/** The saved sound setting is "<sound>" plus "+pop" when caption pop sounds are on. */
-export function parseSfx(saved: string | null | undefined): { type: string; textPop: boolean } {
+/**
+ * The saved sound setting is "<sound>", then optional per-cut choices "@<cut>=<sound>,..."
+ * (cut 0 = into scene 2; "none" = silent), then "+pop" when caption pop sounds are on.
+ */
+export function parseSfx(saved: string | null | undefined): { type: string; textPop: boolean; overrides: Record<number, string> } {
   const v = saved || "whoosh";
-  return { type: v.replace(/\+pop$/, "") || "whoosh", textPop: v.endsWith("+pop") };
+  const textPop = v.endsWith("+pop");
+  const [base, list] = v.replace(/\+pop$/, "").split("@");
+  const overrides: Record<number, string> = {};
+  (list ?? "").split(",").forEach((pair) => {
+    const [k, snd] = pair.split("=");
+    const i = Number(k);
+    if (snd && Number.isInteger(i) && i >= 0) overrides[i] = snd;
+  });
+  return { type: base || "whoosh", textPop, overrides };
 }
-export const joinSfx = (type: string, textPop: boolean) => (textPop ? `${type}+pop` : type);
+export const joinSfx = (type: string, textPop: boolean, overrides: Record<number, string> = {}) => {
+  const list = Object.entries(overrides).filter(([, v]) => v).sort((a, b) => Number(a[0]) - Number(b[0])).map(([k, v]) => `${k}=${v}`).join(",");
+  return `${type}${list ? `@${list}` : ""}${textPop ? "+pop" : ""}`;
+};
 
-/** Which sound plays at a given transition ("random" varies, "auto" follows the music mood). */
+/** Which sound plays at a given cut: a per-cut choice wins, then "random" varies and "auto" follows the music mood. "none" = silent. */
 export function sfxFor(type: string, index: number, mood?: string | null): string {
-  const base = parseSfx(type).type;
+  const { type: base, overrides } = parseSfx(type);
+  const own = overrides[index];
+  if (own) return own === "random" || own === "auto" ? sfxFor(own, index, mood) : own;
   if (base === "auto") { const set = MOOD_SFX[mood ?? ""] ?? DEFAULT_SMART; return set[index % set.length]; }
   if (base !== "random") return base;
   return PLAYABLE[(index * 7 + 3) % PLAYABLE.length];
@@ -78,6 +94,7 @@ function noise(ctx: BaseAudioContext, secs: number) {
 
 /** Plays one synthesized transition sound into `out` at time `at` (volume 0–100). */
 export function playSfx(ctx: AudioContext, out: AudioNode, type: string, at = ctx.currentTime, volume = 50) {
+  if (type === "none") return;
   const master = ctx.createGain();
   master.gain.value = Math.max(0, Math.min(1, volume / 100));
   master.connect(out);

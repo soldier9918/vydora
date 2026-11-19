@@ -119,8 +119,12 @@ const MOOD_SFX = {
   lofi: ["soft-whoosh", "page", "click"], chill: ["soft-whoosh", "bubble", "page"], ambient: ["wind", "soft-whoosh", "chime"],
   piano: ["soft-whoosh", "chime", "page"], sad: ["soft-whoosh", "wind", "page"], hopeful: ["chime", "sparkle", "soft-whoosh"], dreamy: ["sparkle", "chime", "soft-whoosh"],
 };
+// Keep in sync with parseSfx/sfxFor in src/lib/sfx.ts ("<sound>@<cut>=<sound>,...+pop").
 export const sfxFor = (type, i, mood) => {
-  const base = String(type || "whoosh").replace(/\+pop$/, "") || "whoosh";
+  const [rawBase, list] = String(type || "whoosh").replace(/\+pop$/, "").split("@");
+  const base = rawBase || "whoosh";
+  const own = (list ?? "").split(",").map((p) => p.split("=")).find(([k, s]) => s && Number(k) === i)?.[1];
+  if (own) return own === "random" || own === "auto" ? sfxFor(own, i, mood) : own;
   if (base === "auto") { const set = MOOD_SFX[mood] ?? ["whoosh", "soft-whoosh", "page"]; return set[i % set.length]; }
   return base !== "random" ? base : PLAYABLE[(i * 7 + 3) % PLAYABLE.length];
 };
@@ -128,6 +132,7 @@ let seed = 1; const rand = () => { seed = (seed * 16807) % 2147483647; return se
 
 /** Adds one transition sound at time `at` (volume 0-100) into buf. */
 export function addSfx(buf, type, at, volume = 50) {
+  if (type === "none") return;
   const master = Math.max(0, Math.min(1, volume / 100));
   const env = (peak, attack, dur) => (x) => (x < 0 ? 0 : x < attack ? expAt(0.0001, peak, x / attack) : x <= dur ? expAt(peak, 0.0001, (x - attack) / (dur - attack)) : 0) * master;
   const tone = (f, t, dur, peak, w = "sine", f2) => osc(buf, t, dur + 0.05, w, (x) => (f2 ? expAt(f, f2, x / dur) : f), env(peak, Math.min(0.01, dur / 4), dur));

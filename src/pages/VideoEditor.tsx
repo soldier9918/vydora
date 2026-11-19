@@ -216,6 +216,7 @@ export default function VideoEditor() {
   // Transition sound effects when the preview moves to the next scene.
   const prevScene = useRef<number | null>(null);
   const sfxCtx = useRef<AudioContext | null>(null);
+  const [perCutOpen, setPerCutOpen] = useState(false);
   const previewSfx = async (type: string, volume: number, index = 0, mood?: string | null) => {
     const ctx = sfxCtx.current ?? (sfxCtx.current = new AudioContext());
     if (ctx.state === "suspended") await ctx.resume().catch(() => {});
@@ -1169,11 +1170,46 @@ export default function VideoEditor() {
                     value={parseSfx(video.sfx_type).type}
                     options={SFX_TYPES}
                     disabled={!video.sfx_enabled}
-                    onChange={(v) => { saveLook({ sfx_type: joinSfx(v, parseSfx(video.sfx_type).textPop) }); previewSfx(v, video.sfx_volume, 0); }}
+                    onChange={(v) => { saveLook({ sfx_type: joinSfx(v, parseSfx(video.sfx_type).textPop, parseSfx(video.sfx_type).overrides) }); previewSfx(v, video.sfx_volume, 0); }}
                   />
                 </div>
                 <Button size="sm" variant="outline" disabled={!video.sfx_enabled} onClick={() => previewSfx(video.sfx_type, video.sfx_volume, Math.floor(Math.random() * 30))}>▶ Listen</Button>
               </div>
+              {scenes.length > 1 && (() => {
+                const cur = parseSfx(video.sfx_type);
+                const setCut = (i: number, v: string) => {
+                  const o = { ...cur.overrides };
+                  if (v === "default") delete o[i]; else o[i] = v;
+                  saveLook({ sfx_type: joinSfx(cur.type, cur.textPop, o) });
+                };
+                const custom = Object.keys(cur.overrides).length;
+                return (
+                  <details className="rounded-lg border border-border p-2 text-sm" open={perCutOpen} onToggle={(e) => setPerCutOpen((e.target as HTMLDetailsElement).open)}>
+                    <summary className="cursor-pointer font-semibold">Customise sound per scene{custom ? ` (${custom} changed)` : ""}</summary>
+                    <p className="mt-1 text-xs text-muted-foreground">Pick a different sound for any scene change. "Default" uses the sound chosen above.</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <Button size="sm" variant="outline" className="h-7 px-2 text-xs" disabled={!video.sfx_enabled || !custom} onClick={() => saveLook({ sfx_type: joinSfx(cur.type, cur.textPop) })}>Reset all to default</Button>
+                      <Button size="sm" variant="outline" className="h-7 px-2 text-xs" disabled={!video.sfx_enabled} onClick={() => saveLook({ sfx_type: joinSfx(cur.type, cur.textPop, Object.fromEntries(scenes.slice(1).map((_, i) => [i, "none"]))) })}>Silence all</Button>
+                    </div>
+                    <div className="mt-2 grid gap-2">
+                      {scenes.slice(1).map((_, i) => (
+                        <div key={i} className="flex items-end gap-2">
+                          <div className="min-w-0 flex-1">
+                            <LookSelect
+                              label={`Scene ${i + 1} → ${i + 2}`}
+                              value={cur.overrides[i] ?? "default"}
+                              options={[{ value: "default", label: "Default" }, { value: "none", label: "No sound" }, ...SFX_TYPES]}
+                              disabled={!video.sfx_enabled}
+                              onChange={(v) => { setCut(i, v); if (v !== "none") previewSfx(v === "default" ? cur.type : v, video.sfx_volume, i); }}
+                            />
+                          </div>
+                          <Button size="sm" variant="outline" className="h-9 px-2" aria-label={`Listen to scene ${i + 1} to ${i + 2} sound`} disabled={!video.sfx_enabled || sfxFor(video.sfx_type, i, video.music_enabled === false ? null : video.music_mood) === "none"} onClick={() => previewSfx(video.sfx_type, video.sfx_volume, i)}>▶</Button>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                );
+              })()}
               {parseSfx(video.sfx_type).type === "auto" && (
                 <p className="text-xs text-muted-foreground">Picks sounds that suit your music mood{video.music_enabled === false ? " (music is off, so gentle whooshes and page turns are used)" : ""}.</p>
               )}
@@ -1182,7 +1218,7 @@ export default function VideoEditor() {
                   <span className="font-semibold">Caption pop sound</span>
                   <span className="block text-xs text-muted-foreground">A soft click each time a new line of captions appears.</span>
                 </span>
-                <Switch checked={parseSfx(video.sfx_type).textPop} disabled={!video.sfx_enabled || video.caption_style === "none"} onCheckedChange={(v) => saveLook({ sfx_type: joinSfx(parseSfx(video.sfx_type).type, v) })} />
+                <Switch checked={parseSfx(video.sfx_type).textPop} disabled={!video.sfx_enabled || video.caption_style === "none"} onCheckedChange={(v) => saveLook({ sfx_type: joinSfx(parseSfx(video.sfx_type).type, v, parseSfx(video.sfx_type).overrides) })} />
               </label>
               <div className="grid gap-1 text-xs font-semibold text-muted-foreground">
                 Effects volume: {video.sfx_volume}%
