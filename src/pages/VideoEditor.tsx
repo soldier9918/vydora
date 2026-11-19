@@ -1171,6 +1171,7 @@ export default function VideoEditor() {
                 </span>
                 <Switch checked={video.music_ducking} disabled={video.music_enabled === false} onCheckedChange={(v) => saveLook({ music_ducking: v })} />
               </label>
+            </SettingsCard>
             <SettingsCard title="Camera motion, transitions & sound effects" hint="How pictures move, how one scene moves into the next, and the sounds that play with it.">
               <label className="flex items-center justify-between gap-3 text-sm">
                 <span>
