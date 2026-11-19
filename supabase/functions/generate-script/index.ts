@@ -355,7 +355,7 @@ async function captureWebsite(site: string, userId: string, videoId: string, idx
       const path = `${userId}/${videoId}/${row.id}-website-${Date.now()}.${type.includes("jpeg") ? "jpg" : "png"}`;
       const { error } = await adminClient().storage.from("video-assets").upload(path, new Uint8Array(await res.arrayBuffer()), { contentType: type });
       if (error) throw error;
-      await adminClient().from("video_scenes").update({ image_path: path }).eq("id", row.id);
+      await adminClient().from("video_scenes").update({ image_path: path, web_url: i === idx.length - 1 ? site : picks[i] ?? null }).eq("id", row.id);
     } catch { failed++; }
   }));
   return failed;

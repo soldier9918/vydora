@@ -219,6 +219,37 @@ Deno.serve(async (req) => {
     }
     if (action === "autopilot_result") return ok(await autopilotResult(db, worker, body));
 
+    if (action === "web_claim") {
+      const { data, error } = await db.rpc("claim_web_recording", { _worker: worker, _lease_seconds: 240 });
+      if (error) throw error;
+      const rec = Array.isArray(data) ? data[0] : null;
+      if (!rec) return ok({ rec: null });
+      const path = `${rec.user_id}/${rec.video_id}/${rec.scene_id}-webrec-${rec.id}.mp4`;
+      const { data: up, error: ue } = await db.storage.from(BUCKET).createSignedUploadUrl(path, { upsert: true });
+      if (ue) throw ue;
+      return ok({ rec: { id: rec.id, url: rec.url, seconds: rec.seconds, aspect: rec.aspect }, upload: { url: up.signedUrl, path } });
+    }
+    if (action === "web_done" || action === "web_fail") {
+      if (!isUuid(body.rec)) return ok({ error: "bad rec" }, 400);
+      const { data: rec } = await db.from("web_recordings").select("*").eq("id", body.rec).eq("locked_by", worker).eq("status", "recording").maybeSingle();
+      if (!rec) return ok({ error: "not_owner", lost: true }, 409);
+      const now = new Date().toISOString();
+      if (action === "web_done") {
+        const path = `${rec.user_id}/${rec.video_id}/${rec.scene_id}-webrec-${rec.id}.mp4`;
+        const { data: files } = await db.storage.from(BUCKET).list(`${rec.user_id}/${rec.video_id}`, { search: `${rec.scene_id}-webrec-${rec.id}` });
+        if (!files?.length) return ok({ error: "upload missing" }, 400);
+        await db.from("video_scenes").update({ clip_path: path, clip_credit: null }).eq("id", rec.scene_id).eq("user_id", rec.user_id);
+        await db.from("web_recordings").update({ status: "completed", clip_path: path, locked_by: null, updated_at: now }).eq("id", rec.id);
+        return ok({ ok: true });
+      }
+      const final = body.permanent === true || rec.attempts >= 3;
+      const msg = String(body.error ?? "Recording failed").slice(0, 300);
+      await db.from("web_recordings").update({ status: final ? "failed" : "queued", error: final ? "Couldn't record this page. Your credits were returned." : null, locked_by: null, locked_until: null, updated_at: now }).eq("id", rec.id);
+      console.warn("web recording failed", rec.id, msg);
+      if (final && rec.charged) await db.rpc("refund_credits", { _user: rec.user_id, _amount: rec.charged, _reason: "refund_web_recording" });
+      return ok({ ok: true });
+    }
+
     const job = await heldJob(db, body.job, worker);
     if (!job) return ok({ error: "not_owner", lost: true }, 409);
 

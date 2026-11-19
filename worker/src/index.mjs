@@ -7,6 +7,7 @@ import { renderVideo } from "./render.mjs";
 import { youtubeUpload } from "./youtube.mjs";
 import { api, WORKER } from "./api.mjs";
 import { autopilotTick } from "./autopilot.mjs";
+import { webTick } from "./webrec.mjs";
 
 const POLL = Number(process.env.POLL_SECONDS ?? "15");
 const WORK = process.env.WORK_DIR ?? "/tmp/vydora";
@@ -80,6 +81,8 @@ while (!stopping) {
   try { m = await api("claim"); } catch (e) { console.error("claim", e.message); }
   if (m?.job) { await processJob(m); continue; }
   let worked = false;
+  try { worked = await webTick(); } catch (e) { console.error("web recording", e.message); }
+  if (worked) continue;
   try { worked = await autopilotTick(); } catch (e) { console.error("autopilot", e.message); }
   if (!worked) await new Promise((r) => setTimeout(r, POLL * 1000));
 }

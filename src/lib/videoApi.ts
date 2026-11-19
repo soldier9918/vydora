@@ -100,6 +100,7 @@ export type Scene = {
   clip_path?: string | null;
   clip_job_id?: string | null;
   clip_credit?: string | null;
+  web_url?: string | null;
 };
 
 // Make sure we send a live sign-in token; a stale saved one is refreshed first.
@@ -146,6 +147,9 @@ export const websiteSceneImage = (sceneId: string, mode: "auto" | "url", url?: s
 
 export const animateScene = (sceneId: string, action: "start" | "status", seconds?: number) =>
   invoke<{ status: string; path?: string; error?: string; progress?: number | null }>("animate-scene", { sceneId, action, seconds });
+
+export const webRecord = (sceneId: string, action: "start" | "status", opts?: { seconds?: number; url?: string }) =>
+  invoke<{ status: string; error?: string | null; url?: string }>("web-record", { sceneId, action, ...opts });
 
 export const rewriteScene = (sceneId: string) =>
   invoke<{ narration: string }>("rewrite-scene", { sceneId });

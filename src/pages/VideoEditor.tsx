@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
-import { websiteSceneImage, generateSceneAsset, generateThumbnail, signedUrls, TONES, editScenes, rewriteScene, animateScene, generateSeo, checkExport, startExport, completeExport, failExport, type Scene, type Seo } from "@/lib/videoApi";
+import { websiteSceneImage, generateSceneAsset, generateThumbnail, signedUrls, TONES, editScenes, rewriteScene, animateScene, webRecord, generateSeo, checkExport, startExport, completeExport, failExport, type Scene, type Seo } from "@/lib/videoApi";
 import { Input } from "@/components/ui/input";
 import { exportVideo, canRecordMp4 } from "@/lib/exportVideo";
 import { fetchCards, isActive, type BrandCard } from "@/lib/brandCards";
@@ -340,6 +340,39 @@ export default function VideoEditor() {
     pollClip(scene);
   }, [pollClip, audioSecs]);
 
+  // Live website recording (product ads): the cloud worker records the real page with a moving cursor.
+  const pollRecord = useCallback(async (scene: Scene) => {
+    const key = `${scene.id}-clip`;
+    setWorking((w) => ({ ...w, [key]: true }));
+    try {
+      for (let n = 0; n < 90; n++) {
+        await new Promise((r) => setTimeout(r, 6000));
+        const r = await webRecord(scene.id, "status");
+        if (r.status === "completed") { await qc.invalidateQueries({ queryKey: ["video", id] }); toast.success(`Scene ${scene.position + 1} now shows a live recording of the website.`); return; }
+        if (r.status === "failed" || r.status === "none") { if (r.error) toast.error(`Scene ${scene.position + 1}: ${r.error}`); return; }
+      }
+      toast.error("The recording is taking too long — reload the page later to check.");
+    } catch (e) {
+      toast.error(`Scene ${scene.position + 1}: ${(e as Error).message}`);
+    } finally {
+      setWorking((w) => ({ ...w, [key]: false }));
+    }
+  }, [id, qc]);
+
+  const recordLive = useCallback(async (scene: Scene) => {
+    const key = `${scene.id}-clip`;
+    setWorking((w) => ({ ...w, [key]: true }));
+    try {
+      const r = await webRecord(scene.id, "start", { seconds: sceneSeconds(scene.audio_path ? audioSecs[scene.id] : null, scene.narration) });
+      toast.message(`Recording ${r.url ?? "the website"} for scene ${scene.position + 1} — this takes about a minute.`);
+    } catch (e) {
+      toast.error(`Scene ${scene.position + 1}: ${(e as Error).message}`);
+      setWorking((w) => ({ ...w, [key]: false }));
+      return;
+    }
+    pollRecord(scene);
+  }, [pollRecord, audioSecs]);
+
   const removeClip = useCallback(async (scene: Scene) => {
     const { error } = await supabase.from("video_scenes").update({ clip_path: null, clip_credit: null }).eq("id", scene.id);
     if (error) return toast.error("Couldn't switch back to the still image.");
@@ -351,7 +384,11 @@ export default function VideoEditor() {
     if (!data || resumed.current) return;
     resumed.current = true;
     data.scenes.filter((s) => s.clip_job_id).forEach((s) => pollClip(s));
-  }, [data, pollClip]);
+    const v = data.video as { kind?: string | null };
+    if (v.kind === "ad") data.scenes.filter((s) => s.image_path?.includes("-website-") && !s.clip_job_id).forEach((s) => {
+      webRecord(s.id, "status").then((r) => { if (r.status === "queued" || r.status === "recording") pollRecord(s); }).catch(() => {});
+    });
+  }, [data, pollClip, pollRecord]);
 
   const redoScript = useCallback(async (scene: Scene) => {
     const key = `${scene.id}-script`;
@@ -1440,6 +1477,11 @@ export default function VideoEditor() {
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) uploadImage(s, f); }} />
                     </label>
                   </Button>
+                  {isWebAd && s.image_path?.includes("-website-") && (
+                    <Button size="sm" variant="outline" disabled={working[`${s.id}-clip`] || working[`${s.id}-image`]} onClick={() => recordLive(s)} title={s.web_url ? `Records ${s.web_url}` : undefined}>
+                      {working[`${s.id}-clip`] ? "Recording website… (about 1 Minute)" : "🎥 Record live website"} · {CREDIT_COSTS.animate} cr
+                    </Button>
+                  )}
                   <Button size="sm" variant="outline" disabled={!s.image_path || working[`${s.id}-clip`] || working[`${s.id}-image`]} onClick={() => animate(s)}>
                     {working[`${s.id}-clip`] ? "Animating… (1–3 minutes)" : s.clip_path ? "Re-animate" : "✨ Animate scene"} · {CREDIT_COSTS.animate} cr
                   </Button>

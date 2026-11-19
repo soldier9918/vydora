@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
       const admin = adminClient();
       const { error: upErr } = await admin.storage.from("video-assets").upload(path, new Uint8Array(await res.arrayBuffer()), { contentType: type });
       if (upErr) throw upErr;
-      const { error: uErr } = await admin.from("video_scenes").update({ image_path: path, clip_path: null, clip_credit: null }).eq("id", scene.id);
+      const { error: uErr } = await admin.from("video_scenes").update({ image_path: path, web_url: target, clip_path: null, clip_credit: null }).eq("id", scene.id);
       if (uErr) throw uErr;
       charged = 0;
       return json({ path, url: target });
