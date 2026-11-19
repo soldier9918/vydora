@@ -422,7 +422,7 @@ export default function VideoEditor() {
       audio.preservesPitch = true;
       audio.playbackRate = speedOf(data.video?.narration_speed);
       audio.onended = next;
-      audio.play().catch(() => setPlaying(null));
+      audio.play().catch((e) => { if ((e as Error)?.name === "AbortError") return; setPlaying(null); toast.error("Your browser blocked the sound. Tap play again."); });
       return () => { audio.onended = null; cleanupRaf(); };
     }
     const t = setTimeout(next, 4000 * (1 - startFrac));
@@ -821,7 +821,7 @@ export default function VideoEditor() {
               )}
               {playing === null && currentImg && previewReady && (
                 <button type="button" aria-label="Play preview"
-                  onClick={() => { soloRef.current = false; setPaused(false); setPlaying(0); }}
+                  onClick={() => { soloRef.current = false; const a = audioRef.current; const u = scenes[0]?.audio_path ? urls[scenes[0].audio_path] : null; if (a && u) { a.src = u; a.play().catch(() => {}); } setPaused(false); setPlaying(0); }}
                   className="absolute inset-0 grid place-items-center bg-background/20 transition hover:bg-background/40">
                   <span className="grid h-16 w-16 place-items-center rounded-full bg-primary text-2xl text-primary-foreground shadow-lg">▶</span>
                 </button>
