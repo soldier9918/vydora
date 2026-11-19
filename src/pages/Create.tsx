@@ -266,11 +266,11 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
               <Label>Video length</Label>
               <Select value={length} onValueChange={setLength}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{VIDEO_LENGTHS.filter((s) => !onPlan || s <= AUTOPILOT_MAX_SECONDS).map((s) => (
+                <SelectContent>{VIDEO_LENGTHS.filter((s) => (!onPlan || s <= AUTOPILOT_MAX_SECONDS) && (!adMode || s <= 300)).map((s) => (
                   <SelectItem key={s} value={String(s)} disabled={!isLengthAllowed(s, Number(scenes)) || !lengthAllowedForTier(s, pro)}>{!lengthAllowedForTier(s, pro) ? "🔒 " : ""}{formatSeconds(s)} · {lengthPlanLabel(s)}{lengthAllowedForTier(s, pro) && !isLengthAllowed(s, Number(scenes)) ? (Number(scenes) < minScenesForSeconds(s) ? ` · needs ${minScenesForSeconds(s)}+ scenes` : ` · max ${maxScenesForSeconds(s)} scenes`) : ""}</SelectItem>
                 ))}</SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">{onPlan ? "Autopilot videos can be up to 20 Minutes long. " : ""}{LENGTH_PLAN_SUMMARY}.</p>
+              <p className="text-xs text-muted-foreground">{onPlan ? "Autopilot videos can be up to 20 Minutes long. " : ""}{adMode ? "Product ads can be up to 5 Minutes long. " : ""}{LENGTH_PLAN_SUMMARY}.</p>
             </div>
             <div className="grid gap-2">
               <Label>Quality</Label>

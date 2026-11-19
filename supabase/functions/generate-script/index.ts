@@ -75,6 +75,7 @@ Deno.serve(async (req) => {
     if (!voiceAllowed(String(voice), pro)) return json({ error: "That narrator is on paid plans. Subscribe to unlock it." }, 403);
     if (!scenesAllowedForPlan(Number(sceneCount) || 6, tier)) return json({ error: scenesLimitMessage(tier) }, 403);
     if (targetSeconds && !lengthAllowedForPlan(Number(targetSeconds), tier)) return json({ error: tier === "free" ? "Free plan videos can be up to 2 minutes. Subscribe to unlock longer videos." : "Creator videos can be up to 20 minutes. Upgrade to Pro for up to 60 minutes." }, 403);
+    if (adMode && Number(targetSeconds) > 300) return json({ error: "Product ads can be up to 5 Minutes long." }, 400);
     const tone = typeof toneIn === "string" && TONES[toneIn] ? toneIn : "engaging";
     if (!qualityAllowedForPlan(String(quality), tier)) return json({ error: "1080p Full HD is a Pro feature. Upgrade to Pro to unlock it." }, 403);
     const qual = ["720p", "1080p"].includes(quality) ? quality : "720p";
