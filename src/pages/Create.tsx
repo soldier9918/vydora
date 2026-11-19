@@ -45,7 +45,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
   const [style, setStyle] = useState<string>(g("style", "Cinematic"));
   const [voice, setVoice] = useState<string>(g("voice", "Kore"));
   const [tone, setTone] = useState<string>(g("tone", "engaging"));
-  const [scenes, setScenes] = useState(g("scenes", "6"));
+  const [scenes, setScenes] = useState(adMode ? String(Math.min(20, Number(g("scenes", "6")) || 6)) : g("scenes", "6"));
   const [caption, setCaption] = useState<string>(g("caption", "typewriter"));
   const [ratio, setRatio] = useState<string>(g("ratio", DEFAULT_RATIO));
   const [quality, setQuality] = useState<string>(g("quality", DEFAULT_QUALITY));
@@ -259,7 +259,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
               <Label>Scenes</Label>
               <Select value={scenes} onValueChange={setScenes}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{SCENE_COUNTS.map(String).map((n) => <SelectItem key={n} value={n} disabled={!scenesAllowedForPlan(Number(n), tier) || !isLengthAllowed(Number(length), Number(n))}>{!scenesAllowedForPlan(Number(n), tier) ? `🔒 ${n} scenes · ${tier === "free" ? "upgrade" : "PRO"}` : !isLengthAllowed(Number(length), Number(n)) ? `${n} scenes · ${Number(n) > maxScenesForSeconds(Number(length)) ? "too many" : "too few"} for ${formatSeconds(Number(length))}` : `${n} scenes`}</SelectItem>)}</SelectContent>
+                <SelectContent>{SCENE_COUNTS.filter((n) => !adMode || n <= 20).map(String).map((n) => <SelectItem key={n} value={n} disabled={!scenesAllowedForPlan(Number(n), tier) || !isLengthAllowed(Number(length), Number(n))}>{!scenesAllowedForPlan(Number(n), tier) ? `🔒 ${n} scenes · ${tier === "free" ? "upgrade" : "PRO"}` : !isLengthAllowed(Number(length), Number(n)) ? `${n} scenes · ${Number(n) > maxScenesForSeconds(Number(length)) ? "too many" : "too few"} for ${formatSeconds(Number(length))}` : `${n} scenes`}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="grid gap-2">
