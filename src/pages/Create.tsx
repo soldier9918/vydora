@@ -1,6 +1,6 @@
 import { SCENE_COUNTS } from "@/lib/sceneCount";
 import { AUTOPILOT_MAX_SECONDS } from "@/lib/autopilot";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Sparkles, Link2, Play, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,7 @@ import { DEFAULT_QUALITY, QUALITIES } from "@/lib/quality";
 import { MUSIC_MOODS } from "@/lib/music";
 import { estimateCredits } from "@/lib/credits";
 import { useAccount } from "@/lib/account";
-import { voiceAllowed, scenesAllowedForPlan, lengthAllowedForPlan, qualityAllowedForPlan, FREE_MAX_SCENES } from "@/lib/tiers";
+import { MAX_SCENES_BY_TIER, MAX_SECONDS_BY_TIER, voiceAllowed, scenesAllowedForPlan, lengthAllowedForPlan, qualityAllowedForPlan, FREE_MAX_SCENES } from "@/lib/tiers";
 import { lengthPlanLabel, LENGTH_PLAN_SUMMARY } from "@/lib/tiers";
 import { VIDEO_LENGTHS, formatSeconds, isLengthAllowed, secondsPerScene, minScenesForSeconds, maxScenesForSeconds } from "@/lib/durations";
 
@@ -45,18 +45,25 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
   const [style, setStyle] = useState<string>(g("style", "Cinematic"));
   const [voice, setVoice] = useState<string>(g("voice", "Kore"));
   const [tone, setTone] = useState<string>(g("tone", "engaging"));
-  const [scenes, setScenes] = useState(adMode ? String(Math.min(20, Number(g("scenes", "6")) || 6)) : g("scenes", "6"));
+  const [scenes, setScenes] = useState(adMode ? String(Math.min(20, Number(g("scenes", "16")) || 16)) : g("scenes", "6"));
   const [caption, setCaption] = useState<string>(g("caption", "typewriter"));
   const [ratio, setRatio] = useState<string>(g("ratio", DEFAULT_RATIO));
   const [quality, setQuality] = useState<string>(g("quality", DEFAULT_QUALITY));
   const [mood, setMood] = useState<string>(g("mood", "none"));
-  const [length, setLength] = useState(g("length", "60"));
+  const [length, setLength] = useState(g("length", adMode ? "300" : "60"));
   const { data: account } = useAccount();
   const pro = account?.pro ?? false;
   const tier = account?.tier ?? "free";
   const lengthAllowedForTier = (sec: number, _p: boolean) => lengthAllowedForPlan(sec, tier);
   const qualityAllowedForTier = (q: string, _p: boolean) => qualityAllowedForPlan(q, tier);
   const tierOk = voiceAllowed(voice, pro) && lengthAllowedForTier(Number(length), pro) && scenesAllowedForPlan(Number(scenes), tier) && qualityAllowedForTier(quality, pro);
+  // Product ads default to the 16-scene, 5-minute flow; trim it to what the plan allows.
+  useEffect(() => {
+    if (!adMode || !account) return;
+    if (Number(scenes) > MAX_SCENES_BY_TIER[tier]) setScenes(String(MAX_SCENES_BY_TIER[tier]));
+    if (Number(length) > MAX_SECONDS_BY_TIER[tier]) setLength(String(MAX_SECONDS_BY_TIER[tier]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adMode, account, tier]);
   const lengthOk = isLengthAllowed(Number(length), Number(scenes));
   const [useFacts, setUseFacts] = useState(init.useFacts === true);
   const [url, setUrl] = useState("");
