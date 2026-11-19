@@ -31,4 +31,4 @@
 - `voice-sample`: free previews cached in `samples/`. Why: previews cost nothing to replay.
 - Public pages prerendered from `PUBLIC_PAGES`. Why: crawler HTML.
 - Post-sign-in return uses validated `next` path (`nextPath.ts`). Why: no open redirects.
-- Per-scene camera movement is encoded in `videos.motion_type` as `<main>@<index>=<effect>,...` (parsed by `motionFor` in browser and worker; "still" = no movement). Why: no schema change; export hash already covers motion_type.
+- Per-scene movement: `motion_type` = `<main>@<i>=<fx>,...` ("still"=none). Why: no schema change.
