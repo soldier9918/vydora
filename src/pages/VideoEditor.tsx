@@ -93,6 +93,8 @@ export default function VideoEditor() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { data: account } = useAccount();
+  const [urlOpen, setUrlOpen] = useState<string | null>(null);
+  const [urlText, setUrlText] = useState("");
   const [working, setWorking] = useState<Record<string, boolean>>({});
   const [assetErr, setAssetErr] = useState<Record<string, string>>({});
   const [playing, setPlaying] = useState<number | null>(null);
@@ -1427,7 +1429,7 @@ export default function VideoEditor() {
                       <Button size="sm" variant="outline" disabled={working[`${s.id}-image`]} onClick={() => runWebsite(s, "auto")}>
                         New website image (auto) · {CREDIT_COSTS.image + CREDIT_COSTS.webCapture} cr
                       </Button>
-                      <Button size="sm" variant="outline" disabled={working[`${s.id}-image`]} onClick={() => { const u = window.prompt(`Enter the page address on ${webHost} to show on this scene:`, (video as { source_url?: string | null }).source_url ?? ""); if (u?.trim()) runWebsite(s, "url", u.trim()); }}>
+                      <Button size="sm" variant={urlOpen === s.id ? "secondary" : "outline"} disabled={working[`${s.id}-image`]} onClick={() => { setUrlOpen(urlOpen === s.id ? null : s.id); setUrlText(webSrc.source_url ?? ""); }}>
                         New website image (enter URL) · {CREDIT_COSTS.image + CREDIT_COSTS.webCapture} cr
                       </Button>
                     </>
@@ -1501,6 +1503,14 @@ export default function VideoEditor() {
                   <Progress value={playing === i ? progress * 100 : 0} className="h-1.5 flex-1" />
                   <span className="shrink-0 whitespace-nowrap text-xs tabular-nums text-muted-foreground">{formatClock(playing === i ? progress * secOf(s) : 0)} / {formatClock(secOf(s))}</span>
                 </div>
+                {isWebAd && urlOpen === s.id && (
+                  <form className="mt-3 flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/30 p-3" onSubmit={(e) => { e.preventDefault(); if (urlText.trim()) { runWebsite(s, "url", urlText.trim()); setUrlOpen(null); } }}>
+                    <label htmlFor={`url-${s.id}`} className="w-full text-xs text-muted-foreground">Page on {webHost} to show on this scene</label>
+                    <Input id={`url-${s.id}`} value={urlText} onChange={(e) => setUrlText(e.target.value)} placeholder={`https://${webHost}/...`} className="h-9 min-w-0 flex-1" autoFocus />
+                    <Button type="submit" size="sm" disabled={!urlText.trim() || working[`${s.id}-image`]}>Capture page</Button>
+                    <Button type="button" size="sm" variant="ghost" onClick={() => setUrlOpen(null)}>Cancel</Button>
+                  </form>
+                )}
                 <p className="mt-2 text-xs text-muted-foreground">If a scene image isn't loading, click <span className="font-semibold">New image</span> and then <span className="font-semibold">Redo voiceover</span> to recreate both, or <span className="font-semibold">Upload image</span> to add your own.</p>
               </li>
             ))}
