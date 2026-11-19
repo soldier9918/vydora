@@ -1006,7 +1006,6 @@ export default function VideoEditor() {
                 </span>
                 <Switch checked={parseSfx(video.sfx_type).textPop} disabled={!video.sfx_enabled || video.caption_style === "none"} onCheckedChange={(v) => saveLook({ sfx_type: joinSfx(parseSfx(video.sfx_type).type, v, parseSfx(video.sfx_type).overrides) })} />
               </label>
-              />
             </SettingsCard>
             <SettingsCard title="Narration speed & accent" hint="Pick the narrator and tone, speed up the voice or change how it sounds.">
               <label className="grid gap-1 text-xs font-semibold text-muted-foreground">
@@ -1044,6 +1043,7 @@ export default function VideoEditor() {
                   }
                   toast.success("All voiceovers now use the new tone.");
                 }}
+              />
               <div className="grid gap-1 text-xs font-semibold text-muted-foreground">
                 Speed: {speed}×
                 <div className="flex gap-2">
