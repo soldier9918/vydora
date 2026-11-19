@@ -32,3 +32,4 @@
 - Public pages prerendered from `PUBLIC_PAGES`. Why: crawler HTML.
 - Post-sign-in return uses validated `next` path (`nextPath.ts`). Why: no open redirects.
 - Per-scene movement: `motion_type` = `<main>@<i>=<fx>,...` ("still"=none). Why: no schema change.
+- Product Ads "Automatic website capture": generate-script screenshots the site via Firecrawl onto `websiteScenes()` positions, charging image+webCapture per scene up front and refunding failed captures; positions/costs mirror src/lib/credits.ts. Why: one charge path, fair refunds.

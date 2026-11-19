@@ -1,4 +1,4 @@
-import { charge, refund, COSTS } from "../_shared/credits.ts";
+import { charge, refund, COSTS, websiteScenes } from "../_shared/credits.ts";
 import { voiceAllowed, scenesAllowedForPlan, scenesLimitMessage, lengthAllowedForPlan, qualityAllowedForPlan } from "../_shared/tiers.ts";
 import { effectiveAccount } from "../_shared/account.ts";
 import { createOpenAI } from "npm:@ai-sdk/openai@3";
@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
     const auth = await getCaller(req);
     if (!auth) return json({ error: "Please sign in first." }, 401);
 
-    const { topic: topicIn, style = "Documentary", voice = "Kore", sceneCount = 6, captionStyle = "typewriter", aspectRatio = "16:9", quality = "720p", targetSeconds, useFacts, tone: toneIn, sourceUrl, narrationSpeed, accent: accentIn, ad } = await req.json();
+    const { topic: topicIn, style = "Documentary", voice = "Kore", sceneCount = 6, captionStyle = "typewriter", aspectRatio = "16:9", quality = "720p", targetSeconds, useFacts, tone: toneIn, sourceUrl, narrationSpeed, accent: accentIn, ad, webVisuals } = await req.json();
     const adMode = !!ad && typeof ad === "object";
     const adFramework = adMode ? String((ad as { framework?: unknown }).framework ?? "problem-solution").slice(0, 40) : "";
     const adCta = adMode ? String((ad as { cta?: unknown }).cta ?? "").slice(0, 120).trim() : "";
@@ -108,7 +108,11 @@ Deno.serve(async (req) => {
       // Sensible pacing: every scene must last 7–90 seconds (e.g. no 50 scenes in a 1-minute video).
       if (t && (t / count < 7 || t / count > 90)) return json({ error: `A ${t}s video needs between ${Math.ceil(t / 90)} and ${Math.floor(t / 7)} scenes.` }, 400);
     }
-    const cost = COSTS.script + (useFacts || srcUrl ? COSTS.facts : 0);
+    const autoWeb = adMode && !!srcUrl && webVisuals === "auto";
+    const webIdx = autoWeb ? websiteScenes(count) : [];
+    // Each real-website scene: the capture fee on top of the normal scene image price (no AI picture is made for it).
+    const webCost = webIdx.length * (COSTS.image + COSTS.webCapture);
+    const cost = COSTS.script + (useFacts || srcUrl ? COSTS.facts : 0) + webCost;
     const denied = await charge(auth.user.id, cost, "video_script");
     if (denied) return denied;
     let charged = cost;
@@ -177,7 +181,7 @@ Deno.serve(async (req) => {
       "before-after": "Before (the frustrating old way) -> after (life with the product) -> proof -> call to action",
     };
     const adRules = adMode
-      ? ` AD MODE: This is a persuasive product/website advertisement, not a faceless documentary. Structure: ${frameworks[adFramework] ?? frameworks["problem-solution"]}. Pace the scenes along this flow, scaled to the scene count (for 16 scenes: scenes 1-2 hook and relatable pain point; 3-4 why existing alternatives fail; 5-6 introduce the product as the solution; 7-11 one key feature or benefit per scene, shown in action; 12-13 proof, results or comparison drawn only from the details provided; 14-16 the offer and the final call to action). Grab attention in the first 3 seconds, speak directly to the viewer ("you"), focus on benefits, keep sentences punchy. Only describe features, prices and claims that appear in the product details or page provided — never invent prices, reviews, awards or statistics. Do NOT ask viewers to subscribe. End the final scene with this call to action: ${adCta || "a clear invitation to visit the website"}. visual_prompts show the product, its users and its benefits in polished commercial style.`
+      ? ` AD MODE: This is a persuasive product/website advertisement, not a faceless documentary. Structure: ${frameworks[adFramework] ?? frameworks["problem-solution"]}. Pace the scenes along this flow, scaled to the scene count (for 16 scenes: scenes 1-2 hook and relatable pain point; 3-4 why existing alternatives fail; 5-6 introduce the product as the solution; 7-11 one key feature or benefit per scene, shown in action; 12-13 proof, results or comparison drawn only from the details provided; 14-16 the offer and the final call to action). Grab attention in the first 3 seconds, speak directly to the viewer ("you"), focus on benefits, keep sentences punchy. Only describe features, prices and claims that appear in the product details or page provided — never invent prices, reviews, awards or statistics. Do NOT ask viewers to subscribe. End the final scene with this call to action: ${adCta || "a clear invitation to visit the website"}.${webIdx.length ? ` Scenes ${webIdx.map((n) => n + 1).join(", ")} will show real screenshots of the website itself: write their narration so it naturally walks the viewer through the site on screen (e.g. "right here on the homepage…"), and keep the other scenes as storytelling visuals.` : ""} visual_prompts show the product, its users and its benefits in polished commercial style.`
       : "";
     const provider = createOpenAI({
       baseURL: `${GATEWAY_URL}/v1`,
@@ -257,6 +261,11 @@ Deno.serve(async (req) => {
     );
     if (sErr) throw sErr;
 
+    if (webIdx.length) {
+      const failed = await captureWebsite(srcUrl!, user.id, video.id, webIdx, apiKey);
+      if (failed) await refund(user.id, failed * (COSTS.image + COSTS.webCapture), "refund_web_capture");
+    }
+
     charged = 0;
     return json({ videoId: video.id });
     } finally {
@@ -268,3 +277,46 @@ Deno.serve(async (req) => {
     return json({ error: "Something went wrong writing your script." }, 500);
   }
 });
+
+// Screenshots the product site (home page plus key sub-pages) and puts them on the chosen scenes. Returns how many scenes failed.
+async function captureWebsite(site: string, userId: string, videoId: string, idx: number[], apiKey: string): Promise<number> {
+  const fcKey = Deno.env.get("FIRECRAWL_API_KEY");
+  if (!fcKey) return idx.length;
+  const shot = async (url: string, links = false) => {
+    const r = await fetch("https://connector-gateway.lovable.dev/firecrawl/v2/scrape", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}`, "X-Connection-Api-Key": fcKey },
+      body: JSON.stringify({ url, formats: links ? ["screenshot", "links"] : ["screenshot"], waitFor: 1500 }),
+    });
+    if (!r.ok) return null;
+    const b = await r.json();
+    return { img: (b?.data?.screenshot ?? b?.screenshot) as string | undefined, links: (b?.data?.links ?? []) as string[] };
+  };
+  const host = new URL(site).hostname;
+  const home = await shot(site, true).catch(() => null);
+  const words = /feature|product|pricing|how-it-works|solution|tour|about|review/i;
+  const pages = [...new Set((home?.links ?? []).filter((l) => {
+    try { const u = new URL(l); return u.hostname === host && /^https?:$/.test(u.protocol) && !isPrivateHost(u.hostname) && words.test(u.pathname); } catch { return false; }
+  }).map((l) => l.split("#")[0]))].slice(0, Math.max(0, idx.length - 2));
+  const rest = await Promise.all(pages.map((p) => shot(p).catch(() => null)));
+  // Home page on the product reveal and the call to action; sub-pages on the feature scenes.
+  const imgs = [home?.img, ...rest.map((r) => r?.img)].filter(Boolean) as string[];
+  if (!imgs.length) return idx.length;
+  const { data: rows } = await adminClient().from("video_scenes").select("id, position").eq("video_id", videoId);
+  let failed = 0;
+  await Promise.all(idx.map(async (pos, i) => {
+    const src = i === idx.length - 1 ? imgs[0] : imgs[i % imgs.length];
+    const row = rows?.find((r) => r.position === pos);
+    try {
+      if (!row || !src?.startsWith("https://")) throw new Error();
+      const res = await fetch(src);
+      if (!res.ok) throw new Error();
+      const type = res.headers.get("content-type") ?? "image/png";
+      const path = `${userId}/${videoId}/${row.id}-website-${Date.now()}.${type.includes("jpeg") ? "jpg" : "png"}`;
+      const { error } = await adminClient().storage.from("video-assets").upload(path, new Uint8Array(await res.arrayBuffer()), { contentType: type });
+      if (error) throw error;
+      await adminClient().from("video_scenes").update({ image_path: path }).eq("id", row.id);
+    } catch { failed++; }
+  }));
+  return failed;
+}

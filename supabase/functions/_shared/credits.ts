@@ -1,7 +1,13 @@
 import { adminClient, json } from "./common.ts";
 
 // Must match src/lib/credits.ts CREDIT_COSTS.
-export const COSTS = { script: 2, facts: 2, image: 3, voice: 2, animate: 25, thumbnail: 5, seo: 1 } as const;
+export const COSTS = { script: 2, facts: 2, image: 3, voice: 2, animate: 25, thumbnail: 5, seo: 1, webCapture: 5 } as const;
+
+/** Must match src/lib/credits.ts websiteScenes. */
+export function websiteScenes(count: number): number[] {
+  if (count < 4) return [count - 1].filter((n) => n >= 0);
+  return [...new Set([Math.round(count * 0.3), Math.round(count * 0.5), Math.round(count * 0.65), count - 1])].sort((a, b) => a - b);
+}
 
 /** Atomically deducts credits (admins are free). Returns an error Response if the balance is too low. */
 export async function charge(userId: string, amount: number, reason: string): Promise<Response | null> {

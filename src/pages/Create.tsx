@@ -20,7 +20,7 @@ import { STYLES, TONES, CAPTION_STYLES, generateScript, suggestTopic } from "@/l
 import { DEFAULT_RATIO } from "@/lib/aspectRatio";
 import { DEFAULT_QUALITY, QUALITIES } from "@/lib/quality";
 import { MUSIC_MOODS } from "@/lib/music";
-import { estimateCredits } from "@/lib/credits";
+import { estimateCredits, websiteScenes, CREDIT_COSTS } from "@/lib/credits";
 import { useAccount } from "@/lib/account";
 import { MAX_SCENES_BY_TIER, MAX_SECONDS_BY_TIER, voiceAllowed, scenesAllowedForPlan, lengthAllowedForPlan, qualityAllowedForPlan, FREE_MAX_SCENES } from "@/lib/tiers";
 import { lengthPlanLabel, LENGTH_PLAN_SUMMARY } from "@/lib/tiers";
@@ -74,6 +74,8 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
   const [framework, setFramework] = useState("problem-solution");
   const [cta, setCta] = useState("");
   const [adImages, setAdImages] = useState<File[]>([]);
+  const [webVisuals, setWebVisuals] = useState<"auto" | "manual">("manual");
+  const autoWeb = adMode && !!url.trim() && webVisuals === "auto";
   const addAdImages = (files: FileList | null) => {
     const ok = Array.from(files ?? []).filter((f) => {
       if (!AD_IMG_TYPES.includes(f.type)) { toast.error(`${f.name}: use PNG, JPEG or WebP.`); return false; }
@@ -119,13 +121,13 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
     };
     const poll = setInterval(async () => { if (adMode) return; const vid = await findNew().catch(() => null); if (vid) go(vid); }, 4000);
     try {
-      const { videoId } = await generateScript({ topic, sourceUrl: (fromUrl || adMode) && url.trim() ? url.trim() : undefined, ad: adMode ? { framework, cta } : undefined, narrationSpeed: Number(speed), accent, style, voice, tone, sceneCount: Number(scenes), captionStyle: caption, aspectRatio: ratio, quality, targetSeconds: Number(length), useFacts });
+      const { videoId } = await generateScript({ topic, sourceUrl: (fromUrl || adMode) && url.trim() ? url.trim() : undefined, ad: adMode ? { framework, cta } : undefined, webVisuals: autoWeb ? "auto" : undefined, narrationSpeed: Number(speed), accent, style, voice, tone, sceneCount: Number(scenes), captionStyle: caption, aspectRatio: ratio, quality, targetSeconds: Number(length), useFacts });
       await supabase.from("videos").update({ music_mood: mood, music_enabled: mood !== "none" }).eq("id", videoId);
       if (adMode && adImages.length) {
         // Put the user's product photos/screenshots on the scenes in order; the rest get AI images.
         const { data: u } = await supabase.auth.getUser();
-        const { data: sc } = await supabase.from("video_scenes").select("id, position").eq("video_id", videoId).order("position");
-        await Promise.all((sc ?? []).slice(0, adImages.length).map(async (row, i) => {
+        const { data: sc } = await supabase.from("video_scenes").select("id, position, image_path").eq("video_id", videoId).order("position");
+        await Promise.all((sc ?? []).filter((r) => !r.image_path).slice(0, adImages.length).map(async (row, i) => {
           const f = adImages[i];
           const ext = f.type === "image/png" ? "png" : f.type === "image/webp" ? "webp" : "jpg";
           const path = `${u.user!.id}/${videoId}/${row.id}-upload-${Date.now()}.${ext}`;
@@ -150,6 +152,20 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
             <div className="grid gap-2">
               <Label htmlFor="url">Website or product page link (optional)</Label>
               <Input id="url" type="url" placeholder="https://yourshop.com/product" value={url} onChange={(e) => setUrl(e.target.value)} />
+              {url.trim() && (
+                <div role="radiogroup" aria-label="Website visuals" className="mt-1 grid gap-2">
+                  <Label>Website visuals</Label>
+                  {([
+                    ["auto", "Automatic website capture", `Takes real screenshots of your website and puts them on ${websiteScenes(Number(scenes)).length} key scenes (product reveal, features and call to action). The rest stay AI scenes. +${CREDIT_COSTS.webCapture} credits per website scene.`],
+                    ["manual", "Manual", "Upload your own screenshots or photos below. Every other scene gets an AI image. No extra credits."],
+                  ] as const).map(([id, label, hint]) => (
+                    <label key={id} className={`flex cursor-pointer gap-3 rounded-lg border p-3 ${webVisuals === id ? "border-primary bg-primary/5" : "border-border"}`}>
+                      <input type="radio" name="webVisuals" value={id} checked={webVisuals === id} onChange={() => setWebVisuals(id)} className="mt-1 accent-[hsl(var(--primary))]" />
+                      <span><span className="font-semibold">{label}</span><span className="block text-xs text-muted-foreground">{hint}</span></span>
+                    </label>
+                  ))}
+                </div>
+              )}
               <Label htmlFor="product" className="mt-2">About your product</Label>
               <Textarea id="product" rows={4} required={!url.trim()} placeholder="e.g. GlowBrew — a smart coffee mug that keeps drinks at your perfect temperature for 3 hours. For busy remote workers." value={topic} onChange={(e) => setTopic(e.target.value)} />
               <div className="mt-2 grid gap-4 sm:grid-cols-2">
@@ -314,7 +330,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
           {planExtra}
           <p className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2 text-sm">
             <span className="text-muted-foreground">Estimated cost (script, images, voiceovers, quality)</span>
-            <Link to="/pricing" className="font-display font-bold text-primary hover:underline">⚡ {estimateCredits({ scenes: Number(scenes), useFacts: useFacts || fromUrl || (adMode && !!url.trim()), quality })} credits</Link>
+            <Link to="/pricing" className="font-display font-bold text-primary hover:underline">⚡ {estimateCredits({ websiteScenes: autoWeb ? websiteScenes(Number(scenes)).length : 0, scenes: Number(scenes), useFacts: useFacts || fromUrl || (adMode && !!url.trim()), quality })} credits</Link>
           </p>
           {!pro && <p className="text-xs text-muted-foreground">Free plan: 4 narrators, up to {FREE_MAX_SCENES} scenes, 2 Minute videos and 720p. <Link to="/billing" className="text-primary underline">Subscribe to a plan</Link> to unlock every narrator and longer videos ({adMode ? "product ads up to 5 Minutes and 20 scenes" : "Creator: 20 Minutes, Pro: 60 Minutes"}, plus 1080p on Pro).</p>}
           <Button type="submit" size="lg" disabled={busy || !lengthOk || !tierOk}>{onPlan ? (busy ? "Adding…" : "Add to plan") : busy ? "Writing your script…" : "Generate video"}</Button>
