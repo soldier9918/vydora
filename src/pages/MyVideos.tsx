@@ -95,6 +95,7 @@ export default function MyVideos() {
           thumbnail: !!v.thumbnail_path,
           seo: !!v.seo,
           quality: v.quality,
+          websiteScenes: mine.filter((s) => s.image_path?.includes("-website-")).length,
         });
       };
       const paths = [

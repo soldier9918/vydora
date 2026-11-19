@@ -732,7 +732,7 @@ export default function VideoEditor() {
             </div>
           )}
           {(() => {
-            const est = { scenes: scenes.length, useFacts: Array.isArray(video.sources) && video.sources.length > 0, animated: scenes.filter((s) => s.clip_path && !s.clip_credit).length, thumbnail: !!video.thumbnail_path, seo: !!video.seo, quality: video.quality ?? "720p" };
+            const est = { scenes: scenes.length, useFacts: Array.isArray(video.sources) && video.sources.length > 0, animated: scenes.filter((s) => s.clip_path && !s.clip_credit).length, thumbnail: !!video.thumbnail_path, seo: !!video.seo, quality: video.quality ?? "720p", websiteScenes: scenes.filter((s) => s.image_path?.includes("-website-")).length };
             return (
               <details className="mt-3 rounded-lg border border-border bg-card p-3 text-sm">
                 <summary className="cursor-pointer font-semibold">⚡ This video: about <span className="text-primary">{estimateCredits(est)} credits</span> with its current settings</summary>
