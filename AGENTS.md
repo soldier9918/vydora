@@ -28,8 +28,8 @@
 - Refunds/disputes reverse credits proportionally (`_shared/refunds.ts`), idempotent, capped at balance; won disputes restore. Why: no negative balances.
 - Live activation: one-time admin `activate-live-billing` (checks, typed confirm, audited); owner sets STRIPE_MODE. Why: both switches must agree.
 - Product Ads: `/ads` = Create `adMode` + `ad` brief to `generate-script`. Why: one pipeline.
-- `voice-sample`: free previews cached in `samples/`.
+- `voice-sample` previews cached in `samples/`.
 - Public pages prerendered from `PUBLIC_PAGES`.
 - Post-sign-in return uses validated `next` path (`nextPath.ts`). Why: no open redirects.
 - Per-scene movement encoded in `motion_type` (`<main>@<i>=<fx>`).
-- Ad website capture: generate-script screenshots onto `websiteScenes()`, refunds failures. Why: one charge path.
+- Ad website capture: generate-script screenshots onto `websiteScenes()`, refunds failures.
