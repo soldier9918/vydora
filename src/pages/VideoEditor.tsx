@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
-import { generateSceneAsset, generateThumbnail, signedUrls, TONES, editScenes, rewriteScene, animateScene, generateSeo, checkExport, startExport, completeExport, failExport, type Scene, type Seo } from "@/lib/videoApi";
+import { websiteSceneImage, generateSceneAsset, generateThumbnail, signedUrls, TONES, editScenes, rewriteScene, animateScene, generateSeo, checkExport, startExport, completeExport, failExport, type Scene, type Seo } from "@/lib/videoApi";
 import { Input } from "@/components/ui/input";
 import { exportVideo, canRecordMp4 } from "@/lib/exportVideo";
 import { fetchCards, isActive, type BrandCard } from "@/lib/brandCards";
@@ -666,6 +666,22 @@ export default function VideoEditor() {
     qc.setQueryData(["video", id], { ...data, video: { ...video, ...patch } });
     const { error } = await supabase.from("videos").update(patch).eq("id", id!);
     if (error) { toast.error("Couldn't save caption settings"); refresh(); }
+  };
+  const webSrc = (video as { kind?: string | null; source_url?: string | null });
+  const isWebAd = webSrc.kind === "ad" && !!webSrc.source_url;
+  const webHost = (() => { try { return new URL(webSrc.source_url ?? "").hostname.replace(/^www\./, ""); } catch { return "the website"; } })();
+  const runWebsite = async (scene: Scene, mode: "auto" | "url", url?: string) => {
+    const key = `${scene.id}-image`;
+    setWorking((w) => ({ ...w, [key]: true }));
+    try {
+      const r = await websiteSceneImage(scene.id, mode, url);
+      await qc.invalidateQueries({ queryKey: ["video", id] });
+      toast.success(`Scene ${scene.position + 1}: now showing ${r.url}`);
+    } catch (e) {
+      toast.error(`Scene ${scene.position + 1}: ${(e as Error).message}`);
+    } finally {
+      setWorking((w) => ({ ...w, [key]: false }));
+    }
   };
   const edited = narrationEdited(scenes);
   const maxSecs = account ? maxVideoSeconds((video as { target_seconds?: number | null }).target_seconds, account.tier, account.isAdmin, edited) : null;
@@ -1404,8 +1420,18 @@ export default function VideoEditor() {
                 )}
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Button size="sm" variant="outline" disabled={working[`${s.id}-image`]} onClick={() => runAsset(s, "image").catch(() => {})}>
-                    {working[`${s.id}-image`] ? "Painting…" : s.image_path ? "New image" : "Make image"} · {CREDIT_COSTS.image} cr
+                    {working[`${s.id}-image`] ? "Painting…" : isWebAd ? "New AI image" : s.image_path ? "New image" : "Make image"} · {CREDIT_COSTS.image} cr
                   </Button>
+                  {isWebAd && (
+                    <>
+                      <Button size="sm" variant="outline" disabled={working[`${s.id}-image`]} onClick={() => runWebsite(s, "auto")}>
+                        New website image (auto) · {CREDIT_COSTS.image + CREDIT_COSTS.webCapture} cr
+                      </Button>
+                      <Button size="sm" variant="outline" disabled={working[`${s.id}-image`]} onClick={() => { const u = window.prompt(`Enter the page address on ${webHost} to show on this scene:`, (video as { source_url?: string | null }).source_url ?? ""); if (u?.trim()) runWebsite(s, "url", u.trim()); }}>
+                        New website image (enter URL) · {CREDIT_COSTS.image + CREDIT_COSTS.webCapture} cr
+                      </Button>
+                    </>
+                  )}
                   <Button size="sm" variant="outline" asChild disabled={working[`${s.id}-image`]}>
                     <label className={`cursor-pointer ${working[`${s.id}-image`] ? "pointer-events-none opacity-50" : ""}`}>
                       Upload image

@@ -141,6 +141,9 @@ export const generateThumbnail = (videoId: string, opts?: { mode?: "text"; text?
 export const generateSceneAsset = (sceneId: string, kind: "image" | "audio") =>
   invoke<{ path: string }>("scene-asset", { sceneId, kind });
 
+export const websiteSceneImage = (sceneId: string, mode: "auto" | "url", url?: string) =>
+  invoke<{ path: string; url: string }>("scene-website", { sceneId, mode, url });
+
 export const animateScene = (sceneId: string, action: "start" | "status", seconds?: number) =>
   invoke<{ status: string; path?: string; error?: string; progress?: number | null }>("animate-scene", { sceneId, action, seconds });
 
