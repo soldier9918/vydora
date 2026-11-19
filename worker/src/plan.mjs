@@ -30,7 +30,10 @@ export const xfadeName = (type, i) => XFADE[transitionFor(type, i)] ?? "fade";
 // Same rotation as the browser (src/lib/motion.ts ROTATION), horror looks included.
 const MOTION_ROT = ["zoom-in","subtle-zoom","zoom-out","punch-in","pan-left","pan-right","pan-up","pan-down","zoom-left","zoom-right","zoom-up","zoom-down","out-left","out-right","diagonal-down","diagonal-up","rotate-zoom","breathe","float","handheld","h-flicker","h-strobe","h-streaks","h-vhs","h-static","h-creep","h-fade","h-lightning","h-blood","h-heartbeat","h-tilt","h-sway","h-shake","h-lurch","h-jumpscare","h-possessed"];
 const HORROR_ROT = MOTION_ROT.filter((m) => m.startsWith("h-"));
-export function motionFor(type, i) {
+export function motionFor(raw, i) {
+  const [base, rest] = String(raw || "zoom-in").split("@");
+  const o = Object.fromEntries((rest ?? "").split(",").map((x) => x.split("=")).filter((x) => x[1]));
+  const type = o[i] && o[i] !== "default" ? o[i] : (base || "zoom-in");
   if (type === "random") return MOTION_ROT[(i * 7 + 3) % MOTION_ROT.length];
   if (type === "h-random") return HORROR_ROT[(i * 5 + 2) % HORROR_ROT.length];
   if (type === "alternate") return i % 2 === 0 ? "zoom-in" : "zoom-out";
@@ -43,7 +46,7 @@ export function zoompanExpr(type, frames, enabled = true) {
   const q = `(on/${Math.max(1, frames - 1)})`;
   const p = `(${q}*${q}*(3-2*${q}))`;
   const c = { x: "iw/2-(iw/zoom/2)", y: "ih/2-(ih/zoom/2)" };
-  if (!enabled) return { z: "1", ...c };
+  if (!enabled || type === "still") return { z: "1", ...c };
   const m = {
     "zoom-in": { z: `1+0.15*${p}`, ...c }, "subtle-zoom": { z: `1+0.06*${p}`, ...c }, "zoom-out": { z: `1.15-0.15*${p}`, ...c },
     "punch-in": { z: `1+0.3*min(1,${p}*3)`, ...c },

@@ -51,7 +51,22 @@ const ROTATION = MOTION_TYPES.map((m) => m.value).filter((v) => !["random", "alt
 const HORROR = ROTATION.filter((v) => v.startsWith("h-"));
 
 /** The effect a given scene uses (Random and Alternate change per scene). */
-export function motionFor(type: string, index: number): string {
+/** Per-scene overrides are stored in motion_type as "<main>@<sceneIndex>=<effect>,...". */
+export function parseMotion(raw: string | null | undefined): { type: string; overrides: Record<number, string> } {
+  const [type, rest] = String(raw || "zoom-in").split("@");
+  const overrides: Record<number, string> = {};
+  for (const part of (rest ?? "").split(",")) { const [k, v] = part.split("="); const n = Number(k); if (v && Number.isInteger(n) && n >= 0) overrides[n] = v; }
+  return { type: type || "zoom-in", overrides };
+}
+export function joinMotion(type: string, overrides: Record<number, string> = {}): string {
+  const e = Object.entries(overrides).filter(([, v]) => v && v !== "default");
+  return e.length ? `${type}@${e.map(([k, v]) => `${k}=${v}`).join(",")}` : type;
+}
+
+export function motionFor(raw: string, index: number): string {
+  const { type: base, overrides } = parseMotion(raw);
+  const o = overrides[index];
+  const type = o && o !== "default" ? o : base;
   if (type === "random") return ROTATION[(index * 7 + 3) % ROTATION.length];
   if (type === "h-random") return HORROR[(index * 5 + 2) % HORROR.length];
   if (type === "alternate") return index % 2 === 0 ? "zoom-in" : "zoom-out";
@@ -79,6 +94,7 @@ function rawMotion(type: string, index: number, progress: number, enabled: boole
   const lerp = (a: number, b: number) => a + (b - a) * k;
   const Z = 1.15, D = 0.05; // zoom amount and drift (always < (Z-1)/2 so edges never show)
   switch (motionFor(type, index)) {
+    case "still": return none;
     case "zoom-in": return { ...none, scale: lerp(1, Z) };
     case "subtle-zoom": return { ...none, scale: lerp(1, 1.06) };
     case "zoom-out": return { ...none, scale: lerp(Z, 1) };

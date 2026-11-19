@@ -1,6 +1,6 @@
 import { confirmDialog } from "@/components/ConfirmDialog";
 import { TRANSITION_SECS, TRANSITION_TYPES, layerCss, transitionAt } from "@/lib/transition";
-import { MOTION_TYPES, motionAt, motionCss, type Fx } from "@/lib/motion";
+import { MOTION_TYPES, motionAt, motionCss, parseMotion, joinMotion, type Fx } from "@/lib/motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -1186,11 +1186,30 @@ export default function VideoEditor() {
               </label>
               <LookSelect
                 label="Movement"
-                value={video.motion_type}
+                value={parseMotion(video.motion_type).type}
                 options={MOTION_TYPES}
                 disabled={!video.motion_enabled}
-                onChange={(v) => saveLook({ motion_type: v })}
+                onChange={(v) => saveLook({ motion_type: joinMotion(v, parseMotion(video.motion_type).overrides) })}
               />
+              {scenes.length > 0 && (() => {
+                const cur = parseMotion(video.motion_type);
+                const custom = Object.keys(cur.overrides).length;
+                const setScene = (i: number, v: string) => { const o = { ...cur.overrides }; if (v === "default") delete o[i]; else o[i] = v; saveLook({ motion_type: joinMotion(cur.type, o) }); };
+                return (
+                  <details className="rounded-lg border border-border p-2 text-sm">
+                    <summary className="cursor-pointer font-semibold">Customise movement per scene{custom ? ` (${custom} changed)` : ""}</summary>
+                    <p className="mt-1 text-xs text-muted-foreground">Each scene uses the movement chosen above unless you pick a different one here.</p>
+                    {custom > 0 && <Button size="sm" variant="outline" className="mt-2 h-7 px-2 text-xs" disabled={!video.motion_enabled} onClick={() => saveLook({ motion_type: cur.type })}>Reset all to main movement</Button>}
+                    <div className="mt-2 grid gap-2">
+                      {scenes.map((_, i) => (
+                        <LookSelect key={i} label={`Scene ${i + 1}`} value={cur.overrides[i] ?? "default"}
+                          options={[{ value: "default", label: "Main movement" }, { value: "still", label: "No movement" }, ...MOTION_TYPES]}
+                          disabled={!video.motion_enabled} onChange={(v) => setScene(i, v)} />
+                      ))}
+                    </div>
+                  </details>
+                );
+              })()}
               <label className="mt-2 flex border-t border-border pt-3 items-center justify-between gap-3 text-sm">
                 <span>
                   <span className="font-semibold">Scene transition</span>

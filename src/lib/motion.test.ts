@@ -21,3 +21,13 @@ describe("motion", () => {
     expect(motionFor("alternate", 1)).toBe("zoom-out");
   });
 });
+
+describe("per-scene movement", () => {
+  it("uses a scene's own movement, else the main one", async () => {
+    const { joinMotion, motionFor, motionAt } = await import("./motion");
+    const raw = joinMotion("zoom-in", { 1: "pan-left", 2: "still" });
+    expect(motionFor(raw, 0)).toBe("zoom-in");
+    expect(motionFor(raw, 1)).toBe("pan-left");
+    expect(motionAt(raw, 2, 0.5).scale).toBe(1);
+  });
+});
