@@ -26,6 +26,9 @@ const Admin = lazy(() => import("./pages/Admin"));
 import NotFound from "./pages/NotFound";
 import FeatureLanding from "./pages/FeatureLanding";
 import Guides from "./pages/Guides";
+import Community from "./pages/Community";
+const CommunityCreator = lazy(() => import("./pages/CommunityCreator"));
+const CommunityMe = lazy(() => import("./pages/CommunityMe"));
 import GuideArticle from "./pages/GuideArticle";
 import { GUIDES } from "@/lib/guides";
 import { FEATURE_PAGES } from "@/lib/featurePages";
@@ -51,6 +54,9 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             {FEATURE_PAGES.map((p) => <Route key={p.slug} path={`/${p.slug}`} element={<FeatureLanding page={p} />} />)}
             <Route path="/guides" element={<Guides />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/community/creator/:slug" element={<CommunityCreator />} />
+            <Route path="/community/me" element={<ProtectedRoute><CommunityMe /></ProtectedRoute>} />
             {GUIDES.map((g) => <Route key={g.slug} path={`/guides/${g.slug}`} element={<GuideArticle guide={g} />} />)}
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/feedback" element={<Feedback />} />

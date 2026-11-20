@@ -414,6 +414,13 @@
       "when": 1795114363375,
       "tag": "0058_add_video_kind",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1795194551332,
+      "tag": "0059_community_showcase",
+      "breakpoints": true
     }
   ]
 }

@@ -31,3 +31,4 @@
 - Public pages prerendered from `PUBLIC_PAGES`.
 - Post-sign-in return uses validated `next` path (`nextPath.ts`). Why: no open redirects.
 - Per-scene movement encoded in `motion_type` (`<main>@<i>=<fx>`).
+- Community Showcase: `community_submissions`/`community_creators`/`community_reports`; public reads only via SECURITY DEFINER `community_gallery` (approved, not withdrawn, no ids/emails); writes via `community_*` RPCs (consent, 5/day, no duplicates, pending by default) and admin via `admin_community*`. Why: no auto-publishing and no private data in public reads.

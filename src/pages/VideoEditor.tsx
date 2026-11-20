@@ -7,6 +7,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import SiteHeader from "@/components/SiteHeader";
+import SubmitDialog from "@/components/community/SubmitDialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
@@ -94,6 +95,7 @@ export default function VideoEditor() {
   const qc = useQueryClient();
   const { data: account } = useAccount();
   const [urlOpen, setUrlOpen] = useState<string | null>(null);
+  const [communityOpen, setCommunityOpen] = useState(false);
   const [urlText, setUrlText] = useState("");
   const [working, setWorking] = useState<Record<string, boolean>>({});
   const [assetErr, setAssetErr] = useState<Record<string, string>>({});
@@ -994,6 +996,8 @@ export default function VideoEditor() {
                 onEnsureExport={() => renderVideo(false)}
                 onSeoRequested={scrollToSeoOrThumb}
                 {...youtubeDefaults(video.seo as unknown as Seo | null, video.title, video.aspect_ratio === "9:16")} />
+              {!!lastExport && <Button variant="outline" onClick={() => setCommunityOpen(true)}>Submit to Community</Button>}
+              <SubmitDialog open={communityOpen} onClose={() => setCommunityOpen(false)} videoId={id} defaults={{ title: video.title, description: video.description ?? "" }} />
               <Button variant="outline" onClick={() => generateMissing(scenes)} disabled={busyAny || readOnly || done === scenes.length}>
                 Generate missing assets · {scenes.reduce((n, s) => n + (s.image_path ? 0 : CREDIT_COSTS.image) + (s.audio_path ? 0 : CREDIT_COSTS.voice), 0)} cr
               </Button>

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import GoLivePanel from "@/components/GoLivePanel";
+import AdminCommunityPanel from "@/components/community/AdminCommunityPanel";
 import { FeedbackPanel, AutopilotQueuePanel, UserDetailSheet, HealthBar, HiddenAccountsPanel, hideUser } from "@/components/AdminTools";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -158,6 +159,7 @@ export default function Admin() {
             <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="coupons">Coupons</TabsTrigger>
             <TabsTrigger value="feedback">Feedback</TabsTrigger>
+            <TabsTrigger value="community">Community</TabsTrigger>
             <TabsTrigger value="queue">Autopilot queue</TabsTrigger>
             <TabsTrigger value="hidden">Hidden accounts</TabsTrigger>
             <TabsTrigger value="golive">Go Live</TabsTrigger>
@@ -271,6 +273,7 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="golive"><GoLivePanel /></TabsContent>
+          <TabsContent value="community"><AdminCommunityPanel /></TabsContent>
           <TabsContent value="feedback"><FeedbackPanel /></TabsContent>
           <TabsContent value="queue"><AutopilotQueuePanel /></TabsContent>
           <TabsContent value="hidden"><HiddenAccountsPanel /></TabsContent>

@@ -237,7 +237,7 @@ export default function Landing() {
             <Button size="lg" variant="outline" asChild><Link to="/pricing">See what things cost</Link></Button>
           </div>
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            <Link to="/guides" className="text-primary underline">Free creator guides</Link> · <Link to="/youtube-autopilot" className="text-primary underline">Schedule videos with YouTube Autopilot</Link>
+            <Link to="/guides" className="text-primary underline">Free creator guides</Link> · <Link to="/youtube-autopilot" className="text-primary underline">Schedule videos with YouTube Autopilot</Link> · <Link to="/community" className="text-primary underline">See the Community Showcase</Link>
           </p>
           <nav aria-label="Features" className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm">
             {FEATURE_PAGES.map((f) => <Link key={f.slug} to={`/${f.slug}`} className="text-muted-foreground hover:text-primary">{f.eyebrow}</Link>)}

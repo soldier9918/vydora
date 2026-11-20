@@ -211,6 +211,146 @@ export type Database = {
         }
         Relationships: []
       }
+      community_creators: {
+        Row: {
+          avatar_url: string | null
+          bio: string
+          channel_name: string
+          channel_url: string
+          consent_withdrawn_at: string | null
+          created_at: string
+          display_name: string
+          slug: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string
+          channel_name?: string
+          channel_url?: string
+          consent_withdrawn_at?: string | null
+          created_at?: string
+          display_name?: string
+          slug?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string
+          channel_name?: string
+          channel_url?: string
+          consent_withdrawn_at?: string | null
+          created_at?: string
+          display_name?: string
+          slug?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      community_reports: {
+        Row: {
+          created_at: string
+          details: string
+          id: string
+          reason: string
+          reporter_id: string
+          status: string
+          submission_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string
+          id?: string
+          reason: string
+          reporter_id: string
+          status?: string
+          submission_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: string
+          id?: string
+          reason?: string
+          reporter_id?: string
+          status?: string
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_reports_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "community_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_submissions: {
+        Row: {
+          category: string
+          consent_at: string
+          consent_text: string
+          created_at: string
+          description: string
+          featured: boolean
+          id: string
+          is_short: boolean
+          review_note: string | null
+          reviewed_at: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+          verified_vydora: boolean
+          video_id: string | null
+          withdrawn_at: string | null
+          youtube_video_id: string
+        }
+        Insert: {
+          category: string
+          consent_at: string
+          consent_text: string
+          created_at?: string
+          description?: string
+          featured?: boolean
+          id?: string
+          is_short?: boolean
+          review_note?: string | null
+          reviewed_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+          verified_vydora?: boolean
+          video_id?: string | null
+          withdrawn_at?: string | null
+          youtube_video_id: string
+        }
+        Update: {
+          category?: string
+          consent_at?: string
+          consent_text?: string
+          created_at?: string
+          description?: string
+          featured?: boolean
+          id?: string
+          is_short?: boolean
+          review_note?: string | null
+          reviewed_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          verified_vydora?: boolean
+          video_id?: string | null
+          withdrawn_at?: string | null
+          youtube_video_id?: string
+        }
+        Relationships: []
+      }
       coupon_codes: {
         Row: {
           active: boolean
@@ -1039,6 +1179,18 @@ export type Database = {
       }
       admin_adjust_test_credits: { Args: { _amount: number }; Returns: number }
       admin_autopilot_queue: { Args: never; Returns: Json }
+      admin_community: { Args: never; Returns: Json }
+      admin_community_moderate: {
+        Args: {
+          _action: string
+          _category?: string
+          _description?: string
+          _id: string
+          _note?: string
+        }
+        Returns: undefined
+      }
+      admin_community_report_done: { Args: { _id: string }; Returns: undefined }
       admin_coupons: {
         Args: never
         Returns: {
@@ -1240,6 +1392,59 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      community_clean: { Args: { _max: number; _t: string }; Returns: string }
+      community_gallery: {
+        Args: { _creator?: string; _id?: string }
+        Returns: {
+          approved_at: string
+          category: string
+          channel_name: string
+          channel_url: string
+          creator_avatar: string
+          creator_bio: string
+          creator_name: string
+          creator_slug: string
+          description: string
+          featured: boolean
+          id: string
+          is_short: boolean
+          title: string
+          verified_vydora: boolean
+          youtube_video_id: string
+        }[]
+      }
+      community_report: {
+        Args: { _details: string; _id: string; _reason: string }
+        Returns: undefined
+      }
+      community_submit: {
+        Args: {
+          _category: string
+          _channel_name: string
+          _channel_url: string
+          _consent: boolean
+          _consent_text: string
+          _description: string
+          _display_name: string
+          _is_short: boolean
+          _title: string
+          _video: string
+          _youtube_id: string
+        }
+        Returns: string
+      }
+      community_update_profile: {
+        Args: {
+          _avatar_url: string
+          _bio: string
+          _channel_name: string
+          _channel_url: string
+          _display_name: string
+        }
+        Returns: undefined
+      }
+      community_withdraw: { Args: { _id: string }; Returns: boolean }
+      community_withdraw_all: { Args: never; Returns: number }
       credit_balance: { Args: { _user: string }; Returns: number }
       effective_account: { Args: { _user: string }; Returns: Json }
       fail_render_job: {

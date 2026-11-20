@@ -59,6 +59,7 @@ export default function SiteHeader() {
               <Button variant="ghost" asChild className={`${navBtn} ${on("/autopilot")}`}><Link to="/autopilot" aria-current={on("/autopilot") ? "page" : undefined}>Autopilot</Link></Button>
               <Button variant="ghost" asChild className={`${navBtn} ${on("/dashboard")}`}><Link to="/dashboard" aria-current={on("/dashboard") ? "page" : undefined}>My videos</Link></Button>
               <Button variant="ghost" asChild className={`${navBtn} ${on("/library")}`}><Link to="/library" aria-current={on("/library") ? "page" : undefined}>My Library</Link></Button>
+              <Button variant="ghost" asChild className={`${navBtn} ${on("/community")}`}><Link to="/community" aria-current={on("/community") ? "page" : undefined}>Community</Link></Button>
               <Button variant="ghost" asChild className={`${navBtn} ${on("/pricing")}`}><Link to="/pricing" aria-current={on("/pricing") ? "page" : undefined}>Pricing</Link></Button>
               <Button variant="ghost" asChild className={`${navBtn} ${on("/billing")}`}><Link to="/billing" aria-current={on("/billing") ? "page" : undefined}>Plans &amp; Billing</Link></Button>
               <div className={`${balancePill} pr-1 ${low ? "border-primary/60 text-primary" : ""}`}>
@@ -74,6 +75,7 @@ export default function SiteHeader() {
             </>
           ) : (
             <>
+              <Button variant="ghost" asChild className={`${navBtn} ${on("/community")}`}><Link to="/community" aria-current={on("/community") ? "page" : undefined}>Community</Link></Button>
               <Button variant="ghost" asChild className={`${navBtn} ${on("/pricing")}`}><Link to="/pricing" aria-current={on("/pricing") ? "page" : undefined}>Pricing</Link></Button>
               <Button variant="ghost" asChild className={`${navBtn} ${on("/billing")}`}><Link to="/billing" aria-current={on("/billing") ? "page" : undefined}>Billing</Link></Button>
               <Button variant="ghost" asChild className={`${navBtn} ${on("/auth")}`}><Link to="/auth" aria-current={on("/auth") ? "page" : undefined}>Sign in</Link></Button>
@@ -115,6 +117,7 @@ export default function SiteHeader() {
                 <Link to="/autopilot" onClick={close} className={`${mobileLink} ${on("/autopilot")}`}>Autopilot</Link>
                 <Link to="/dashboard" onClick={close} className={`${mobileLink} ${on("/dashboard")}`}>My videos</Link>
                 <Link to="/library" onClick={close} className={`${mobileLink} ${on("/library")}`}>My Library</Link>
+                <Link to="/community" onClick={close} className={`${mobileLink} ${on("/community")}`}>Community</Link>
                 <Link to="/pricing" onClick={close} className={`${mobileLink} ${on("/pricing")}`}>Pricing</Link>
                 <Link to="/billing" onClick={close} className={`${mobileLink} ${on("/billing")}`}>Plans &amp; Billing</Link>
                 <Link to="/profile" onClick={close} className={`${mobileLink} ${on("/profile")}`}>My profile &amp; YouTube</Link>
@@ -135,6 +138,7 @@ export default function SiteHeader() {
               </>
             ) : (
               <>
+                <Link to="/community" onClick={close} className={`${mobileLink} ${on("/community")}`}>Community</Link>
                 <Link to="/pricing" onClick={close} className={`${mobileLink} ${on("/pricing")}`}>Pricing</Link>
                 <Link to="/billing" onClick={close} className={`${mobileLink} ${on("/billing")}`}>Billing</Link>
                 <Link to="/auth" onClick={close} className={`${mobileLink} ${on("/auth")}`}>Sign in</Link>

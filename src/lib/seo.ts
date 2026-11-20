@@ -18,6 +18,7 @@ export const PUBLIC_PAGES: Record<string, { title: string; description: string }
   "/refund": { title: "Refund Policy | Vydora", description: "When you can get a refund for Vydora subscriptions and credits." },
   "/disclaimer": { title: "Disclaimer | Vydora", description: "What Vydora's AI-generated videos do and do not promise." },
   "/acceptable-use": { title: "Acceptable Use Policy | Vydora", description: "The content rules for Vydora: what you must not create or publish with the AI YouTube video maker." },
+  "/community": { title: "Vydora Community Showcase | AI Videos Made by Creators", description: "Explore AI videos created by the Vydora community, discover talented YouTubers, and share your own creations." },
   "/guides": { title: "Free YouTube Creator Guides | Vydora", description: "Free guides on faceless niches, YouTube monetisation, Shorts hooks, repurposing blog posts and planning a series." },
   ...Object.fromEntries(GUIDES.map((g) => [`/guides/${g.slug}`, { title: g.title, description: g.description }])),
   ...Object.fromEntries(FEATURE_PAGES.map((p) => [`/${p.slug}`, { title: p.title, description: p.description }])),

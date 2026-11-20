@@ -36,6 +36,7 @@ export default function SiteFooter() {
             <li><Link className="transition-colors hover:text-primary" to="/from-url">Article to video</Link></li>
             <li><Link className="transition-colors hover:text-primary" to="/series">Series planner</Link></li>
             <li><Link className="transition-colors hover:text-primary" to="/dashboard">My videos</Link></li>
+            <li><Link className="transition-colors hover:text-primary" to="/community">Community showcase</Link></li>
             <li><Link className="transition-colors hover:text-primary" to="/pricing">Pricing &amp; costs</Link></li>
             <li><Link className="transition-colors hover:text-primary" to="/billing">Billing</Link></li>
             <li><Link className="transition-colors hover:text-primary" to="/#how">How it works</Link></li>

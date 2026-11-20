@@ -14,7 +14,7 @@ const NAV: [string, string][] = [
   ["/", "AI YouTube video maker"], ["/pricing", "Pricing"], ["/faceless-youtube-channel", "Faceless YouTube channels"],
   ["/article-to-video", "Article to video"], ["/youtube-shorts-maker", "YouTube Shorts maker"], ["/text-to-video", "Text to video"],
   ["/youtube-series-generator", "Series generator"], ["/youtube-autopilot", "YouTube Autopilot"], ["/ai-product-ads", "AI product ads"], ["/ai-voiceover-video-maker", "AI voiceover"], ["/ai-story-video-generator", "Story videos"],
-  ["/guides", "Creator guides"],
+  ["/guides", "Creator guides"], ["/community", "Community showcase"],
 ];
 
 export function bodyFor(route: string): string {
@@ -33,6 +33,12 @@ export function bodyFor(route: string): string {
       g.sections.map((s) => `<h2>${esc(s.heading)}</h2>${s.paras.map((p) => `<p>${esc(p)}</p>`).join("")}${s.list ? `<ul>${s.list.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>` : ""}`).join("") +
       (g.sources ? `<h2>Sources</h2><ul>${g.sources.map((s) => `<li><a href="${esc(s.url)}" rel="noopener">${esc(s.label)}</a></li>`).join("")}</ul>` : "") +
       `<p><a href="${esc(g.related.to)}">${esc(g.related.label)}</a> · <a href="/pricing">Compare plans and prices</a></p></article>`;
+  } else if (route === "/community") {
+    main = `<h1>Made with Vydora. Shared with the world.</h1><p>Explore AI videos created by the Vydora community, discover talented YouTubers, and share your own creations.</p>` +
+      `<h2>What is the Community Showcase?</h2><p>The showcase is a gallery of YouTube videos that creators made with Vydora and chose to share. Every video plays through YouTube's own player, and each card links to the creator's YouTube channel so you can subscribe and watch more.</p>` +
+      `<h2>Browse by category</h2><ul><li>Horror &amp; Mystery</li><li>History &amp; Documentaries</li><li>Education</li><li>Science &amp; Technology</li><li>Storytelling</li><li>Finance &amp; Business</li><li>YouTube Shorts</li><li>Entertainment</li></ul>` +
+      `<h2>Submit your video</h2><p>Signed-in Vydora creators can submit a public YouTube video for free. Our team reviews every submission before it appears, and you can remove your video or withdraw consent at any time.</p>` +
+      `<p><a href="/auth?mode=signup">Start making videos free</a> · <a href="/guides">Creator guides</a> · <a href="/pricing">Plans and pricing</a></p>`;
   } else if (route === "/guides") {
     main = `<h1>YouTube creator guides</h1><p>${esc(page.description)}</p><ul>${GUIDES.map((x) => `<li><a href="/guides/${x.slug}">${esc(x.h1)}</a> – ${esc(x.description)}</li>`).join("")}</ul>`;
   } else if (route === "/") {

@@ -75,6 +75,15 @@ export const LEGAL_DOCS: LegalDoc[] = [
         ],
       },
       {
+        id: "community",
+        heading: "Community Showcase",
+        body: [
+          "If you choose to submit a video to the Community Showcase, we store the YouTube link, title, category, description, the channel name and link you give us, your optional display name, bio and picture link, and a record of when you gave consent.",
+          "Only videos our team approves are shown publicly. Your email address and account ID are never shown.",
+          "You can remove a video or withdraw consent at any time from your Community profile; withdrawn videos leave the public gallery straight away. Reports about showcased videos are kept so our team can review them.",
+        ],
+      },
+      {
         id: "cookies",
         heading: "Cookies and browser storage",
         body: [
@@ -177,6 +186,15 @@ export const LEGAL_DOCS: LegalDoc[] = [
           "You decide what to publish and where. Before uploading, check that you have the rights to every idea, fact, name, image and clip involved.",
           "You must follow the rules of the platform you publish to, including YouTube's policies on spam, misleading content and synthetic media.",
           "Where a platform requires you to label AI-generated or altered content, you are responsible for doing so.",
+        ],
+      },
+      {
+        id: "community",
+        heading: "Community Showcase",
+        body: [
+          "Submitting a video to the Community Showcase is optional and free. You must own the video and channel or have permission to share them.",
+          "By submitting, you allow Vydora to show the video through YouTube's player, with its thumbnail, title and your creator details, in the public showcase. You can ask for removal at any time by removing it from your Community profile.",
+          "We review every submission and may decline, edit the category or description of, or remove any video at our discretion.",
         ],
       },
       {
