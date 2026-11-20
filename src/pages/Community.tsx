@@ -11,6 +11,14 @@ import VideoDialog from "@/components/community/VideoDialog";
 import SubmitDialog from "@/components/community/SubmitDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { COMMUNITY_CATEGORIES, filterGallery, type GalleryItem } from "@/lib/community";
+import thumbTravel from "@/assets/community-thumbs/thumb-travel.jpg";
+import thumbHistory from "@/assets/community-thumbs/thumb-history.jpg";
+import thumbTech from "@/assets/community-thumbs/thumb-tech.jpg";
+import thumbFood from "@/assets/community-thumbs/thumb-food.jpg";
+import thumbFitness from "@/assets/community-thumbs/thumb-fitness.jpg";
+import thumbFinance from "@/assets/community-thumbs/thumb-finance.jpg";
+import thumbSpace from "@/assets/community-thumbs/thumb-space.jpg";
+import thumbGaming from "@/assets/community-thumbs/thumb-gaming.jpg";
 
 export const useGallery = (creator?: string) => useQuery({
   queryKey: ["community-gallery", creator ?? null],
@@ -20,27 +28,24 @@ export const useGallery = (creator?: string) => useQuery({
   },
 });
 
-/** Decorative wall of thousands of tiny video thumbnails (drawn, not real videos). */
+const WALL_THUMBS = [thumbTravel, thumbHistory, thumbTech, thumbFood, thumbFitness, thumbFinance, thumbSpace, thumbGaming];
+
+/** Decorative wall of hundreds of tiny video thumbnails (AI-generated samples, not real videos). */
 function ThumbWall() {
   const tiles = useMemo(() => {
     let seed = 7; const r = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
-    return Array.from({ length: 64 }, (_, i) => ({ x: (i % 8) * 30, y: Math.floor(i / 8) * 17, o: 0.08 + r() * 0.35, red: r() > 0.7 }));
+    return Array.from({ length: 180 }, (_, i) => ({ src: WALL_THUMBS[Math.floor(r() * WALL_THUMBS.length)], o: 0.25 + r() * 0.55, key: i }));
   }, []);
   return (
-    <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full [mask-image:radial-gradient(ellipse_at_center,transparent_15%,black_75%)]">
-      <defs>
-        <pattern id="thumbs" width="240" height="136" patternUnits="userSpaceOnUse" patternTransform="scale(0.5) rotate(-8)">
-          {tiles.map((t, i) => (
-            <g key={i}>
-              <rect x={t.x + 1} y={t.y + 1} width="28" height="15" rx="2" fill={t.red ? "hsl(var(--primary))" : "hsl(var(--foreground))"} opacity={t.o} />
-              <path d={`M${t.x + 13} ${t.y + 6}l4 2.5-4 2.5z`} fill="hsl(var(--background))" opacity={0.7} />
-            </g>
-          ))}
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#thumbs)" />
-      <rect width="100%" height="100%" fill="hsl(var(--card))" opacity="0.35" />
-    </svg>
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden [mask-image:radial-gradient(ellipse_at_center,transparent_15%,black_78%)]">
+      <div className="absolute -inset-[30%] grid rotate-[-8deg] grid-cols-[repeat(15,minmax(0,1fr))] gap-1.5 content-center">
+        {tiles.map((t) => (
+          <img key={t.key} src={t.src} alt="" loading="lazy" width={912} height={512}
+            className="aspect-video w-full rounded-[3px] object-cover" style={{ opacity: t.o }} />
+        ))}
+      </div>
+      <div className="absolute inset-0 bg-card/40" />
+    </div>
   );
 }
 
