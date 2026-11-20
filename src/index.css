@@ -102,19 +102,3 @@
       radial-gradient(ellipse at center, transparent 30%, hsl(var(--background) / 0.8) 100%);
   }
 }
-
-/* Animated logo: purple neon beam orbiting the badge + steadily pulsing triangle */
-:root { --logo-beam: 271 91% 65%; --logo-beam-hot: 270 100% 92%; --logo-beam-tail: 292 84% 61%; }
-.logo-glow { isolation: isolate; animation: logo-halo 4.5s ease-in-out infinite; }
-.logo-beam { position: absolute; inset: -3px; border-radius: calc(var(--radius) - 0px); overflow: hidden; z-index: -2; filter: drop-shadow(0 0 4px hsl(var(--logo-beam))) drop-shadow(0 0 8px hsl(var(--logo-beam) / 0.7)); }
-.logo-beam::before {
-  content: ""; position: absolute; left: 50%; top: 50%; width: 200%; height: 200%; margin: -100% 0 0 -100%;
-  background: conic-gradient(transparent 0 55%, hsl(var(--logo-beam-tail) / 0.6) 75%, hsl(var(--logo-beam)) 92%, hsl(var(--logo-beam-hot)) 98%, transparent 100%);
-  animation: logo-orbit 4.5s linear infinite; will-change: transform;
-}
-.logo-glow::after { content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; background: hsl(var(--primary)); }
-.logo-triangle { animation: logo-pulse 2.5s ease-in-out infinite; }
-@keyframes logo-orbit { to { transform: rotate(360deg); } }
-@keyframes logo-halo { 0%,100% { box-shadow: 0 0 8px hsl(var(--logo-beam) / 0.35); } 50% { box-shadow: 0 0 18px hsl(var(--logo-beam) / 0.7); } }
-@keyframes logo-pulse { 0%,100% { opacity: 0.55; filter: drop-shadow(0 0 0 transparent); } 50% { opacity: 1; filter: drop-shadow(0 0 5px hsl(var(--primary-foreground))); } }
-@media (prefers-reduced-motion: reduce) { .logo-glow, .logo-beam::before, .logo-triangle { animation: none; } }
