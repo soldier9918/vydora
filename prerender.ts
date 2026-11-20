@@ -90,7 +90,10 @@ export default function prerender(): Plugin {
       for (const route of Object.keys(PUBLIC_PAGES)) {
         const out = route === "/" ? tplPath : path.join(dist, route.slice(1), "index.html");
         fs.mkdirSync(path.dirname(out), { recursive: true });
-        fs.writeFileSync(out, htmlFor(route === "/" ? guarded : template, route));
+        const html = htmlFor(route === "/" ? guarded : template, route);
+        fs.writeFileSync(out, html);
+        // Also write <route>.html so hosts that map /slug to slug.html never fall back to the homepage shell.
+        if (route !== "/") fs.writeFileSync(path.join(dist, route.slice(1) + ".html"), html);
       }
     },
   };

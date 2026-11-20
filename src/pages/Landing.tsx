@@ -52,10 +52,10 @@ const steps = [
 ];
 
 const niches = [
-  { t: "History & mystery", d: "Documentary-style videos on unsolved cases, lost civilisations and famous events, with optional real-fact research and sources." },
-  { t: "Finance, tech & crypto", d: "Clear explainers on markets, Bitcoin, AI and gadgets, turned from a single idea or a news article link." },
-  { t: "Science & space", d: "Visual stories about planets, the deep sea and big discoveries, with AI images or stock B-roll for every scene." },
-  { t: "Shorts & quick facts", d: "Vertical 9:16 videos for YouTube Shorts, or remix any long video into a Short without paying again." },
+  { t: "History & mystery", to: "/history-documentary-video-maker", d: "Documentary-style videos on unsolved cases, lost civilisations and famous events, with optional real-fact research and sources." },
+  { t: "Finance, tech & crypto", to: "/faceless-youtube-channel", d: "Clear explainers on markets, Bitcoin, AI and gadgets, turned from a single idea or a news article link." },
+  { t: "Science & space", to: "/text-to-video", d: "Visual stories about planets, the deep sea and big discoveries, with AI images or stock B-roll for every scene." },
+  { t: "Shorts & quick facts", to: "/youtube-shorts-maker", d: "Vertical 9:16 videos for YouTube Shorts, or remix any long video into a Short without paying again." },
 ];
 
 const allInOne = [
@@ -190,10 +190,10 @@ export default function Landing() {
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {niches.map((n) => (
-              <div key={n.t} className="rounded-xl border border-border bg-card p-6">
+              <Link key={n.t} to={n.to} className="rounded-xl border border-border bg-card p-6 transition-colors hover:border-primary">
                 <h3 className="text-lg font-semibold">{n.t}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">{n.d}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
@@ -237,7 +237,7 @@ export default function Landing() {
             <Button size="lg" variant="outline" asChild><Link to="/pricing">See what things cost</Link></Button>
           </div>
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            <Link to="/guides" className="text-primary underline">Free creator guides</Link>
+            <Link to="/guides" className="text-primary underline">Free creator guides</Link> · <Link to="/youtube-autopilot" className="text-primary underline">Schedule videos with YouTube Autopilot</Link>
           </p>
           <nav aria-label="Features" className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm">
             {FEATURE_PAGES.map((f) => <Link key={f.slug} to={`/${f.slug}`} className="text-muted-foreground hover:text-primary">{f.eyebrow}</Link>)}

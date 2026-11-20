@@ -159,10 +159,18 @@ export const FEATURE_PAGES: FeaturePage[] = [
         "AI can make mistakes, so Vydora shows where its facts came from. Add the links to your video description to show viewers your research.",
         "Pictures are AI-made illustrations, not historical photos. Say so in your description where it matters.",
       ]},
+      { heading: "Structure a documentary viewers finish", paras: [
+        "Open with the question the video answers, then move through events in order. Vydora writes one scene per beat, so you can reorder, cut or rewrite any part of the timeline before visuals and narration are made.",
+        "For long topics, split the story across a Series: each episode covers one period or one suspect and shares the same visual style.",
+      ]},
+      { heading: "Topics that suit this format", paras: [
+        "Ancient civilisations, wars and turning points, famous disappearances, unexplained places, scientific discoveries and the history behind everyday objects all work well as narrated, illustrated videos.",
+      ]},
     ],
     faqs: [
       ["Are facts guaranteed correct?", "No. Real-facts mode helps, but always check the sources before you publish."],
       ["Can I make long documentaries?", "Video length depends on your plan. See the pricing page for each plan's limit."],
+      ["Can I use my own research?", "Yes. Paste your notes or a full script and Vydora turns it into scenes, or paste an article link to start from it."],
     ],
     cta: { label: "Make a documentary free", to: "/auth?mode=signup" },
   },
@@ -183,6 +191,9 @@ export const FEATURE_PAGES: FeaturePage[] = [
       ]},
       { heading: "No surprise credit spend", paras: [
         "Planning is free. Each video uses the usual credits only when it is made, and if you run out the video is skipped and you are told, never charged twice.",
+      ]},
+      { heading: "Same settings as a video you make by hand", paras: [
+        "Each planned video keeps its own format, voice, style and length, so a Short and a long video can sit in the same schedule. You can edit or remove any planned video until it starts being made.",
       ]},
     ],
     faqs: [

@@ -67,3 +67,20 @@ describe("social sharing", () => {
     expect(htmlForLd(tpl, "/pricing")).toContain('og:type" content="website"');
   });
 });
+
+describe("indexing problem pages", () => {
+  const t = readTpl("index.html", "utf8");
+  for (const r of ["/faceless-youtube-channel", "/text-to-video", "/youtube-autopilot", "/guides", "/history-documentary-video-maker"]) {
+    it(`${r} serves its own head and content, not the homepage`, () => {
+      const h = htmlForLd(t, r);
+      expect(h).toContain(`<link rel="canonical" href="https://vydora.ai${r}"`);
+      expect(h).not.toContain("<title>AI YouTube Video Generator & Faceless Video Maker | Vydora</title>");
+      expect(h).not.toMatch(/noindex/);
+      expect(h.match(/<div id="root">([\s\S]*?)<\/main><\/div>/)![1].length).toBeGreaterThan(1200);
+    });
+  }
+  it("/guides links to every article", () => {
+    const h = htmlForLd(t, "/guides");
+    for (const g of GUIDES_LD) expect(h).toContain(`href="/guides/${g.slug}"`);
+  });
+});
