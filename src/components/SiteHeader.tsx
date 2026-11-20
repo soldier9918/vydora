@@ -12,6 +12,7 @@ export function Logo({ name = "Vydora" }: { name?: string }) {
   return (
     <Link to="/" className="flex items-center gap-2 font-display text-xl font-extrabold">
       <span className="logo-glow relative grid h-8 w-8 place-items-center rounded-md bg-primary text-primary-foreground">
+        <span aria-hidden className="logo-beam" />
         <svg viewBox="0 0 24 24" className="logo-triangle relative z-10 h-4 w-4 fill-current"><path d="M8 5v14l11-7z" /></svg>
       </span>
       {name}
