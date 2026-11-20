@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { Minus, Plus, Shield } from "lucide-react";
+import { ChevronDown, ChevronUp, Minus, Plus, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccount } from "@/lib/account";
@@ -16,6 +16,8 @@ export default function AdminTesting() {
   const qc = useQueryClient();
   const [amount, setAmount] = useState("30");
   const [busy, setBusy] = useState(false);
+  const [open, setOpen] = useState(() => { try { return localStorage.getItem("vydora-admin-bar") !== "closed"; } catch { return true; } });
+  const toggle = () => setOpen((o) => { const n = !o; try { localStorage.setItem("vydora-admin-bar", n ? "open" : "closed"); } catch { /* ignore */ } return n; });
   if (!account?.adminAccess) return null;
   const update = async (mode?: string, delta?: number) => {
     setBusy(true);
@@ -29,6 +31,13 @@ export default function AdminTesting() {
     } catch (error) { toast.error(error instanceof Error ? error.message : "Couldn't update test settings"); }
     finally { setBusy(false); }
   };
+  const toggleBtn = <Button size="sm" variant="ghost" className="ml-auto h-7 px-2 text-xs" onClick={toggle} aria-expanded={open} aria-label={open ? "Hide admin testing" : "Show admin testing"}>{open ? <><ChevronUp className="mr-1 h-4 w-4" />Hide</> : <><ChevronDown className="mr-1 h-4 w-4" />Show</>}</Button>;
+  if (!open) return <section aria-label="Subscription testing" className="border-t border-border bg-muted/30">
+    <div className="container flex items-center gap-3 py-1">
+      <span className="inline-flex items-center gap-2 text-xs font-semibold"><Shield className="h-3.5 w-3.5 text-primary" />Admin testing · {(account.testMode ?? "admin").toUpperCase()}</span>
+      {toggleBtn}
+    </div>
+  </section>;
   return <section aria-label="Subscription testing" className="border-t border-border bg-muted/30">
     <div className="container flex flex-wrap items-center gap-3 py-3">
       <Link to="/admin-kb20" className="inline-flex items-center gap-2 text-sm font-semibold"><Shield className="h-4 w-4 text-primary" />Admin testing</Link>
@@ -44,6 +53,7 @@ export default function AdminTesting() {
         <Button size="icon" variant="outline" className="h-9 w-9" aria-label="Subtract test credits" title="Subtract test credits" disabled={busy || !validCreditAdjustment(amount) || Number(amount) < 1 || Number(amount) > account.balance} onClick={() => void update(undefined, -Number(amount))}><Minus className="h-4 w-4" /></Button>
         <Button size="sm" variant="secondary" disabled={busy} onClick={() => void update("admin")}><Shield className="mr-1 h-4 w-4" />Return to ADMIN</Button>
       </>}
+      {toggleBtn}
       <p className="w-full text-xs text-muted-foreground">Test plans and credits only. Your real subscription, payments and credit history stay unchanged. AI generation still uses service resources.</p>
     </div>
   </section>;
