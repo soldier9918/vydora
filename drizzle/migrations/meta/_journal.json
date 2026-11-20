@@ -421,6 +421,13 @@
       "when": 1795194551332,
       "tag": "0059_community_showcase",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1795194934883,
+      "tag": "0060_community_require_youtube_connection",
+      "breakpoints": true
     }
   ]
 }
