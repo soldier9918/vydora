@@ -3,7 +3,7 @@
 import fs from "fs";
 import path from "path";
 import type { Plugin } from "vite";
-import { PUBLIC_PAGES, SITE } from "./src/lib/seo";
+import { PUBLIC_PAGES, SITE, AUTH_PAGE, INDEPENDENCE_DISCLAIMER } from "./src/lib/seo";
 import { FEATURE_PAGES } from "./src/lib/featurePages";
 import { GUIDES } from "./src/lib/guides";
 import { guidesForFeature } from "./src/lib/related";
@@ -45,7 +45,7 @@ export function bodyFor(route: string): string {
     main = `<h1>${esc(page.title.split(/ [–|] /)[0])}</h1><p>${esc(page.description)}</p>`;
   }
   const nav = `<nav><ul>${NAV.map(([h, l]) => `<li><a href="${h}">${esc(l)}</a></li>`).join("")}</ul></nav>`;
-  return `<main style="max-width:720px;margin:0 auto;padding:48px 16px;font-family:sans-serif;color:#eee">${main}${nav}</main>`;
+  return `<main style="max-width:720px;margin:0 auto;padding:48px 16px;font-family:sans-serif;color:#eee">${main}${nav}<p><small>${esc(INDEPENDENCE_DISCLAIMER)}</small></p></main>`;
 }
 
 export function htmlFor(template: string, route: string): string {
@@ -72,6 +72,21 @@ export function htmlFor(template: string, route: string): string {
   return html;
 }
 
+export function authHtmlFor(template: string): string {
+  const t = esc(AUTH_PAGE.title), d = esc(AUTH_PAGE.description);
+  return template
+    .replace(/<title>[\s\S]*?<\/title>/, `<title>${t}</title>`)
+    .replace(/(<meta name="description" content=")[^"]*/, `$1${d}`)
+    .replace(/(<meta property="og:title" content=")[^"]*/, `$1${t}`)
+    .replace(/(<meta property="og:description" content=")[^"]*/, `$1${d}`)
+    .replace(/(<meta name="twitter:title" content=")[^"]*/, `$1${t}`)
+    .replace(/(<meta name="twitter:description" content=")[^"]*/, `$1${d}`)
+    .replace(/(<meta property="og:url" content=")[^"]*/, `$1${SITE}/auth`)
+    .replace(/<link rel="canonical"[^>]*>\s*/, "")
+    .replace("</head>", `  <meta name="robots" content="noindex, follow" />\n  </head>`)
+    .replace(/<div id="root">[\s\S]*?<\/div>\s*(?=<script|<\/body>)/, `<div id="root"><main style="max-width:420px;margin:0 auto;padding:48px 16px;font-family:sans-serif;color:#eee"><h1>Vydora account sign-in</h1><p>Sign in to your Vydora account, or create a free one. Signing in with Google is optional.</p><p><small>${esc(INDEPENDENCE_DISCLAIMER)}</small></p></main></div>\n    `);
+}
+
 export default function prerender(): Plugin {
   return {
     name: "vydora-prerender",
@@ -87,6 +102,10 @@ export default function prerender(): Plugin {
       const guard = `<script>(function(){var p=location.pathname.replace(/\\/+$/,"")||"/";if(${publicList}.indexOf(p)<0){var c=document.querySelector('link[rel="canonical"]');if(c)c.remove();var m=document.createElement("meta");m.name="robots";m.content="noindex, nofollow";document.head.appendChild(m);}})();</script>`;
       const guarded = template.replace("</head>", `  ${guard}\n  </head>`);
       fs.writeFileSync(path.join(dist, "404.html"), guarded.replace(/<link rel="canonical"[^>]*>\s*/, "").replace(/<title>[\s\S]*?<\/title>/, "<title>Page not found | Vydora</title>"));
+      fs.mkdirSync(path.join(dist, "auth"), { recursive: true });
+      const authHtml = authHtmlFor(template);
+      fs.writeFileSync(path.join(dist, "auth", "index.html"), authHtml);
+      fs.writeFileSync(path.join(dist, "auth.html"), authHtml);
       for (const route of Object.keys(PUBLIC_PAGES)) {
         const out = route === "/" ? tplPath : path.join(dist, route.slice(1), "index.html");
         fs.mkdirSync(path.dirname(out), { recursive: true });

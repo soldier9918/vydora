@@ -3,6 +3,7 @@ import { Logo } from "@/components/SiteHeader";
 import { LEGAL_DOCS } from "@/lib/legal";
 import { FEATURE_PAGES } from "@/lib/featurePages";
 import { GUIDES } from "@/lib/guides";
+import { INDEPENDENCE_DISCLAIMER } from "@/lib/seo";
 
 const GUIDE_LABELS: Record<string, string> = {
   "youtube-monetization-faceless-ai-channels": "Monetising AI channels",
@@ -79,6 +80,9 @@ export default function SiteFooter() {
       </div>
 
       <div className="border-t border-border/60 py-6">
+        <p className="container mb-3 text-center text-xs text-muted-foreground">
+          {INDEPENDENCE_DISCLAIMER}
+        </p>
         <p className="container text-center text-xs text-muted-foreground">
           © {new Date().getFullYear()} Vydora · All rights reserved
         </p>

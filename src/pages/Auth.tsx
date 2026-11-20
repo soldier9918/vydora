@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/SiteHeader";
+import { INDEPENDENCE_DISCLAIMER } from "@/lib/seo";
 import { rememberNext, takeNext } from "@/lib/nextPath";
 
 type Mode = "signin" | "signup" | "forgot";
@@ -87,7 +88,10 @@ export default function Auth() {
     <div className="relative grid min-h-screen place-items-center px-4">
       <div className="absolute inset-0 bg-glow" />
       <div className="relative w-full max-w-sm">
-        <div className="mb-8 flex justify-center"><Logo /></div>
+        <div className="mb-8 flex flex-col items-center gap-2">
+          <Logo />
+          <p className="text-sm text-muted-foreground">Sign in to your Vydora account</p>
+        </div>
         {sentTo ? (
         <div className="rounded-xl border border-border bg-card p-6 text-center">
           <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-primary/15 text-2xl">✉️</div>
@@ -121,6 +125,7 @@ export default function Auth() {
           {mode !== "forgot" && (
             <div className="mt-6 grid gap-2">
               <Button variant="outline" onClick={() => oauth("google")}>Continue with Google</Button>
+              <p className="text-center text-xs text-muted-foreground">Optional: use your Google login to open your Vydora account.</p>
               <div className="my-2 text-center text-xs uppercase tracking-widest text-muted-foreground">or</div>
             </div>
           )}
@@ -151,6 +156,7 @@ export default function Auth() {
           </div>
         </div>
         )}
+        <p className="mt-6 text-center text-xs text-muted-foreground">{INDEPENDENCE_DISCLAIMER}</p>
       </div>
     </div>
   );

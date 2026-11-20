@@ -16,7 +16,7 @@ export default function RouteSeo() {
     setMeta("name", "description", s.description);
     setMeta("property", "og:title", s.title);
     setMeta("property", "og:description", s.description);
-    setMeta("name", "robots", s.index ? "index, follow" : "noindex, nofollow");
+    setMeta("name", "robots", s.robots);
     let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     if (s.canonical) {
       if (!link) { link = document.createElement("link"); link.rel = "canonical"; document.head.appendChild(link); }
