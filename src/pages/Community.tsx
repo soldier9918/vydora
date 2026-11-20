@@ -20,6 +20,30 @@ export const useGallery = (creator?: string) => useQuery({
   },
 });
 
+/** Decorative wall of thousands of tiny video thumbnails (drawn, not real videos). */
+function ThumbWall() {
+  const tiles = useMemo(() => {
+    let seed = 7; const r = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+    return Array.from({ length: 64 }, (_, i) => ({ x: (i % 8) * 30, y: Math.floor(i / 8) * 17, o: 0.08 + r() * 0.35, red: r() > 0.7 }));
+  }, []);
+  return (
+    <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full [mask-image:radial-gradient(ellipse_at_center,transparent_15%,black_75%)]">
+      <defs>
+        <pattern id="thumbs" width="240" height="136" patternUnits="userSpaceOnUse" patternTransform="scale(0.5) rotate(-8)">
+          {tiles.map((t, i) => (
+            <g key={i}>
+              <rect x={t.x + 1} y={t.y + 1} width="28" height="15" rx="2" fill={t.red ? "hsl(var(--primary))" : "hsl(var(--foreground))"} opacity={t.o} />
+              <path d={`M${t.x + 13} ${t.y + 6}l4 2.5-4 2.5z`} fill="hsl(var(--background))" opacity={0.7} />
+            </g>
+          ))}
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#thumbs)" />
+      <rect width="100%" height="100%" fill="hsl(var(--card))" opacity="0.35" />
+    </svg>
+  );
+}
+
 export default function Community() {
   const [params, setParams] = useSearchParams();
   const { data = [], isLoading } = useGallery();
@@ -37,12 +61,15 @@ export default function Community() {
       <SiteHeader />
       <main className="container max-w-6xl py-10">
         <section className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/20 via-card to-card px-6 py-14 text-center">
+          <ThumbWall />
+          <div className="relative">
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">The Vydora Community</p>
           <h1 className="mt-4 text-4xl font-extrabold md:text-5xl">Made with Vydora.<br /><span className="text-primary">Shared with the world.</span></h1>
           <p className="mx-auto mt-5 max-w-2xl text-muted-foreground">Explore AI videos created by the Vydora community, discover talented YouTubers, and share your own creations.</p>
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Button size="lg" onClick={explore}>Explore Videos</Button>
             <Button size="lg" variant="outline" onClick={() => setSubmitOpen(true)}>Submit Your Video</Button>
+          </div>
           </div>
         </section>
 

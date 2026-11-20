@@ -58,7 +58,6 @@ export default function SiteHeader() {
               <Button variant="ghost" asChild className={`${navBtn} ${on("/ads")}`}><Link to="/ads" aria-current={on("/ads") ? "page" : undefined}>Product Ads</Link></Button>
               <Button variant="ghost" asChild className={`${navBtn} ${on("/autopilot")}`}><Link to="/autopilot" aria-current={on("/autopilot") ? "page" : undefined}>Autopilot</Link></Button>
               <Button variant="ghost" asChild className={`${navBtn} ${on("/dashboard")}`}><Link to="/dashboard" aria-current={on("/dashboard") ? "page" : undefined}>My videos</Link></Button>
-              <Button variant="ghost" asChild className={`${navBtn} ${on("/library")}`}><Link to="/library" aria-current={on("/library") ? "page" : undefined}>My Library</Link></Button>
               <Button variant="ghost" asChild className={`${navBtn} ${on("/community")}`}><Link to="/community" aria-current={on("/community") ? "page" : undefined}>Community</Link></Button>
               <Button variant="ghost" asChild className={`${navBtn} ${on("/pricing")}`}><Link to="/pricing" aria-current={on("/pricing") ? "page" : undefined}>Pricing</Link></Button>
               <Button variant="ghost" asChild className={`${navBtn} ${on("/billing")}`}><Link to="/billing" aria-current={on("/billing") ? "page" : undefined}>Plans &amp; Billing</Link></Button>
