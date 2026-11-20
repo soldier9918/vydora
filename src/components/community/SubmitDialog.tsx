@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { youtubeStatus, connectYouTube } from "@/components/YouTubePublish";
 import { COMMUNITY_CATEGORIES, CONSENT_TEXT, checkEmbeddable, isYouTubeChannel, parseYouTubeVideo, watchUrl } from "@/lib/community";
 
 type Props = { open: boolean; onClose: () => void; videoId?: string; defaults?: { title?: string; description?: string } };
@@ -20,6 +22,7 @@ export default function SubmitDialog({ open, onClose, videoId, defaults }: Props
   const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const { data: yt, isLoading: ytLoading } = useQuery({ queryKey: ["youtube-status"], queryFn: youtubeStatus, staleTime: 60_000, retry: false, enabled: open && !!user });
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF((s) => ({ ...s, [k]: e.target.value }));
 
   useEffect(() => {
@@ -73,6 +76,11 @@ export default function SubmitDialog({ open, onClose, videoId, defaults }: Props
         ) : !user ? (
           <div className="space-y-3"><p className="text-sm text-muted-foreground">Sign in to your Vydora account to submit a video.</p>
             <Button asChild><Link to="/auth?next=/community">Sign in</Link></Button></div>
+        ) : ytLoading ? (
+          <p className="text-sm text-muted-foreground">Checking your YouTube connection…</p>
+        ) : !yt?.connection ? (
+          <div className="space-y-3"><p className="text-sm text-muted-foreground">Connect your YouTube channel to Vydora to submit a video. This confirms the channel is yours.</p>
+            <Button onClick={() => connectYouTube().catch((e) => toast.error(e.message))}>Connect YouTube channel</Button></div>
         ) : (
           <form onSubmit={submit} className="space-y-4">
             <div><Label htmlFor="cs-proj">Vydora project (optional)</Label>

@@ -86,3 +86,10 @@ describe("community page SEO", async () => {
     expect(seoFor("/community/creator/abc").robots).toContain("noindex");
   });
 });
+
+describe("YouTube connection required to submit", () => {
+  it("server rejects submissions without a connected channel", () => {
+    const sql = readFileSync("drizzle/migrations/0060_community_require_youtube_connection.sql", "utf8");
+    expect(sql).toMatch(/IF NOT EXISTS \(SELECT 1 FROM youtube_connections WHERE user_id = me\) THEN RAISE EXCEPTION/);
+  });
+});
