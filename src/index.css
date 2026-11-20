@@ -102,14 +102,3 @@
       radial-gradient(ellipse at center, transparent 30%, hsl(var(--background) / 0.8) 100%);
   }
 }
-
-@property --beam-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
-.logo-beam { position: relative; isolation: isolate; }
-.logo-beam::before {
-  content: ""; position: absolute; inset: -2px; border-radius: calc(var(--radius) - 2px); z-index: -1;
-  background: conic-gradient(from var(--beam-angle), transparent 0deg, hsl(var(--primary) / 0.15) 40deg, hsl(var(--foreground)) 80deg, hsl(var(--primary)) 110deg, transparent 170deg);
-  padding: 2px; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
-  animation: logo-beam 3.5s linear infinite; filter: drop-shadow(0 0 4px hsl(var(--primary) / 0.7));
-}
-@keyframes logo-beam { to { --beam-angle: 360deg; } }
-@media (prefers-reduced-motion: reduce) { .logo-beam::before { animation: none; } }

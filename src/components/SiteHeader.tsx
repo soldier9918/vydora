@@ -11,7 +11,7 @@ import AdminTesting from "@/components/AdminTesting";
 export function Logo({ name = "Vydora" }: { name?: string }) {
   return (
     <Link to="/" className="flex items-center gap-2 font-display text-xl font-extrabold">
-      <span className="logo-beam grid h-8 w-8 place-items-center rounded-md bg-primary text-primary-foreground">
+      <span className="grid h-8 w-8 place-items-center rounded-md bg-primary text-primary-foreground">
         <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current"><path d="M8 5v14l11-7z" /></svg>
       </span>
       {name}
@@ -42,8 +42,8 @@ export default function SiteHeader() {
   const mobileLink = "block rounded-md px-3 py-3 text-base font-medium hover:bg-muted";
 
   return (
-    <header className="sticky top-0 z-40 px-3 pt-3 sm:px-6 sm:pt-4">
-      <div className="container flex h-16 items-center justify-between gap-2 rounded-full border border-border/60 bg-card/70 pl-5 pr-2 shadow-[0_6px_36px_hsl(var(--background)/0.6)] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
+      <div className="container flex h-16 items-center justify-between gap-2">
         <Logo name="Vydora.ai" />
         <nav className="hidden items-center gap-1 min-[1150px]:flex">
           {user ? (
