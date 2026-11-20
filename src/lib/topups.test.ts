@@ -3,7 +3,14 @@ import { autoTopUpSchema, creditsFor, CREDITS_PER_GBP, gbp, gbpAmount, gbpValueO
 
 describe("pay-as-you-go top-ups", () => {
   it("offers the six requested GBP amounts", () => {
-    expect(TOP_UP_AMOUNTS).toEqual([5, 10, 50, 100, 1000, 5000]);
+    expect(TOP_UP_AMOUNTS).toEqual([5, 10, 15, 20, 50, 100]);
+  });
+  it("each preset shows the right credits", () => {
+    expect(TOP_UP_AMOUNTS.map(creditsFor)).toEqual([125, 250, 375, 500, 1250, 2500]);
+  });
+  it("custom amounts convert at 25 per £1", () => {
+    expect(creditsFor(12.5)).toBe(312);
+    expect(creditsFor(10000)).toBe(250000);
   });
   it("buys 25 credits per £1", () => {
     expect(CREDITS_PER_GBP).toBe(25);

@@ -17,7 +17,7 @@ export default function TopUpSettings() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const storageKey = `vydora:topup-draft:${user?.id ?? "guest"}`;
-  const [selected, setSelected] = useState("5");
+  const [selected, setSelected] = useState("10");
   const [custom, setCustom] = useState("");
   const [draft, setDraft] = useState(initial);
   const [error, setError] = useState("");

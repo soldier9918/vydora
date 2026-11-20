@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const TOP_UP_AMOUNTS = [5, 10, 50, 100, 1000, 5000] as const;
+export const TOP_UP_AMOUNTS = [5, 10, 15, 20, 50, 100] as const;
 /** Credits granted per £1 paid. Must match TOPUP_CREDITS_PER_GBP in supabase/functions/_shared/stripe.ts. */
 export const CREDITS_PER_GBP = 25;
 /** Credits a payment buys: whole credits only, so £7.50 buys 187. */
