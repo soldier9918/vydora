@@ -24,9 +24,9 @@ export async function billingBlocked(db: any): Promise<string | null> {
 /** One-time top-ups: credits granted per £1 paid. */
 export const TOPUP_CREDITS_PER_GBP = 25;
 
-const ALLOWED = ["https://vydora.ai", "https://www.vydora.ai", "https://story-scene-voice-maker.lovable.app", "http://localhost:8080"];
+const ALLOWED = ["https://vydora.ai", "https://www.vydora.ai", "https://story-scene-voice-maker.lovable.app", "https://id-preview--4666d663-b9f2-4d3b-aa7e-f872d9cd86ad.lovable.app", "http://localhost:8080"];
 export function returnOrigin(req: Request) {
   const o = req.headers.get("Origin") ?? "";
-  if (ALLOWED.includes(o) || /^https:\/\/[a-z0-9-]+\.lovable\.app$/.test(o)) return o;
+  if (ALLOWED.includes(o)) return o;
   return "https://vydora.ai";
 }
