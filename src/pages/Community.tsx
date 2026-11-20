@@ -10,6 +10,7 @@ import VideoCard from "@/components/community/VideoCard";
 import VideoDialog from "@/components/community/VideoDialog";
 import SubmitDialog from "@/components/community/SubmitDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useAccount } from "@/lib/account";
 import { COMMUNITY_CATEGORIES, filterGallery, type GalleryItem } from "@/lib/community";
 import thumbTravel from "@/assets/community-thumbs/thumb-travel.jpg";
 import thumbHistory from "@/assets/community-thumbs/thumb-history.jpg";
@@ -50,6 +51,7 @@ function ThumbWall() {
 }
 
 export default function Community() {
+  const { data: acct } = useAccount();
   const [params, setParams] = useSearchParams();
   const { data = [], isLoading } = useGallery();
   const [q, setQ] = useState("");
@@ -60,6 +62,27 @@ export default function Community() {
   const open = data.find((x) => x.id === params.get("v")) ?? null;
   const setOpen = (id: string | null) => { const p = new URLSearchParams(params); if (id) p.set("v", id); else p.delete("v"); setParams(p, { replace: true }); };
   const explore = () => document.getElementById("gallery")?.scrollIntoView({ behavior: "smooth" });
+
+  // The showcase is in preview: only admins see the full gallery for now.
+  if (!acct?.isAdmin) {
+    return (
+      <div className="min-h-screen">
+        <SiteHeader />
+        <main className="container max-w-6xl py-10">
+          <section className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-primary/20 via-card to-card px-6 py-20 text-center">
+            <ThumbWall />
+            <div className="relative">
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary">The Vydora Community</p>
+              <h1 className="mt-4 text-4xl font-extrabold md:text-5xl">Made with Vydora.<br /><span className="text-primary">Shared with the world.</span></h1>
+              <p className="mx-auto mt-5 max-w-2xl text-muted-foreground">A showcase of AI videos created by the Vydora community is on its way. Soon you'll be able to discover talented YouTubers and share your own creations here.</p>
+              <p className="mt-7 inline-block rounded-full border border-primary/40 bg-primary/10 px-5 py-2 text-sm font-semibold text-primary">Coming soon</p>
+            </div>
+          </section>
+        </main>
+        <SiteFooter />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
