@@ -15,7 +15,7 @@
 - Speed applies at playback; accent is a `scene-asset` TTS hint. Why: no re-recording.
 - "Remix for Shorts" copies a video and its scene rows into a new 9:16 video that reuses the same media paths (no regeneration). Why: original stays intact and remixing costs no credits; never delete shared media when a video row is deleted.
 - My Library (/library) stores user files privately in video-assets under <user_id>/library/, listed via storage (no table). Why: reuses owner-scoped storage policies.
-- Admin access uses the `user_roles` table + `has_role()`; admin data comes only from SECURITY DEFINER `admin_*` RPCs that check the role. No plan gets an export watermark. Why: never trust client-side checks for privileges.
+- Admin access uses the `user_roles` table + `has_role()`; admin data comes only from SECURITY DEFINER `admin_*` RPCs that check the role. No plan gets a watermark on in-browser exports (`video-export`); cloud worker renders (`worker-api`) watermark non-Pro accounts. Why: never trust client-side checks for privileges.
 - Tiers (`planTierOf`): Free/Creator/Pro length and 1080p caps enforced in generate-script, video-export and DB trigger; tier = active `user_subscriptions` plan_tier, admin = Pro; top-ups never unlock. Why: drives upgrades, server is the source of truth.
 - Stripe (own account; Live needs STRIPE_MODE=live + 4 valid Live settings + DB `billing_config.live`, else 503; subs keyed per `livemode`) via `create-checkout`, `customer-portal`, signed `stripe-webhook`; only the webhook writes `user_subscriptions` and grants credits on `invoice.paid`, deduped by `stripe_invoice_id` + `processed_stripe_events`. Price map in `_shared/stripe.ts`. Why: clients can't mint credits.
 - Coupons: `coupon_codes` (service-role only), redeemed once per account via SECURITY DEFINER `redeem_coupon` (logs `coupon_redemptions`, writes ledger); admins use `admin_*coupon*` RPCs. Why: no client reads/edits/double-redeems.
@@ -28,8 +28,6 @@
 - Refunds/disputes reverse credits proportionally (`_shared/refunds.ts`), idempotent, capped at balance; won disputes restore. Why: no negative balances.
 - Live activation: one-time admin `activate-live-billing` (checks, typed confirm, audited); owner sets STRIPE_MODE. Why: both switches must agree.
 - Product Ads: `/ads` = Create `adMode` + `ad` brief to `generate-script`. Why: one pipeline.
-- `voice-sample` previews cached in `samples/`.
 - Public pages prerendered from `PUBLIC_PAGES`.
 - Post-sign-in return uses validated `next` path (`nextPath.ts`). Why: no open redirects.
 - Per-scene movement encoded in `motion_type` (`<main>@<i>=<fx>`).
-- Ad website capture: generate-script screenshots onto `websiteScenes()`, refunds failures.

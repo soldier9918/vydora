@@ -1,0 +1,2 @@
+- `voice-sample` previews cached in `samples/`.
+- Ad website capture: generate-script screenshots onto `websiteScenes()`, refunds failures.
