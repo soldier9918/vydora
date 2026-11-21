@@ -74,7 +74,9 @@ export default function ProfileMenu({ onSignOut }: { onSignOut: () => void }) {
           {acct?.code && <span className="ml-auto font-mono text-xs text-primary">{acct.code}</span>}
         </DropdownMenuItem>
         <DropdownMenuItem asChild><Link to="/profile" className="cursor-pointer"><UserRound className="mr-2 h-4 w-4" />My profile &amp; YouTube</Link></DropdownMenuItem>
-        <DropdownMenuItem asChild><Link to="/library" className="cursor-pointer"><FolderOpen className="mr-2 h-4 w-4" />My Library</Link></DropdownMenuItem>
+        <div className="ml-4 border-l border-border/70 pl-1">
+          <DropdownMenuItem asChild><Link to="/library" className="cursor-pointer"><FolderOpen className="mr-2 h-4 w-4" />My Library</Link></DropdownMenuItem>
+        </div>
         <DropdownMenuItem asChild><Link to="/billing" className="cursor-pointer"><CreditCard className="mr-2 h-4 w-4" />Plans &amp; Billing</Link></DropdownMenuItem>
         {acct?.isAdmin && <DropdownMenuItem asChild><Link to="/admin-kb20" className="cursor-pointer"><Shield className="mr-2 h-4 w-4" />Admin dashboard</Link></DropdownMenuItem>}
         <DropdownMenuSeparator />

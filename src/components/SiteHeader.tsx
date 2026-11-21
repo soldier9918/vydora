@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Coins, Gift, LogOut, Menu, Plus, Shield, X } from "lucide-react";
+import { Coins, FolderOpen, Gift, LogOut, Menu, Plus, Shield, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useAccount } from "@/lib/account";
@@ -119,7 +119,11 @@ export default function SiteHeader() {
                 <Link to="/pricing" onClick={close} className={`${mobileLink} ${on("/pricing")}`}>Pricing</Link>
                 <Link to="/billing" onClick={close} className={`${mobileLink} ${on("/billing")}`}>Plans &amp; Billing</Link>
                 <Link to="/profile" onClick={close} className={`${mobileLink} ${on("/profile")}`}>My profile &amp; YouTube</Link>
-                <Link to="/library" onClick={close} className={`${mobileLink} ${on("/library")}`}>My Library</Link>
+                <div className="ml-3 border-l border-border/70 pl-2">
+                  <Link to="/library" onClick={close} className={`${mobileLink} ${on("/library")} flex items-center gap-2`}>
+                    <FolderOpen className="h-4 w-4 shrink-0 text-muted-foreground" />My Library
+                  </Link>
+                </div>
                 {acct?.isAdmin && <Link to="/admin-kb20" onClick={close} className={`${mobileLink} ${on("/admin-kb20")} flex items-center gap-2 text-primary`}><Shield className="h-4 w-4" />Admin dashboard</Link>}
                 <div className="mb-2 flex items-center gap-2">
                   <Link to="/billing" onClick={close} className={`${balancePill} min-w-0 flex-1 justify-center ${low ? "border-primary/60 text-primary" : ""}`}>
