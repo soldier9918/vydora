@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useAccount } from "@/lib/account";
 import { youtubeStatus, connectYouTube, disconnectYouTube } from "@/components/YouTubePublish";
+import LibrarySection from "@/components/LibrarySection";
 
 export default function Profile() {
   const { user } = useAuth();
@@ -67,6 +68,7 @@ export default function Profile() {
             )}
           </div>
         </section>
+        <LibrarySection />
       </main>
     </div>
   );
