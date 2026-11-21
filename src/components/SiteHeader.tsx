@@ -115,11 +115,11 @@ export default function SiteHeader() {
                 <Link to="/ads" onClick={close} className={`${mobileLink} ${on("/ads")}`}>Product Ads</Link>
                 <Link to="/autopilot" onClick={close} className={`${mobileLink} ${on("/autopilot")}`}>Autopilot</Link>
                 <Link to="/dashboard" onClick={close} className={`${mobileLink} ${on("/dashboard")}`}>My videos</Link>
-                <Link to="/library" onClick={close} className={`${mobileLink} ${on("/library")}`}>My Library</Link>
                 <Link to="/community" onClick={close} className={`${mobileLink} ${on("/community")}`}>Community</Link>
                 <Link to="/pricing" onClick={close} className={`${mobileLink} ${on("/pricing")}`}>Pricing</Link>
                 <Link to="/billing" onClick={close} className={`${mobileLink} ${on("/billing")}`}>Plans &amp; Billing</Link>
                 <Link to="/profile" onClick={close} className={`${mobileLink} ${on("/profile")}`}>My profile &amp; YouTube</Link>
+                <Link to="/library" onClick={close} className={`${mobileLink} ${on("/library")}`}>My Library</Link>
                 {acct?.isAdmin && <Link to="/admin-kb20" onClick={close} className={`${mobileLink} ${on("/admin-kb20")} flex items-center gap-2 text-primary`}><Shield className="h-4 w-4" />Admin dashboard</Link>}
                 <div className="mb-2 flex items-center gap-2">
                   <Link to="/billing" onClick={close} className={`${balancePill} min-w-0 flex-1 justify-center ${low ? "border-primary/60 text-primary" : ""}`}>
