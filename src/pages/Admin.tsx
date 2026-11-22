@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import GoLivePanel from "@/components/GoLivePanel";
 import AdminCommunityPanel from "@/components/community/AdminCommunityPanel";
 import { FeedbackPanel, AutopilotQueuePanel, UserDetailSheet, HealthBar, HiddenAccountsPanel, hideUser } from "@/components/AdminTools";
+import AdminMfaGate from "@/components/AdminMfaGate";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }) : "—");
@@ -115,7 +116,7 @@ export default function Admin() {
   const refresh = () => qc.invalidateQueries({ predicate: (x) => String(x.queryKey[0]).startsWith("admin-") });
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <AdminMfaGate><div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
       <main className="container max-w-7xl py-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
@@ -313,6 +314,6 @@ export default function Admin() {
         </Tabs>
       </main>
       <UserDetailSheet userId={detail} onClose={() => setDetail(null)} />
-    </div>
+    </div></AdminMfaGate>
   );
 }

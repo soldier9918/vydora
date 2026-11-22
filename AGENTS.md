@@ -32,3 +32,4 @@
 - Post-sign-in return uses validated `next` path (`nextPath.ts`). Why: no open redirects.
 - Per-scene movement encoded in `motion_type` (`<main>@<i>=<fx>`).
 - Community: reads via `community_gallery`, writes via `community_*` RPCs. Why: privacy.
+- /admin-kb20 sits behind AdminMfaGate (authenticator code, AAL2) on top of server has_role. Why: password alone can't open admin.
