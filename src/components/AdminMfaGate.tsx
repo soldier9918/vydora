@@ -13,6 +13,7 @@ export default function AdminMfaGate({ children }: { children: ReactNode }) {
   const [factorId, setFactorId] = useState("");
   const [qr, setQr] = useState("");
   const [secret, setSecret] = useState("");
+  const [uri, setUri] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -26,7 +27,7 @@ export default function AdminMfaGate({ children }: { children: ReactNode }) {
     for (const f of data?.all ?? []) if (f.status !== "verified") await supabase.auth.mfa.unenroll({ factorId: f.id });
     const { data: en, error } = await supabase.auth.mfa.enroll({ factorType: "totp", friendlyName: `Vydora admin ${Date.now()}` });
     if (error || !en) { toast.error(error?.message ?? "Could not start setup"); return; }
-    setFactorId(en.id); setQr(en.totp.qr_code); setSecret(en.totp.secret); setStage("enroll");
+    setFactorId(en.id); setQr(en.totp.qr_code); setSecret(en.totp.secret); setUri(en.totp.uri); setStage("enroll");
   };
   useEffect(() => { check(); }, []);
 
@@ -50,8 +51,11 @@ export default function AdminMfaGate({ children }: { children: ReactNode }) {
         {stage === "enroll" ? (
           <>
             <p className="text-sm text-muted-foreground">Scan this with Google Authenticator, 1Password, Authy or similar, then enter the 6-digit code.</p>
-            <img src={qr} alt="Authenticator QR code" className="mx-auto h-44 w-44 rounded bg-foreground p-2" />
-            <p className="text-xs text-muted-foreground break-all">Or type this key: <span className="font-mono text-foreground">{secret}</span></p>
+            <img src={qr} alt="Authenticator QR code" className="mx-auto h-52 w-52 rounded-lg p-3" style={{ background: "#fff" }} />
+            <p className="text-sm text-muted-foreground">On this phone? Tap the button to add Vydora to your authenticator app, or copy the key and paste it in as a "setup key".</p>
+            <Button asChild variant="secondary" className="w-full"><a href={uri}>Open in authenticator app</a></Button>
+            <Button variant="outline" className="w-full" onClick={() => { navigator.clipboard.writeText(secret); toast.success("Key copied"); }}>Copy setup key</Button>
+            <p className="text-xs font-mono break-all text-foreground">{secret}</p>
           </>
         ) : <p className="text-sm text-muted-foreground">Open your authenticator app and enter the 6-digit code for Vydora.</p>}
         <Input inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} autoFocus
