@@ -1,2 +1,9 @@
 - `voice-sample` previews cached in `samples/`.
 - Ad website capture: generate-script screenshots onto `websiteScenes()`, refunds failures.
+- Stripe (own account; Live needs STRIPE_MODE=live + 4 valid Live settings + DB `billing_config.live`, else 503; subs keyed per `livemode`) via `create-checkout`, `customer-portal`, signed `stripe-webhook`; only the webhook writes `user_subscriptions` and grants credits on `invoice.paid`, deduped by `stripe_invoice_id` + `processed_stripe_events`. Price map in `_shared/stripe.ts`. Why: clients can't mint credits.
+- Coupons: `coupon_codes` (service-role only), redeemed once per account via SECURITY DEFINER `redeem_coupon` (logs `coupon_redemptions`, writes ledger); admins use `admin_*coupon*` RPCs. Why: no client reads/edits/double-redeems.
+- Billing history is read live from Stripe (`billing-history`) via the server-stored customer id; records carry `ledger_keys` to match credit lines. Why: invoices stay authoritative, owner-scoped.
+- Plan changes: Vydora-only portal config (`customer-portal`); upgrades immediate (grant new minus old), downgrades at period end. Why: one allowance per cycle.
+- Pending plan changes: live via `subscription-status`.
+- Refunds/disputes reverse credits proportionally (`_shared/refunds.ts`), idempotent, capped at balance; won disputes restore. Why: no negative balances.
+- Live activation: one-time admin `activate-live-billing` (checks, typed confirm, audited); owner sets STRIPE_MODE. Why: both switches must agree.
