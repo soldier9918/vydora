@@ -26,4 +26,4 @@
 - Per-scene movement encoded in `motion_type` (`<main>@<i>=<fx>`).
 - Community: reads via `community_gallery`, writes via `community_*` RPCs. Why: privacy.
 - /admin-kb20 sits behind AdminMfaGate (authenticator code, AAL2) on top of server has_role. Why: password alone can't open admin.
-- Google Ads (`src/lib/googleAds.ts`) loads only after advertising consent (`src/lib/consent.ts`, banner in `components/consent`); purchase conversions come from webhook-written `credit_ledger` grants keyed by Stripe invoice id, labels stay empty until copied from Google Ads. Why: no unconsented sends, no invented or duplicate purchases.
+- Google Ads (`src/lib/googleAds.ts`) loads only after advertising consent (`src/lib/consent.ts`); purchase conversions come from webhook-written `credit_ledger` grants keyed by Stripe invoice id; subscription value = `paid_net_pence` (Stripe amount paid minus itemised tax) and only for `billing_reason=subscription_create`. Why: no unconsented sends, no invented, list-price or duplicate purchases.

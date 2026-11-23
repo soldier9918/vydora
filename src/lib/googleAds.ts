@@ -61,15 +61,26 @@ export async function reportConversion(kind: ConversionKind, transactionId: stri
   return true;
 }
 
-export type LedgerRow = { reason: string; amount: number; stripe_invoice_id: string | null; created_at: string; livemode: boolean | null };
+export type LedgerRow = { reason: string; amount: number; stripe_invoice_id: string | null; created_at: string; livemode: boolean | null; paid_net_pence?: number | null; billing_reason?: string | null };
 export type PurchaseConversion = { kind: "subscription" | "topup"; id: string; value: number };
 
 /** Confirmed paid ledger grants (written only by the Stripe webhook) created after checkout started. */
 export function purchasesFrom(rows: LedgerRow[], sinceMs: number): PurchaseConversion[] {
-  return rows
-    .filter((r) => (r.reason === "subscription" || r.reason === "topup") && r.amount > 0 && !!r.stripe_invoice_id
-      && r.livemode === true && Date.parse(r.created_at) >= sinceMs)
-    .map((r) => ({ kind: r.reason as "subscription" | "topup", id: r.stripe_invoice_id!, value: poundsFor(r.reason, r.amount) }));
+  const out: PurchaseConversion[] = [];
+  const seen = new Set<string>();
+  for (const r of rows) {
+    if (!(r.reason === "subscription" || r.reason === "topup") || r.amount <= 0 || !r.stripe_invoice_id
+      || r.livemode !== true || Date.parse(r.created_at) < sinceMs || seen.has(r.stripe_invoice_id)) continue;
+    let value: number;
+    if (r.reason === "subscription") {
+      // Only the first subscription payment, valued at what was actually paid (ex VAT). Renewals, unknown or £0 never count.
+      if (r.billing_reason !== "subscription_create" || r.paid_net_pence == null || r.paid_net_pence <= 0) continue;
+      value = r.paid_net_pence / 100;
+    } else value = poundsFor(r.reason, r.amount);
+    seen.add(r.stripe_invoice_id);
+    out.push({ kind: r.reason as "subscription" | "topup", id: r.stripe_invoice_id, value });
+  }
+  return out;
 }
 
 /** A Google sign-in counts as a registration only when the account was created moments ago. */

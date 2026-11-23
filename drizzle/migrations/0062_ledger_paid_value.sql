@@ -1,0 +1,1 @@
+ALTER TABLE public.credit_ledger ADD COLUMN IF NOT EXISTS paid_net_pence integer, ADD COLUMN IF NOT EXISTS billing_reason text;

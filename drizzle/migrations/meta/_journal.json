@@ -435,6 +435,13 @@
       "when": 1795434889484,
       "tag": "0061_announcements",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1795437224146,
+      "tag": "0062_ledger_paid_value",
+      "breakpoints": true
     }
   ]
 }

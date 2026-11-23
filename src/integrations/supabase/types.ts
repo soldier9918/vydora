@@ -476,27 +476,33 @@ export type Database = {
       credit_ledger: {
         Row: {
           amount: number
+          billing_reason: string | null
           created_at: string
           id: string
           livemode: boolean | null
+          paid_net_pence: number | null
           reason: string
           stripe_invoice_id: string | null
           user_id: string
         }
         Insert: {
           amount: number
+          billing_reason?: string | null
           created_at?: string
           id?: string
           livemode?: boolean | null
+          paid_net_pence?: number | null
           reason: string
           stripe_invoice_id?: string | null
           user_id: string
         }
         Update: {
           amount?: number
+          billing_reason?: string | null
           created_at?: string
           id?: string
           livemode?: boolean | null
+          paid_net_pence?: number | null
           reason?: string
           stripe_invoice_id?: string | null
           user_id?: string

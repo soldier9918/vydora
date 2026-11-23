@@ -39,7 +39,7 @@ export default function GoogleAdsTracker() {
     const check = async () => {
       if (stop) return;
       const { data } = await supabase.from("credit_ledger")
-        .select("reason, amount, stripe_invoice_id, created_at, livemode")
+        .select("reason, amount, stripe_invoice_id, created_at, livemode, paid_net_pence, billing_reason")
         .eq("user_id", user.id).in("reason", ["subscription", "topup"]).gt("amount", 0)
         .gte("created_at", new Date(since).toISOString()).limit(20);
       const found = purchasesFrom((data ?? []) as LedgerRow[], since);

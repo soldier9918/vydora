@@ -2,6 +2,7 @@ import type Stripe from "npm:stripe@17.7.0";
 import { adminClient } from "../_shared/common.ts";
 import { stripe, PLANS, LIVE, WEBHOOK_SECRET, billingBlocked } from "../_shared/stripe.ts";
 import { reversalFor } from "../_shared/refunds.ts";
+import { paidNetPence } from "../_shared/paidValue.ts";
 
 const db = adminClient();
 const ok = (msg = "ok") => new Response(msg, { status: 200 });
@@ -57,7 +58,8 @@ async function grantInvoiceCredits(inv: Stripe.Invoice) {
   const userId = await userForCustomer(customerId, anyInv.subscription_details?.metadata ?? anyInv.parent?.subscription_details?.metadata ?? inv.lines.data[0]?.metadata);
   if (!userId) throw new Error(`No Vydora user for customer ${customerId}`);
   // Unique index on stripe_invoice_id means each invoice credits at most once.
-  const { error } = await db.from("credit_ledger").insert({ user_id: userId, amount: credits, reason: "subscription", stripe_invoice_id: inv.id, livemode: LIVE });
+  const { error } = await db.from("credit_ledger").insert({ user_id: userId, amount: credits, reason: "subscription", stripe_invoice_id: inv.id, livemode: LIVE,
+    paid_net_pence: paidNetPence(anyInv), billing_reason: anyInv.billing_reason ?? null });
   if (error && error.code !== "23505") throw error;
 }
 

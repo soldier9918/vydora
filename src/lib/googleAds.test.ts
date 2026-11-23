@@ -10,10 +10,17 @@ describe("Google Ads conversions", () => {
   it("uses the Vydora tag id", () => expect(GOOGLE_ADS_ID).toBe("AW-17577433830"));
   it("reports a £10 top-up with its Stripe invoice id", () =>
     expect(purchasesFrom([row({})], since)).toEqual([{ kind: "topup", id: "in_1", value: 10 }]));
-  it("values Creator at £19 and Pro at £49", () => {
-    expect(purchasesFrom([row({ reason: "subscription", amount: 600 })], since)[0].value).toBe(19);
-    expect(purchasesFrom([row({ reason: "subscription", amount: 2000 })], since)[0].value).toBe(49);
-  });
+  const sub = (o: object) => row({ reason: "subscription", amount: 600, billing_reason: "subscription_create", ...o });
+  it("reports a full-price Creator payment as £19", () =>
+    expect(purchasesFrom([sub({ paid_net_pence: 1900 })], since)).toEqual([{ kind: "subscription", id: "in_1", value: 19 }]));
+  it("reports a discounted Pro payment at the £24.50 actually paid, not £49", () =>
+    expect(purchasesFrom([sub({ amount: 2000, paid_net_pence: 2450 })], since)[0].value).toBe(24.5));
+  it("never reports a £0 trial or unvalued payment", () =>
+    expect(purchasesFrom([sub({ paid_net_pence: 0 }), sub({ paid_net_pence: null, stripe_invoice_id: "in_2" })], since)).toEqual([]));
+  it("never reports renewals or plan changes", () =>
+    expect(purchasesFrom([sub({ paid_net_pence: 1900, billing_reason: "subscription_cycle" }), sub({ paid_net_pence: 3000, billing_reason: "subscription_update", stripe_invoice_id: "in_3" })], since)).toEqual([]));
+  it("reports a repeated invoice only once", () =>
+    expect(purchasesFrom([sub({ paid_net_pence: 1900 }), sub({ paid_net_pence: 1900 })], since)).toHaveLength(1));
   it("ignores test-mode, older, refund and non-Stripe rows", () => {
     expect(purchasesFrom([
       row({ livemode: false }), row({ created_at: "2026-11-23T11:00:00Z" }),
