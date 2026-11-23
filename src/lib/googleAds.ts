@@ -9,9 +9,9 @@ export const GOOGLE_ADS_ID = "AW-17577433830";
  * Leave empty until the action exists; empty labels send nothing.
  */
 export const CONVERSION_LABELS = {
-  signup: "",
-  subscription: "",
-  topup: "",
+  signup: "9EjuCOba9b0dEOa1yb1B",
+  subscription: "0j7MCOWt9r0dEOa1yb1B",
+  topup: "15PPCJHd9b0dEOa1yb1B",
 } as const;
 
 export type ConversionKind = keyof typeof CONVERSION_LABELS;
