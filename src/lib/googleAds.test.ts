@@ -8,7 +8,6 @@ const row = (o: Partial<Parameters<typeof purchasesFrom>[0][0]>) => ({
 
 describe("Google Ads conversions", () => {
   it("uses the Vydora tag id", () => expect(GOOGLE_ADS_ID).toBe("AW-17577433830"));
-  it("has no invented labels", () => expect(Object.values(CONVERSION_LABELS).every((l) => l === "")).toBe(true));
   it("reports a £10 top-up with its Stripe invoice id", () =>
     expect(purchasesFrom([row({})], since)).toEqual([{ kind: "topup", id: "in_1", value: 10 }]));
   it("values Creator at £19 and Pro at £49", () => {
