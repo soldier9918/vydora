@@ -7,6 +7,7 @@ import { useAccount } from "@/lib/account";
 import { scrollToSection } from "@/components/ScrollToTop";
 import ProfileMenu, { planLabel } from "@/components/ProfileMenu";
 import AdminTesting from "@/components/AdminTesting";
+import AnnouncementBanner from "@/components/announcements/AnnouncementBanner";
 
 export function Logo({ name = "Vydora" }: { name?: string }) {
   return (
@@ -43,6 +44,7 @@ export default function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
+      <AnnouncementBanner />
       <div className="container flex h-16 items-center justify-between gap-2">
         <Logo name="Vydora.ai" />
         <nav className="hidden items-center gap-1 min-[1150px]:flex">

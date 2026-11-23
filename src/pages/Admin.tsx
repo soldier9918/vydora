@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import GoLivePanel from "@/components/GoLivePanel";
 import AdminCommunityPanel from "@/components/community/AdminCommunityPanel";
 import { FeedbackPanel, AutopilotQueuePanel, UserDetailSheet, HealthBar, HiddenAccountsPanel, hideUser } from "@/components/AdminTools";
+import AdminAnnouncementsPanel from "@/components/announcements/AdminAnnouncementsPanel";
 import AdminMfaGate from "@/components/AdminMfaGate";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -159,6 +160,7 @@ export default function Admin() {
             <TabsTrigger value="ledger">Credit activity</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="coupons">Coupons</TabsTrigger>
+            <TabsTrigger value="announcements">Announcements</TabsTrigger>
             <TabsTrigger value="feedback">Feedback</TabsTrigger>
             <TabsTrigger value="community">Community</TabsTrigger>
             <TabsTrigger value="queue">Autopilot queue</TabsTrigger>
@@ -275,6 +277,7 @@ export default function Admin() {
 
           <TabsContent value="golive"><GoLivePanel /></TabsContent>
           <TabsContent value="community"><AdminCommunityPanel /></TabsContent>
+          <TabsContent value="announcements"><AdminAnnouncementsPanel /></TabsContent>
           <TabsContent value="feedback"><FeedbackPanel /></TabsContent>
           <TabsContent value="queue"><AutopilotQueuePanel /></TabsContent>
           <TabsContent value="hidden"><HiddenAccountsPanel /></TabsContent>

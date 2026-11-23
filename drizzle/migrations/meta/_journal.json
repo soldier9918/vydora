@@ -428,6 +428,13 @@
       "when": 1795194934883,
       "tag": "0060_community_require_youtube_connection",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1795434889484,
+      "tag": "0061_announcements",
+      "breakpoints": true
     }
   ]
 }

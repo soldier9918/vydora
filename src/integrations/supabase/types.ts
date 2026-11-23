@@ -74,6 +74,51 @@ export type Database = {
         }
         Relationships: []
       }
+      announcements: {
+        Row: {
+          allow_dismiss: boolean
+          audience: string
+          created_at: string
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          link_text: string | null
+          link_url: string | null
+          message: string
+          starts_at: string | null
+          tone: string
+          updated_at: string
+        }
+        Insert: {
+          allow_dismiss?: boolean
+          audience?: string
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          link_text?: string | null
+          link_url?: string | null
+          message: string
+          starts_at?: string | null
+          tone?: string
+          updated_at?: string
+        }
+        Update: {
+          allow_dismiss?: boolean
+          audience?: string
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          link_text?: string | null
+          link_url?: string | null
+          message?: string
+          starts_at?: string | null
+          tone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       app_flags: {
         Row: {
           enabled: boolean
@@ -1173,11 +1218,46 @@ export type Database = {
         Args: { _admin: string; _details: Json }
         Returns: number
       }
+      active_announcements: {
+        Args: never
+        Returns: {
+          allow_dismiss: boolean
+          id: string
+          link_text: string
+          link_url: string
+          message: string
+          tone: string
+          updated_at: string
+        }[]
+      }
       admin_adjust_credits: {
         Args: { _amount: number; _note: string; _user: string }
         Returns: undefined
       }
       admin_adjust_test_credits: { Args: { _amount: number }; Returns: number }
+      admin_announcements: {
+        Args: never
+        Returns: {
+          allow_dismiss: boolean
+          audience: string
+          created_at: string
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          link_text: string | null
+          link_url: string | null
+          message: string
+          starts_at: string | null
+          tone: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "announcements"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       admin_autopilot_queue: { Args: never; Returns: Json }
       admin_community: { Args: never; Returns: Json }
       admin_community_moderate: {
@@ -1212,6 +1292,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_delete_announcement: { Args: { _id: string }; Returns: undefined }
       admin_feedback: {
         Args: never
         Returns: {
@@ -1246,6 +1327,25 @@ export type Database = {
       }
       admin_overview: { Args: never; Returns: Json }
       admin_retry_autopilot_plan: { Args: { _plan: string }; Returns: boolean }
+      admin_save_announcement: {
+        Args: {
+          _allow_dismiss: boolean
+          _audience: string
+          _ends_at: string
+          _id: string
+          _is_active: boolean
+          _link_text: string
+          _link_url: string
+          _message: string
+          _starts_at: string
+          _tone: string
+        }
+        Returns: string
+      }
+      admin_set_announcement_active: {
+        Args: { _active: boolean; _id: string }
+        Returns: undefined
+      }
       admin_set_autopilot_launch: {
         Args: { _enabled: boolean }
         Returns: boolean
