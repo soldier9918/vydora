@@ -1,3 +1,4 @@
+import { reportConversion } from "@/lib/googleAds";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -59,8 +60,10 @@ export default function Auth() {
     setBusy(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
+        const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
         if (error) throw error;
+        // An existing email returns no identities: only a newly created account counts.
+        if (data.user && (data.user.identities?.length ?? 0) > 0) void reportConversion("signup", data.user.id);
         setSentKind("signup");
         setSentTo(email);
       } else if (mode === "signin") {

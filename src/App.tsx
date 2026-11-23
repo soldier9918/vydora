@@ -37,6 +37,8 @@ import PostLoginRedirect from "@/components/PostLoginRedirect";
 import { LEGAL_DOCS } from "@/lib/legal";
 
 import { queryClient } from "@/lib/queryClient";
+import CookieBanner from "@/components/consent/CookieBanner";
+import GoogleAdsTracker from "@/components/consent/GoogleAdsTracker";
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -49,6 +51,8 @@ const App = () => (
           <PostLoginRedirect />
           <ScrollToTop />
           <RouteSeo />
+          <GoogleAdsTracker />
+          <CookieBanner />
           <Suspense fallback={<div className="min-h-screen" />}>
           <Routes>
             <Route path="/" element={<Landing />} />

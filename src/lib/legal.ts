@@ -88,14 +88,14 @@ export const LEGAL_DOCS: LegalDoc[] = [
         heading: "Cookies and browser storage",
         body: [
           "We store a sign-in token in your browser so you stay logged in, and remember your editor choices between visits.",
-          "We do not run advertising cookies or sell browsing profiles. See our Cookie Policy for the short version.",
+          "If you accept advertising on our cookie banner, Google Ads sets cookies so we can see which of our ads led to a sign-up or purchase. Nothing is sent to Google before you accept, and you can change your choice any time from Cookie settings in the footer. See our Cookie Policy.",
         ],
       },
       {
         id: "sharing",
         heading: "Who else sees it",
         body: [
-          "We do not sell your personal information, and we do not share it with advertisers.",
+          "We do not sell your personal information. If you accept advertising cookies, Google receives the page visited, that a sign-up or purchase happened, its value and a payment reference, to measure and improve our ads. Your email address is not sent.",
           "We share it only with the service providers who host our infrastructure and run AI generation for us, and only to the extent they need to.",
           "We may disclose information if we are legally required to, or to protect people from harm or our service from abuse.",
           "If Vydora is bought by or merged into another business, your information may transfer with it; we would tell you if that happened.",
@@ -282,7 +282,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
     blurb: "Small files that keep you signed in",
     updated: "5 November 2026",
     intro:
-      "Cookies and similar browser storage are small pieces of data saved on your device. This page explains which ones Vydora uses. We do not use advertising or tracking cookies.",
+      "Cookies and similar browser storage are small pieces of data saved on your device. This page explains which ones Vydora uses. Advertising cookies are used only if you accept them.",
     sections: [
       {
         id: "what",
@@ -314,14 +314,14 @@ export const LEGAL_DOCS: LegalDoc[] = [
         heading: "Analytics",
         body: [
           "We keep technical logs on our own servers about which features succeed or fail, so we can fix broken things.",
-          "If we ever add analytics or advertising cookies, this page will be updated first and, where the law requires it, we will ask for your consent.",
+          "We count page visits without cookies. If you accept analytics, we also measure clicks.",
         ],
       },
       {
         id: "third-party",
         heading: "Third-party cookies",
         body: [
-          "We do not embed advertising trackers or social-media pixels that follow you around the web.",
+          "Advertising (Google Ads): only if you accept, Google sets cookies to measure which of our ads lead to sign-ups and purchases. Visitors in the UK, EU, Switzerland and Canada are asked first; everyone can reject or change this in Cookie settings. See https://business.safety.google/privacy/.",
           "If you sign in with Google, Google sets its own cookies during that sign-in, under Google's own privacy policy.",
         ],
       },
@@ -329,7 +329,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
         id: "manage",
         heading: "Managing cookies",
         body: [
-          "Your browser settings let you block or clear cookies and site storage. Clearing them will sign you out of Vydora.",
+          "Use Cookie settings in the footer to change your choices at any time. Your browser settings also let you block or clear cookies and site storage. Clearing them will sign you out of Vydora.",
           "Blocking essential storage means you will not be able to sign in or reach your saved videos.",
         ],
       },

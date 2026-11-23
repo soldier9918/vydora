@@ -1,3 +1,4 @@
+import { openCookieSettings } from "@/components/consent/CookieBanner";
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/SiteHeader";
 import { LEGAL_DOCS } from "@/lib/legal";
@@ -71,6 +72,7 @@ export default function SiteFooter() {
                 <Link className="transition-colors hover:text-primary" to={`/${doc.slug}`}>{doc.title}</Link>
               </li>
             ))}
+            <li><button type="button" className="transition-colors hover:text-primary" onClick={openCookieSettings}>Cookie settings</button></li>
           </ul>
           <h3 className="mt-8 text-xs uppercase tracking-widest text-muted-foreground">Help &amp; contact</h3>
           <ul className="mt-4 space-y-2 text-sm">
