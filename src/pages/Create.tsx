@@ -45,7 +45,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
   const [style, setStyle] = useState<string>(g("style", "Cinematic"));
   const [voice, setVoice] = useState<string>(g("voice", "Kore"));
   const [tone, setTone] = useState<string>(g("tone", "engaging"));
-  const [scenes, setScenes] = useState(adMode ? String(Math.min(20, Number(g("scenes", "16")) || 16)) : g("scenes", "6"));
+  const [scenes, setScenes] = useState(adMode ? String(Math.min(20, Number(g("scenes", "16")) || 16)) : g("scenes", "5"));
   const [caption, setCaption] = useState<string>(g("caption", "typewriter"));
   const [ratio, setRatio] = useState<string>(g("ratio", DEFAULT_RATIO));
   const [quality, setQuality] = useState<string>(g("quality", DEFAULT_QUALITY));
@@ -107,6 +107,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
       if (ok) setTopic("");
       return;
     }
+    if (!creditsOk) { toast.error(`This video needs ${estCost} credits and you have ${account?.balance ?? 0}.`); return; }
     setBusy(true);
     const started = new Date(Date.now() - 5000).toISOString();
     let moved = false;
@@ -145,6 +146,10 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
       setBusy(false);
     }
   };
+
+  const estCost = estimateCredits({ websiteScenes: autoWeb ? websiteScenes(Number(scenes)).length : 0, scenes: Number(scenes), useFacts: useFacts || fromUrl || (adMode && !!url.trim()), quality });
+  // The whole video (script + every scene's image and voiceover) must be affordable before we start.
+  const creditsOk = !!onPlan || !account || account.isAdmin || account.balance >= estCost;
 
   const formEl = (
         <form onSubmit={create} className={`${onPlan ? "" : "mt-6 "}grid gap-5 rounded-xl border border-border bg-card p-6`}>
@@ -330,10 +335,11 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
           {planExtra}
           <p className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2 text-sm">
             <span className="text-muted-foreground">Estimated cost (script, images, voiceovers, quality)</span>
-            <Link to="/pricing" className="font-display font-bold text-primary hover:underline">⚡ {estimateCredits({ websiteScenes: autoWeb ? websiteScenes(Number(scenes)).length : 0, scenes: Number(scenes), useFacts: useFacts || fromUrl || (adMode && !!url.trim()), quality })} credits</Link>
+            <Link to="/pricing" className="font-display font-bold text-primary hover:underline">⚡ {estCost} credits</Link>
           </p>
+          {!creditsOk && account && <p role="alert" className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">Not enough credits: this video needs {estCost} and you have {account.balance}. Use fewer scenes or <Link to="/billing" className="font-semibold underline">add credits</Link>.</p>}
           {!pro && <p className="text-xs text-muted-foreground">Free plan: 4 narrators, up to {FREE_MAX_SCENES} scenes, 2 Minute videos and 720p. <Link to="/billing" className="text-primary underline">Subscribe to a plan</Link> to unlock every narrator and longer videos ({adMode ? "product ads up to 5 Minutes and 20 scenes" : "Creator: 20 Minutes, Pro: 60 Minutes"}, plus 1080p on Pro).</p>}
-          <Button type="submit" size="lg" disabled={busy || !lengthOk || !tierOk}>{onPlan ? (busy ? "Adding…" : "Add to plan") : busy ? "Writing your script…" : "Generate video"}</Button>
+          <Button type="submit" size="lg" disabled={busy || !lengthOk || !tierOk || !creditsOk}>{onPlan ? (busy ? "Adding…" : "Add to plan") : busy ? "Writing your script…" : "Generate video"}</Button>
         </form>
   );
   if (onPlan) return formEl;
