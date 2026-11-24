@@ -26,4 +26,5 @@
 - Per-scene movement encoded in `motion_type` (`<main>@<i>=<fx>`).
 - Community: reads via `community_gallery`, writes via `community_*` RPCs. Why: privacy.
 - /admin-kb20 sits behind AdminMfaGate (authenticator code, AAL2) on top of server has_role. Why: password alone can't open admin.
+- Failed exports are read through `admin_failed_exports`; browser reasons are bounded/redacted by `video-export`. Why: private diagnostics, no media access or changes to refunds; device-save completion cannot be observed after a browser download handoff.
 - Google Ads (`src/lib/googleAds.ts`) loads only after advertising consent (`src/lib/consent.ts`); purchase conversions come from webhook-written `credit_ledger` grants keyed by Stripe invoice id; subscription value = `paid_net_pence` (Stripe amount paid minus itemised tax) and only for `billing_reason=subscription_create`. Why: no unconsented sends, no invented, list-price or duplicate purchases.

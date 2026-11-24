@@ -14,6 +14,7 @@ import AdminCommunityPanel from "@/components/community/AdminCommunityPanel";
 import { FeedbackPanel, AutopilotQueuePanel, UserDetailSheet, HealthBar, HiddenAccountsPanel, hideUser } from "@/components/AdminTools";
 import AdminAnnouncementsPanel from "@/components/announcements/AdminAnnouncementsPanel";
 import AdminMfaGate from "@/components/AdminMfaGate";
+import AdminFailedExportsPanel from "@/components/AdminFailedExportsPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }) : "—");
@@ -157,6 +158,7 @@ export default function Admin() {
           <TabsList className="h-auto flex-wrap">
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="videos">Videos</TabsTrigger>
+            <TabsTrigger value="failed-downloads">Failed downloads</TabsTrigger>
             <TabsTrigger value="ledger">Credit activity</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="coupons">Coupons</TabsTrigger>
@@ -276,6 +278,7 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="golive"><GoLivePanel /></TabsContent>
+          <TabsContent value="failed-downloads"><AdminFailedExportsPanel /></TabsContent>
           <TabsContent value="community"><AdminCommunityPanel /></TabsContent>
           <TabsContent value="announcements"><AdminAnnouncementsPanel /></TabsContent>
           <TabsContent value="feedback"><FeedbackPanel /></TabsContent>

@@ -1,6 +1,7 @@
 import { corsHeaders, json, getUserClient, adminClient } from "../_shared/common.ts";
 import { charge, refund } from "../_shared/credits.ts";
 import { effectiveAccount } from "../_shared/account.ts";
+import { exportFailureMessage } from "../_shared/exportFailure.ts";
 import { effectiveQuality, exportFormat, exportCost, maxExportBytes, versionHash, exportDecision, RENDER_TIMEOUT_MS } from "../_shared/exports.ts";
 
 // Secure export flow: check → start (charge + signed upload) → browser renders & uploads → complete | fail (refund once).
@@ -22,7 +23,7 @@ Deno.serve(async (req) => {
       const { data: row } = await db.from("video_exports").select("*").eq("id", exportId).eq("user_id", uid).maybeSingle();
       if (!row) return json({ error: "Export not found." }, 404);
       if (action === "fail") {
-        const { data: won } = await db.from("video_exports").update({ status: "failed", refunded: true }).eq("id", row.id).eq("status", "rendering").eq("refunded", false).select("id");
+        const { data: won } = await db.from("video_exports").update({ status: "failed", refunded: true, error_message: exportFailureMessage(body.reason), failed_at: new Date().toISOString() }).eq("id", row.id).eq("status", "rendering").eq("refunded", false).select("id");
         if (won?.length) {
           await refund(uid, row.credits_charged, "refund_export");
           await db.storage.from(BUCKET).remove([row.path]);
@@ -40,7 +41,7 @@ Deno.serve(async (req) => {
       const size = Number(file.metadata?.size ?? 0);
       const paid = await isPaid(db, uid);
       if (!size || size > maxExportBytes(paid)) {
-        const { data: won } = await db.from("video_exports").update({ status: "failed", refunded: true }).eq("id", row.id).eq("status", "rendering").eq("refunded", false).select("id");
+        const { data: won } = await db.from("video_exports").update({ status: "failed", refunded: true, error_message: "The exported file was empty or too large to store.", failed_at: new Date().toISOString() }).eq("id", row.id).eq("status", "rendering").eq("refunded", false).select("id");
         await db.storage.from(BUCKET).remove([row.path]);
         if (won?.length) await refund(uid, row.credits_charged, "refund_export");
         return json({ error: "The exported file was empty or too large to store." }, 413);
@@ -111,7 +112,7 @@ Deno.serve(async (req) => {
     }
     const { data: up, error: upErr } = await db.storage.from(BUCKET).createSignedUploadUrl(path);
     if (upErr || !up) {
-      await db.from("video_exports").update({ status: "failed", refunded: true }).eq("id", id).eq("refunded", false);
+      await db.from("video_exports").update({ status: "failed", refunded: true, error_message: "Could not prepare the video upload.", failed_at: new Date().toISOString() }).eq("id", id).eq("refunded", false);
       await refund(uid, charged, "refund_export");
       throw upErr ?? new Error("no upload url");
     }
@@ -140,7 +141,7 @@ async function isPaid(db: Db, uid: string) {
 /** Abandoned renders are failed and refunded exactly once (atomic status flip). */
 async function expireStale(db: Db, videoId: string) {
   const cutoff = new Date(Date.now() - RENDER_TIMEOUT_MS).toISOString();
-  const { data: stale } = await db.from("video_exports").update({ status: "failed", refunded: true }).eq("video_id", videoId).eq("status", "rendering").eq("refunded", false).lt("created_at", cutoff).select("id, user_id, credits_charged, path");
+  const { data: stale } = await db.from("video_exports").update({ status: "failed", refunded: true, error_message: "Export timed out or the browser closed before it finished.", failed_at: new Date().toISOString() }).eq("video_id", videoId).eq("status", "rendering").eq("refunded", false).lt("created_at", cutoff).select("id, user_id, credits_charged, path");
   for (const s of stale ?? []) {
     await refund(s.user_id, s.credits_charged, "refund_export");
     if (s.path) await db.storage.from(BUCKET).remove([s.path]);

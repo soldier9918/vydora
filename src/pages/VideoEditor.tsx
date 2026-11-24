@@ -571,7 +571,7 @@ export default function VideoEditor() {
       }
       qc.invalidateQueries({ queryKey: ["export-check", id] });
     } catch (e) {
-      if (job) { await failExport(job.exportId).catch(() => {}); toast.error(`Export failed: ${(e as Error).message}. Please try again.`); }
+      if (job) { await failExport(job.exportId, e instanceof Error ? e.message : "Browser export failed").catch(() => {}); toast.error(`Export failed: ${(e as Error).message}. Please try again.`); }
       else toast.error(`Export failed: ${(e as Error).message}`);
       if (!saveFile) throw e;
     } finally {

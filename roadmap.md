@@ -12,3 +12,9 @@
 - [x] Task 11 – Social sharing
 - [x] Task 12 – Conversion
 - [x] Task 13 – Validation
+
+# Failed downloads
+- [x] Add secure admin failure report for browser exports and cloud renders.
+- [x] Capture future browser export failure reasons without changing credits or billing.
+- [x] Verify signed-in report with existing failure records, anonymous access denial and all 357 tests.
+- [ ] Visually verify the dashboard table after authenticator verification (blocked by AAL2; no bypass).

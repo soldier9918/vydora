@@ -844,6 +844,8 @@ export type Database = {
           content_type: string | null
           created_at: string
           credits_charged: number
+          error_message: string | null
+          failed_at: string | null
           format: string
           id: string
           path: string | null
@@ -860,6 +862,8 @@ export type Database = {
           content_type?: string | null
           created_at?: string
           credits_charged?: number
+          error_message?: string | null
+          failed_at?: string | null
           format: string
           id?: string
           path?: string | null
@@ -876,6 +880,8 @@ export type Database = {
           content_type?: string | null
           created_at?: string
           credits_charged?: number
+          error_message?: string | null
+          failed_at?: string | null
           format?: string
           id?: string
           path?: string | null
@@ -1299,6 +1305,24 @@ export type Database = {
         Returns: undefined
       }
       admin_delete_announcement: { Args: { _id: string }; Returns: undefined }
+      admin_failed_exports: {
+        Args: { _limit?: number }
+        Returns: {
+          created_at: string
+          credits_charged: number
+          email: string
+          error_message: string
+          failed_at: string
+          format: string
+          id: string
+          quality: string
+          refunded: boolean
+          source: string
+          title: string
+          user_id: string
+          video_id: string
+        }[]
+      }
       admin_feedback: {
         Args: never
         Returns: {
