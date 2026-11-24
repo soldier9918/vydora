@@ -113,6 +113,12 @@ Deno.serve(async (req) => {
     // Each real-website scene: the capture fee on top of the normal scene image price (no AI picture is made for it).
     const webCost = webIdx.length * (COSTS.image + COSTS.webCapture);
     const cost = COSTS.script + (useFacts || srcUrl ? COSTS.facts : 0) + webCost;
+    // Refuse up front if the balance can't cover the whole video (this script plus every scene's image and voiceover),
+    // so a video never gets half-made. Must match estimateCredits in src/lib/credits.ts.
+    const fullCost = cost + count * (COSTS.image + COSTS.voice) - webIdx.length * COSTS.image;
+    const { data: eff } = await adminClient().rpc("effective_account", { _user: auth.user.id });
+    const acc = eff as { isAdmin?: boolean; balance?: number } | null;
+    if (acc && !acc.isAdmin && (acc.balance ?? 0) < fullCost) return json({ error: `This video needs ${fullCost} credits and you have ${acc.balance ?? 0}. Use fewer scenes or add credits on the Billing page.`, code: "insufficient_credits" }, 402);
     const denied = await charge(auth.user.id, cost, "video_script");
     if (denied) return denied;
     let charged = cost;

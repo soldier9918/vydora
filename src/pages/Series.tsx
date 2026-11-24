@@ -61,6 +61,15 @@ export default function Series() {
       i < n - 1 ? `End by teasing the next episode: "${plan.episodes[i + 1].title}".` : "End by wrapping up the whole series.",
       `Keep visuals consistent across the series: ${plan.visualMotif}`,
     ].filter(Boolean).join(" ");
+    // Don't start an episode the balance can't fully pay for (script + every scene's image and voiceover).
+    const { data: u } = await supabase.auth.getUser();
+    const { data: eff } = u.user ? await supabase.rpc("effective_account", { _user: u.user.id }) : { data: null };
+    const acc = eff as { isAdmin?: boolean; balance?: number } | null;
+    if (acc && !acc.isAdmin && (acc.balance ?? 0) < perEpisode) {
+      const msg = `Part ${i + 1} needs ${perEpisode} credits and you have ${acc.balance ?? 0}. Add credits or use fewer scenes.`;
+      toast.error(msg);
+      throw new Error(msg);
+    }
     setCreating(i);
     try {
       const { videoId } = await generateScript({ topic: brief.slice(0, 1500), style, voice, tone, sceneCount: Number(scenes), captionStyle: "typewriter", aspectRatio: "16:9", targetSeconds: Number(length) });

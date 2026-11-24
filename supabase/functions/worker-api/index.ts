@@ -85,6 +85,13 @@ async function autopilotClaim(db: DB, worker: string) {
   if (!run.video_id) {
     const st = (plan.settings ?? {}) as Record<string, unknown>;
     if (Number(st.length) > 20 * 60) { await finishRun(db, run, "failed", "Autopilot videos can be up to 20 Minutes long. Remove this plan and plan a shorter one."); return { run: null }; }
+    // Only start when the balance covers the whole video (script, every scene's image and voiceover, auto title/thumbnail),
+    // so a run never spends part of the credits and then stops half-made. Must match src/lib/credits.ts.
+    const n = Number(st.scenes) || 6;
+    const need = 2 + (st.useFacts === true ? 2 : 0) + n * (3 + 2) + (st.meta === "auto" ? 1 + 5 : 0);
+    const { data: eff } = await db.rpc("effective_account", { _user: run.user_id });
+    const acc = eff as { isAdmin?: boolean; balance?: number } | null;
+    if (acc && !acc.isAdmin && (acc.balance ?? 0) < need) { await finishRun(db, run, "skipped", `Skipped: not enough credits (needs ${need}, you have ${acc.balance ?? 0}). Top up and press Retry.`); return { run: null }; }
     return { run: { id: run.id }, token, tasks: [{ fn: "generate-script", body: {
       topic: plan.topic, style: st.style, voice: st.voice, tone: st.tone, sceneCount: Number(st.scenes) || 6, captionStyle: st.caption,
       aspectRatio: st.ratio, quality: st.quality, targetSeconds: Number(st.length) || undefined, accent: st.accent,
