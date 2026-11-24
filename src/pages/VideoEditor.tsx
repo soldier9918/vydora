@@ -38,7 +38,7 @@ import { VIDEO_LENGTHS } from "@/lib/durations";
 import { duplicateVideo, useAccount, isReadOnlyAccount } from "@/lib/account";
 import { scenesAllowedForPlan } from "@/lib/tiers";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function LookSelect<T extends string>({ label, value, options, onChange, swatch, disabled }: {
@@ -675,6 +675,21 @@ export default function VideoEditor() {
     } finally {
       setSceneBusy(false);
     }
+  };
+
+  const deleteScene = async (scene: Scene) => {
+    const all = data?.scenes ?? [];
+    if (all.length <= 1) return;
+    const n = all.findIndex((x) => x.id === scene.id) + 1;
+    const ok = await confirmDialog({ title: `Delete Scene ${n}?`, message: "This removes the scene, its picture and its voiceover from this video. The scenes after it move up to fill the gap. This can't be undone.", confirmText: "Delete scene", destructive: true });
+    if (!ok) return;
+    setPlaying(null);
+    const { error } = await supabase.from("video_scenes").delete().eq("id", scene.id);
+    if (error) return toast.error("Couldn't delete the scene.");
+    const rest = all.filter((x) => x.id !== scene.id);
+    await Promise.all(rest.map((x, i) => x.position === i ? null : supabase.from("video_scenes").update({ position: i }).eq("id", x.id)));
+    await qc.invalidateQueries({ queryKey: ["video", id] });
+    toast.success(`Scene ${n} deleted.`);
   };
 
   const remove = async () => {
@@ -1547,6 +1562,9 @@ export default function VideoEditor() {
                   )}
                   <Progress value={playing === i ? progress * 100 : 0} className="h-1.5 flex-1" />
                   <span className="shrink-0 whitespace-nowrap text-xs tabular-nums text-muted-foreground">{formatClock(playing === i ? progress * secOf(s) : 0)} / {formatClock(secOf(s))}</span>
+                  <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive" aria-label={`Delete scene ${i + 1}`} title={scenes.length <= 1 ? "A video needs at least one scene" : `Delete scene ${i + 1}`} disabled={scenes.length <= 1} onClick={() => deleteScene(s)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
                 {isWebAd && urlOpen === s.id && (
                   <form className="mt-3 flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/30 p-3" onSubmit={(e) => { e.preventDefault(); if (urlText.trim()) { runWebsite(s, "url", urlText.trim()); setUrlOpen(null); } }}>
