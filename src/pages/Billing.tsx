@@ -4,13 +4,15 @@ import BillingHistory from "@/components/BillingHistory";
 import InviteEarn from "@/components/InviteEarn";
 import SubscriptionPlans from "@/components/SubscriptionPlans";
 import TopUpSettings from "@/components/TopUpSettings";
+import { CurrencyPreviewProvider, CurrencySelector } from "@/components/CurrencyPreview";
 
 export default function Billing() {
   return (
-    <div className="min-h-screen">
+    <CurrencyPreviewProvider><div className="min-h-screen">
       <SiteHeader />
       <main className="container max-w-3xl py-12">
         <h1 className="text-4xl font-extrabold">Billing</h1>
+        <CurrencySelector />
         <BillingHistory part="summary" />
         <SubscriptionPlans />
         <TopUpSettings />
@@ -18,6 +20,6 @@ export default function Billing() {
         <BillingHistory />
       </main>
       <SiteFooter />
-    </div>
+    </div></CurrencyPreviewProvider>
   );
 }

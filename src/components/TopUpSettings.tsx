@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { TOP_UP_AMOUNTS, autoTopUpSchema, creditsFor, gbpAmount } from "@/lib/topups";
+import { ConvertedPrice } from "@/components/CurrencyPreview";
 
 const initial = { enabled: false, threshold: "20", amount: "10", limitEnabled: false, monthlyLimit: "50" };
 const money = (value: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 2 }).format(value);
@@ -108,6 +109,7 @@ export default function TopUpSettings() {
             {!purchase.success && <p role="alert" className="text-sm text-destructive">{purchase.error.issues[0]?.message}</p>}
           </div>}
           <div className="mt-5 flex items-center justify-between border-t border-border pt-4"><span>Top-up total</span><strong className="text-xl text-primary">{purchase.success ? money(purchase.data) : "—"}</strong></div>
+          {purchase.success && <div className="text-right"><ConvertedPrice gbp={purchase.data} /></div>}
           <div className="mt-1 flex items-center justify-between text-sm text-muted-foreground"><span>Credits you'll get</span><strong>{purchase.success ? credits : "—"}</strong></div>
           <Button className="mt-4 w-full" disabled={!purchase.success || paying} onClick={pay}>
             {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}

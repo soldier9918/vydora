@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useAccount, STARTER_CREDITS } from "@/lib/account";
 import { FREE_VOICES, FREE_MAX_SECONDS, FREE_MAX_SCENES } from "@/lib/tiers";
+import { ConvertedPrice } from "@/components/CurrencyPreview";
 
 const FREE_MINUTES = FREE_MAX_SECONDS / 60;
 
@@ -113,6 +114,7 @@ export default function SubscriptionPlans() {
           <div key={p.name} className={`flex flex-col rounded-xl border bg-card p-6 ${p.featured ? "border-primary" : "border-border"}`}>
             <p className="font-semibold text-muted-foreground">{p.name}</p>
             <p className="mt-2 font-display text-3xl font-extrabold">{p.price}<span className="text-base font-semibold text-muted-foreground">{p.name === "Free" ? "" : "/mo"}</span></p>
+            <ConvertedPrice gbp={p.name === "Creator" ? 19 : p.name === "Pro" ? 49 : 0} monthly={p.name !== "Free"} />
             <p className="mt-1 font-semibold text-primary">{p.credits}</p>
             <ul className="mt-4 mb-5 grid flex-1 content-start gap-2 text-sm">
               {p.perks.map((k) => <li key={k} className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" />{k}</li>)}
@@ -124,7 +126,7 @@ export default function SubscriptionPlans() {
               : cancelAt ? <Button className="mt-auto w-full" variant="outline" disabled>Cancellation scheduled</Button>
               : pendingName === p.name ? <Button className="mt-auto w-full" variant="outline" disabled>Downgrade scheduled</Button>
               : <Button className="mt-auto w-full" variant={p.featured ? "default" : "outline"} disabled={!!busy}
-                  onClick={() => active ? go("customer-portal", "portal") : go("create-checkout", p.tier!, { plan: p.tier })}>
+                  onClick={() => { if (active) go("customer-portal", "portal"); else if (p.tier) go("create-checkout", p.tier, { plan: p.tier }); }}>
                   {busy === p.tier && <Loader2 className="h-4 w-4 animate-spin" />}{active ? `Switch to ${p.name}` : `Subscribe to ${p.name}`}</Button>
             )}
           </div>

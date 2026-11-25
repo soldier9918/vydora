@@ -18,3 +18,7 @@
 - [x] Capture future browser export failure reasons without changing credits or billing.
 - [x] Verify signed-in report with existing failure records, anonymous access denial and all 357 tests.
 - [ ] Visually verify the dashboard table after authenticator verification (blocked by AAL2; no bypass).
+
+# Currency previews
+- [x] Add GBP, USD, EUR, CAD, AUD and INR selector on Pricing and Billing with current exchange rates.
+- [x] Keep GBP checkout, credit amounts and historical invoices unchanged; 41 relevant tests passed, all currencies and signed-in top-up previews verified on desktop/mobile without starting a payment.

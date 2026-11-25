@@ -7,6 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { CREDIT_COSTS, costBreakdown, estimateCredits } from "@/lib/credits";
 import { MIN_SCENES, MAX_SCENES } from "@/lib/sceneCount";
+import { CurrencyPreviewProvider, CurrencySelector, ConvertedPrice } from "@/components/CurrencyPreview";
 
 const MENU = [
   { label: "Write the script", credits: CREDIT_COSTS.script, note: "Once per video" },
@@ -36,11 +37,12 @@ export default function Pricing() {
   const total = estimateCredits(input);
 
   return (
-    <div className="min-h-screen">
+    <CurrencyPreviewProvider><div className="min-h-screen">
       <SiteHeader />
       <main className="container max-w-5xl py-12">
         <h1 className="text-4xl font-extrabold md:text-5xl">What things cost</h1>
         <p className="mt-3 max-w-2xl text-muted-foreground">Vydora uses credits. Each AI step uses a few; everything that runs in your browser is free. You only pay for what you make.</p>
+        <CurrencySelector />
 
         <section className="mt-10 grid gap-6 lg:grid-cols-2">
           <div className="rounded-xl border border-border bg-card p-6">
@@ -88,6 +90,7 @@ export default function Pricing() {
                 <>
                   <p className="font-semibold text-muted-foreground">{p.name}</p>
                   <p className="mt-2 font-display text-3xl font-extrabold">{p.price}</p>
+                  <ConvertedPrice gbp={p.name === "Creator" ? 19 : p.name === "Pro" ? 49 : 0} monthly={p.name !== "Free"} />
                   <p className="mt-1 font-semibold text-primary">{p.credits}</p>
                   <p className="mt-3 text-sm text-muted-foreground">{p.desc}</p>
                   {p.to && (
@@ -130,6 +133,6 @@ export default function Pricing() {
         <div className="mt-12 text-center"><Button size="lg" asChild><Link to="/create">Make a video</Link></Button></div>
       </main>
       <SiteFooter />
-    </div>
+    </div></CurrencyPreviewProvider>
   );
 }
