@@ -1393,6 +1393,7 @@ export type Database = {
         Args: { _hidden: boolean; _user: string }
         Returns: undefined
       }
+      admin_usage_costs: { Args: { _days?: number }; Returns: Json }
       admin_user_detail: { Args: { _user: string }; Returns: Json }
       admin_users: {
         Args: never
