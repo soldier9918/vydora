@@ -9,8 +9,8 @@ export const INDEPENDENCE_DISCLAIMER = "YouTube is a trademark of Google LLC. Vy
 export const AUTH_PAGE = { title: "Sign In or Create Account | Vydora", description: "Sign in to your Vydora account, or create a free one, to make AI videos. Vydora is an independent video creation platform." };
 
 export const PUBLIC_PAGES: Record<string, { title: string; description: string }> = {
-  "/": { title: "AI YouTube Video Generator & Faceless Video Maker | Vydora", description: "Create YouTube videos with AI. Vydora writes the script, makes scene visuals and records the voiceover, then exports a YouTube-ready video. Free monthly credits." },
-  "/pricing": { title: "Pricing & Plans – AI YouTube Video Maker | Vydora", description: "Compare Vydora plans: Free with 30 credits a month, Creator £19/month with 600 credits and Pro £49/month with 2,000 credits. Top up from £5." },
+  "/": { title: "AI YouTube Video Generator & Faceless Video Maker | Vydora", description: "Create YouTube videos with AI. Vydora writes scripts, makes scene visuals and records voiceovers. AI generation starts with a £5 top-up or subscription." },
+  "/pricing": { title: "Pricing & Plans – AI YouTube Video Maker | Vydora", description: "AI generation starts with a £5 top-up or subscription. Compare Creator £19/month with 600 credits and Pro £49/month with 2,000 credits. No free AI generations." },
   "/feedback": { title: "Send Feedback | Vydora", description: "Tell the Vydora team what you love, what's broken, or what the AI video maker should do next." },
   "/privacy": { title: "Privacy Policy | Vydora", description: "What Vydora collects, how it is used and how your private video files are kept safe." },
   "/terms": { title: "Terms of Service | Vydora", description: "The terms you agree to when you use Vydora, the AI YouTube video maker, including plans, credits and your content." },

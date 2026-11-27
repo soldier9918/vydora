@@ -21,7 +21,7 @@ const MENU = [
 ];
 
 const PLANS = [
-  { name: "Free", price: "£0", credits: "30 credits / month", desc: "Enough for a short video each month to try things out." },
+  { name: "Free", price: "£0", credits: "0 free AI generations", desc: "Create an account for free. Start generating with a £5 top-up or a subscription." },
   { name: "Creator", price: "£19/mo", credits: "600 credits / month", desc: "About 15–18 standard videos, or 3 fully animated.", to: "/billing#subscriptions" },
   { name: "Pro", price: "£49/mo", credits: "2,000 credits / month", desc: "About 60 standard videos, or 10–12 fully animated.", to: "/billing#subscriptions" },
 ];
@@ -122,7 +122,7 @@ export default function Pricing() {
             ["What happens if I run out?", "AI steps pause until you top up. You can still view and download your videos for free."],
             ["Are estimates exact?", "They're close guides based on your settings. Redos and extra scenes add to the total."],
             ["Do I own the videos I make?", "You can download and publish your videos on YouTube or anywhere else. Downloads never carry a watermark."],
-            ["Do Free credits roll over?", "Yes. Free accounts get 30 credits each month, added on top of what you already have."],
+            ["Can I generate a video for free?", "No. AI generation requires a £5-or-more top-up or a paid subscription. Existing credits remain in your account; new free monthly credits are no longer granted."],
             ["Do top-ups unlock paid features?", "No. Top-ups add credits (25 per £1, from £5). Longer videos and 1080p come with Creator or Pro."],
             ["Can I cancel anytime?", "Yes. Cancel from Billing and keep your plan until the end of the period you paid for."],
           ].map(([q, a]) => (

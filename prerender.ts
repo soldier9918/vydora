@@ -38,14 +38,14 @@ export function bodyFor(route: string): string {
       `<h2>What is the Community Showcase?</h2><p>The showcase is a gallery of YouTube videos that creators made with Vydora and chose to share. Every video plays through YouTube's own player, and each card links to the creator's YouTube channel so you can subscribe and watch more.</p>` +
       `<h2>Browse by category</h2><ul><li>Horror &amp; Mystery</li><li>History &amp; Documentaries</li><li>Education</li><li>Science &amp; Technology</li><li>Storytelling</li><li>Finance &amp; Business</li><li>YouTube Shorts</li><li>Entertainment</li></ul>` +
       `<h2>Submit your video</h2><p>Signed-in Vydora creators can submit a public YouTube video for free. Our team reviews every submission before it appears, and you can remove your video or withdraw consent at any time.</p>` +
-      `<p><a href="/auth?mode=signup">Start making videos free</a> · <a href="/guides">Creator guides</a> · <a href="/pricing">Plans and pricing</a></p>`;
+      `<p><a href="/auth?mode=signup">Create an account</a> · <a href="/guides">Creator guides</a> · <a href="/pricing">Plans and pricing</a></p>`;
   } else if (route === "/guides") {
     main = `<h1>YouTube creator guides</h1><p>${esc(page.description)}</p><ul>${GUIDES.map((x) => `<li><a href="/guides/${x.slug}">${esc(x.h1)}</a> – ${esc(x.description)}</li>`).join("")}</ul>`;
   } else if (route === "/") {
     main = `<h1>AI YouTube video generator &amp; faceless video maker</h1><p>Type an idea or paste an article link. Vydora writes the script, creates a picture for every scene, records an AI voiceover and exports a YouTube-ready video. No camera, no editing skills needed.</p>` +
       `<h2>How it works</h2><ol><li>Describe your video or paste a link.</li><li>Vydora writes the script and makes the scenes and narration.</li><li>Preview, tweak and export or publish to YouTube.</li></ol>` +
       `<h2>Features</h2><ul>${FEATURE_PAGES.map((x) => `<li><a href="/${x.slug}">${esc(x.eyebrow)}</a> – ${esc(x.description)}</li>`).join("")}</ul>` +
-      `<h2>Plans</h2><p>Free: 30 credits every month. Creator: £19/month with 600 credits. Pro: £49/month with 2,000 credits. <a href="/pricing">Compare plans</a>.</p>` +
+      `<h2>Plans</h2><p>Free accounts have no free AI generations. Start with a £5 top-up or subscription. Creator: £19/month with 600 credits. Pro: £49/month with 2,000 credits. <a href="/pricing">Compare plans</a>.</p>` +
       `<h2>Who uses Vydora</h2><p>Beginners and faceless channels making history, true crime, science, finance, horror stories and explainer videos.</p>`;
   } else {
     main = `<h1>${esc(page.title.split(/ [–|] /)[0])}</h1><p>${esc(page.description)}</p>`;

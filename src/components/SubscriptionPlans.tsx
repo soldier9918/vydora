@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { useAccount, STARTER_CREDITS } from "@/lib/account";
+import { useAccount } from "@/lib/account";
 import { FREE_VOICES, FREE_MAX_SECONDS, FREE_MAX_SCENES } from "@/lib/tiers";
 import { ConvertedPrice } from "@/components/CurrencyPreview";
 
@@ -14,8 +14,9 @@ const PLANS = [
   {
     name: "Free",
     price: "£0",
-    credits: `${STARTER_CREDITS} credits / month`,
+    credits: "0 free AI generations",
     perks: [
+      "Start with a £5 top-up or subscription",
       `${FREE_VOICES.length} narrators`,
       `Videos up to ${FREE_MINUTES} minutes · ${FREE_MAX_SCENES} scenes`,
       "720p HD · music, SFX & captions free",

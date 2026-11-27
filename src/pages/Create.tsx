@@ -55,6 +55,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
   const { data: account } = useAccount();
   const pro = account?.pro ?? false;
   const tier = account?.tier ?? "free";
+  const generationAllowed = account?.canGenerate === true;
   const lengthAllowedForTier = (sec: number, _p: boolean) => lengthAllowedForPlan(sec, tier);
   const qualityAllowedForTier = (q: string, _p: boolean) => qualityAllowedForPlan(q, tier);
   const tierOk = voiceAllowed(voice, pro) && lengthAllowedForTier(Number(length), pro) && scenesAllowedForPlan(Number(scenes), tier) && qualityAllowedForTier(quality, pro);
@@ -89,6 +90,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
   const [suggesting, setSuggesting] = useState(false);
 
   const suggest = async () => {
+    if (!generationAllowed) { toast.error("Top up £5 or subscribe before using AI."); return; }
     setSuggesting(true);
     try {
       const { idea } = await suggestTopic(topic);
@@ -109,6 +111,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
       if (ok) setTopic("");
       return;
     }
+    if (!generationAllowed) { toast.error("Top up £5 or subscribe before generating a video."); return; }
     if (!creditsOk) { toast.error(`This video needs ${estCost} credits and you have ${account?.balance ?? 0}.`); return; }
     setAiDown(false);
     setBusy(true);
@@ -239,7 +242,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
               </div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="topic">Video idea</Label>
-                <Button type="button" variant="outline" size="sm" onClick={suggest} disabled={suggesting || busy}>
+                <Button type="button" variant="outline" size="sm" onClick={suggest} disabled={suggesting || busy || !generationAllowed}>
                   <Sparkles className="h-4 w-4" />
                   {suggesting ? "Thinking…" : "Suggest an idea"}
                 </Button>
@@ -347,7 +350,17 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
             <span className="text-muted-foreground">Estimated cost (script, images, voiceovers, quality)</span>
             <Link to="/pricing" className="font-display font-bold text-primary hover:underline">⚡ {estCost} credits</Link>
           </p>
-          {!creditsOk && account && (
+          {!onPlan && account && !generationAllowed && (
+            <div role="alert" className="rounded-lg border border-primary/50 bg-primary/10 p-4 text-sm">
+              <p className="font-semibold">Top up or subscribe to create your first video.</p>
+              <p className="mt-1 text-muted-foreground">No free AI generations. Get 125 credits for £5 — no subscription needed. Existing credits and videos stay in your account.</p>
+              <div className="mt-3 flex flex-wrap gap-3">
+                <Button asChild size="sm"><Link to="/billing?topup=5#top-ups">Top up £5</Link></Button>
+                <Button asChild size="sm" variant="outline"><Link to="/billing#subscriptions">View subscriptions</Link></Button>
+              </div>
+            </div>
+          )}
+          {!creditsOk && account && generationAllowed && (
             <div role="alert" className="rounded-lg border border-primary/50 bg-primary/10 p-4 text-sm">
               <p className="text-foreground">Not enough credits: this video needs {estCost} and you have {account.balance}.</p>
               <p className="mt-1 font-semibold text-primary">Get 125 credits for £5 — enough for about 4 more videos. No subscription.</p>
@@ -358,7 +371,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
             </div>
           )}
           {!pro && <p className="text-xs text-muted-foreground">Free plan: 4 narrators, up to {FREE_MAX_SCENES} scenes, 2 Minute videos and 720p. <Link to="/billing" className="text-primary underline">Subscribe to a plan</Link> to unlock every narrator and longer videos ({adMode ? "product ads up to 5 Minutes and 20 scenes" : "Creator: 20 Minutes, Pro: 60 Minutes"}, plus 1080p on Pro).</p>}
-          <Button type="submit" size="lg" disabled={busy || !lengthOk || !tierOk || !creditsOk}>{onPlan ? (busy ? "Adding…" : "Add to plan") : busy ? "Writing your script…" : "Generate video"}</Button>
+          <Button type="submit" size="lg" disabled={busy || !lengthOk || !tierOk || !creditsOk || (!onPlan && !generationAllowed)}>{onPlan ? (busy ? "Adding…" : "Add to plan") : busy ? "Writing your script…" : "Generate video"}</Button>
         </form>
   );
   if (onPlan) return formEl;

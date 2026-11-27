@@ -1,4 +1,4 @@
-import { charge, refund, COSTS, websiteScenes } from "../_shared/credits.ts";
+import { charge, refund, COSTS, websiteScenes, requireGeneration } from "../_shared/credits.ts";
 import { voiceAllowed, scenesAllowedForPlan, scenesLimitMessage, lengthAllowedForPlan, qualityAllowedForPlan } from "../_shared/tiers.ts";
 import { effectiveAccount } from "../_shared/account.ts";
 import { createOpenAI } from "npm:@ai-sdk/openai@3";
@@ -66,6 +66,8 @@ Deno.serve(async (req) => {
   try {
     const auth = await getCaller(req);
     if (!auth) return json({ error: "Please sign in first." }, 401);
+    const blocked = await requireGeneration(auth.user.id);
+    if (blocked) return blocked;
 
     const { topic: topicIn, style = "Documentary", voice = "Kore", sceneCount = 6, captionStyle = "typewriter", aspectRatio = "16:9", quality = "720p", targetSeconds, useFacts, tone: toneIn, sourceUrl, narrationSpeed, accent: accentIn, ad, webVisuals } = await req.json();
     const adMode = !!ad && typeof ad === "object";

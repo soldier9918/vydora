@@ -1,6 +1,6 @@
 import type { PlanTier } from "@/lib/tiers";
 
-export type EffectiveAccount = { isAdmin: boolean; adminAccess: boolean; testMode: PlanTier | null; tier: PlanTier; pro: boolean; balance: number };
+export type EffectiveAccount = { isAdmin: boolean; adminAccess: boolean; testMode: PlanTier | null; tier: PlanTier; pro: boolean; balance: number; canGenerate?: boolean };
 export function parseEffectiveAccount(value: unknown): EffectiveAccount {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Couldn't check your account");
   const v = value as Record<string, unknown>;

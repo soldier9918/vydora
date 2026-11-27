@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-export const STARTER_CREDITS = 30;
+export const STARTER_CREDITS = 0;
 export const REFERRAL_BONUS = 50;
 const PAID_REASONS = ["purchase", "topup", "subscription"];
 
@@ -36,8 +36,6 @@ export function useAccount() {
     refetchOnWindowFocus: "always",
     queryFn: async () => {
       if (!user) throw new Error("Please sign in first");
-      // Free accounts get +30 credits each month; the server decides eligibility.
-      await supabase.rpc("claim_monthly_free_credits");
       const { data: liveFlag } = await supabase.rpc("stripe_livemode");
       const live = liveFlag === true;
       const [{ data: acct }, { data: ledger }, effective, { data: sub }] = await Promise.all([

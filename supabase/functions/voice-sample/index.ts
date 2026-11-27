@@ -1,6 +1,7 @@
 // Free narrator previews. Each voice+accent sample is generated once and cached in storage,
 // so repeated listens never call the AI again and never cost credits.
 import { corsHeaders, GATEWAY_URL, json, getUserClient, adminClient, gatewayError } from "../_shared/common.ts";
+import { requireGeneration } from "../_shared/credits.ts";
 
 const SPEECH_MODEL = "google/gemini-3.1-flash-tts-preview";
 const VOICES = new Set(["Kore","Aoede","Leda","Callirrhoe","Autonoe","Despina","Erinome","Laomedeia","Sulafat","Vindemiatrix","Puck","Charon","Fenrir","Orus","Enceladus","Iapetus","Umbriel","Algieba","Algenib","Rasalgethi","Achernar","Alnilam","Gacrux","Pulcherrima","Achird","Zubenelgenubi","Sadachbia","Sadaltager","Schedar","Zephyr"]);
@@ -25,6 +26,8 @@ Deno.serve(async (req) => {
 
     const { data: existing } = await store.list("samples", { search: `${voice}_${acc}.wav` });
     if (!existing?.some((f) => f.name === `${voice}_${acc}.wav`)) {
+      const blocked = await requireGeneration(auth.user.id);
+      if (blocked) return blocked;
       const apiKey = Deno.env.get("LOVABLE_API_KEY");
       if (!apiKey) return json({ error: "Voice previews are unavailable right now." }, 500);
       const res = await fetch(`${GATEWAY_URL}/v1/audio/speech`, {

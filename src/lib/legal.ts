@@ -354,7 +354,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
         id: "free",
         heading: "Free use",
         body: [
-          "Vydora can be tried without paying. If you are not sure a paid plan suits you, make a video first and see whether the output works for you.",
+          "Creating an account is free, but AI generation requires a top-up of at least £5 or a paid subscription. There are no free AI video generations. Existing account credits and videos are retained.",
         ],
       },
       {

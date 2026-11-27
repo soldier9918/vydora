@@ -58,7 +58,7 @@ export default function FeatureLanding({ page }: { page: FeaturePage }) {
 
         <section className="mt-14 rounded-2xl border border-border bg-card p-8 text-center">
           <h2 className="text-2xl font-bold">Ready to make your first video?</h2>
-          <p className="mt-2 text-muted-foreground">Free plan includes 30 credits every month. <Link className="text-primary hover:underline" to="/pricing">See pricing</Link>.</p>
+          <p className="mt-2 text-muted-foreground">AI generation starts with a £5 top-up or a subscription. <Link className="text-primary hover:underline" to="/pricing">See pricing</Link>.</p>
           <div className="mt-6"><Button size="lg" asChild><Link to={page.cta.to}>{page.cta.label}</Link></Button></div>
         </section>
 

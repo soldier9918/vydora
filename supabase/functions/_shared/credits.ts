@@ -3,6 +3,16 @@ import { adminClient, json } from "./common.ts";
 // Must match src/lib/credits.ts CREDIT_COSTS.
 export const COSTS = { script: 2, facts: 2, image: 3, voice: 2, animate: 25, thumbnail: 5, seo: 1, webCapture: 5 } as const;
 
+export const PAYMENT_REQUIRED = "AI generation requires a £5 top-up or a paid subscription. Get 125 credits for £5 on the Billing page.";
+const paymentRequired = () => json({ error: PAYMENT_REQUIRED, code: "payment_required" }, 402);
+
+/** Check before uncharged AI helpers or generating an uncached narrator sample. */
+export async function requireGeneration(userId: string): Promise<Response | null> {
+  const { data, error } = await adminClient().rpc("can_generate_ai", { _user: userId });
+  if (error) return json({ error: "Couldn't check your account. Please try again." }, 500);
+  return data === true ? null : paymentRequired();
+}
+
 /** Must match src/lib/credits.ts websiteScenes. */
 export function websiteScenes(count: number): number[] {
   if (count < 4) return [count - 1].filter((n) => n >= 0);
@@ -14,6 +24,7 @@ export async function charge(userId: string, amount: number, reason: string): Pr
   if (amount <= 0) return null;
   const { data, error } = await adminClient().rpc("spend_credits", { _user: userId, _amount: amount, _reason: reason });
   if (error) { console.error("spend_credits", error); return json({ error: "Couldn't check your credit balance. Please try again." }, 500); }
+  if (data === "payment_required") return paymentRequired();
   if (data === "insufficient") return json({ error: `You need ${amount} credits for this. Top up or subscribe on the Billing page.`, code: "insufficient_credits" }, 402);
   return null;
 }

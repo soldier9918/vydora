@@ -22,3 +22,8 @@
 # Currency previews
 - [x] Add GBP, USD, EUR, CAD, AUD and INR selector on Pricing and Billing with current exchange rates.
 - [x] Keep GBP checkout, credit amounts and historical invoices unchanged; 41 relevant tests passed, all currencies and signed-in top-up previews verified on desktop/mobile without starting a payment.
+
+# Paid generation
+- [x] Require verified payment before AI calls, including free helpers, without altering existing balances or subscriptions.
+- [x] Stop future free credit grants and update pricing and creation prompts.
+- [x] Test payment eligibility and verify an unpaid account is blocked before any AI spend; 393 tests passed, £5 Billing offer verified without initiating a payment.

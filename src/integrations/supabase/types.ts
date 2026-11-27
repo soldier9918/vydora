@@ -1428,8 +1428,17 @@ export type Database = {
           voice: string
         }[]
       }
+      ai_payment_eligible: {
+        Args: {
+          _admin: boolean
+          _paid_subscription: boolean
+          _topup_credits: number
+        }
+        Returns: boolean
+      }
       autopilot_access: { Args: never; Returns: Json }
       autopilot_cloud_eligible: { Args: { _user: string }; Returns: boolean }
+      can_generate_ai: { Args: { _user: string }; Returns: boolean }
       can_mutate_project: { Args: { _user_id: string }; Returns: boolean }
       cancel_render_job: { Args: { _job: string }; Returns: boolean }
       claim_autopilot_run: {

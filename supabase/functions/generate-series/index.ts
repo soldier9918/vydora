@@ -1,6 +1,7 @@
 import { createOpenAI } from "npm:@ai-sdk/openai@3";
 import { streamText } from "npm:ai@6";
 import { corsHeaders, GATEWAY_URL, json, getUserClient, aiSdkError } from "../_shared/common.ts";
+import { requireGeneration } from "../_shared/credits.ts";
 
 const schema = {
   type: "object", additionalProperties: false, required: ["title", "logline", "visualMotif", "episodes"],
@@ -16,6 +17,8 @@ Deno.serve(async (req) => {
   try {
     const auth = await getUserClient(req);
     if (!auth) return json({ error: "Please sign in first." }, 401);
+    const blocked = await requireGeneration(auth.user.id);
+    if (blocked) return blocked;
     const body = await req.json().catch(() => ({}));
     const topic = typeof body.topic === "string" ? body.topic.trim().slice(0, 300) : "";
     const parts = body.parts === 5 ? 5 : 3;

@@ -34,9 +34,9 @@ export const FEATURE_PAGES: FeaturePage[] = [
     faqs: [
       ["Do I need editing skills?", "No. Everything happens in your browser, and you edit scenes by typing."],
       ["Can I make long and short videos?", "Yes. Make standard landscape videos, then remix any of them into a vertical Short at no extra cost."],
-      ["Is there a free plan?", "Yes. Free accounts get 30 credits every month, enough to try a short video."],
+      ["Is there a free plan?", "Accounts are free, but there are no free AI generations. Start with a £5 top-up or a paid subscription."],
     ],
-    cta: { label: "Start your channel free", to: "/auth?mode=signup" },
+    cta: { label: "Start your channel", to: "/auth?mode=signup" },
   },
   {
     slug: "article-to-video", eyebrow: "Article to video",
@@ -91,7 +91,7 @@ export const FEATURE_PAGES: FeaturePage[] = [
       ["Is there a watermark?", "No. Downloads have no watermark on any plan."],
       ["Does remixing cost credits?", "No. Remixing reuses the media you already made."],
     ],
-    cta: { label: "Make a Short free", to: "/auth?mode=signup" },
+    cta: { label: "Make a Short", to: "/auth?mode=signup" },
   },
   {
     slug: "text-to-video", eyebrow: "Text to video",
@@ -118,7 +118,7 @@ export const FEATURE_PAGES: FeaturePage[] = [
       ["What voices are available?", "Several natural AI voices, with accent and speed you can change per video."],
       ["Do I own the videos?", "Yes. You can publish what you make, including on monetised channels."],
     ],
-    cta: { label: "Try text to video free", to: "/auth?mode=signup" },
+    cta: { label: "Try text to video", to: "/auth?mode=signup" },
   },
   {
     slug: "youtube-series-generator", eyebrow: "Series generator",
@@ -134,14 +134,14 @@ export const FEATURE_PAGES: FeaturePage[] = [
     sections: [
       { heading: "Why series grow channels", paras: [
         "Viewers who enjoy one episode often watch the next. A planned series gives you a steady upload schedule and makes playlists easy.",
-        "Planning the series is free. You only use credits when you create an episode.",
+        "Series planning requires a £5 top-up or paid subscription, but uses no additional Vydora credits. Each episode uses credits when created.",
       ]},
     ],
     faqs: [
       ["How many episodes can I plan?", "You choose the number when you plan the series."],
       ["Do episodes look the same?", "They share a visual style so they feel connected, while each has its own scenes."],
     ],
-    cta: { label: "Plan a series free", to: "/auth?mode=signup" },
+    cta: { label: "Plan a series", to: "/auth?mode=signup" },
   },
   {
     slug: "history-documentary-video-maker", eyebrow: "History & documentary",
@@ -172,7 +172,7 @@ export const FEATURE_PAGES: FeaturePage[] = [
       ["Can I make long documentaries?", "Video length depends on your plan. See the pricing page for each plan's limit."],
       ["Can I use my own research?", "Yes. Paste your notes or a full script and Vydora turns it into scenes, or paste an article link to start from it."],
     ],
-    cta: { label: "Make a documentary free", to: "/auth?mode=signup" },
+    cta: { label: "Make a documentary", to: "/auth?mode=signup" },
   },
   {
     slug: "youtube-autopilot", eyebrow: "YouTube autopilot",
@@ -260,7 +260,7 @@ export const FEATURE_PAGES: FeaturePage[] = [
       ["Can I change one line?", "Yes. Redo a single scene's voiceover without remaking the whole video."],
       ["Are captions included?", "Yes. Captions follow the narration and can be turned off."],
     ],
-    cta: { label: "Make a narrated video free", to: "/auth?mode=signup" },
+    cta: { label: "Make a narrated video", to: "/auth?mode=signup" },
   },
   {
     slug: "ai-story-video-generator", eyebrow: "Story videos",
@@ -287,7 +287,7 @@ export const FEATURE_PAGES: FeaturePage[] = [
       ["How long can a story be?", "It depends on your plan: Free up to 2 Minutes, Creator up to 20 Minutes, Pro up to 60 Minutes."],
       ["Can I turn it into a Short?", "Yes. Remix the finished video into a vertical Short at no extra cost."],
     ],
-    cta: { label: "Make a story video free", to: "/auth?mode=signup" },
+    cta: { label: "Make a story video", to: "/auth?mode=signup" },
   },
 ];
 

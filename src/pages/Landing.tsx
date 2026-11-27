@@ -73,7 +73,7 @@ const faqs = [
   { q: "Do I need video editing experience or software?", a: "No. Everything runs in your web browser. There is nothing to install, and the editor is built for beginners as well as experienced creators." },
   { q: "Can I monetise videos made with Vydora?", a: "You own the videos you create. YouTube decides monetisation based on its own policies, which favour original, valuable content and ask creators to disclose realistic AI content, so add your own ideas, research and voice to every video." },
   { q: "Can Vydora use real facts and sources?", a: "Turn on Use real facts and Vydora researches the topic on the web before writing, then lists the sources so you can check them." },
-  { q: "How much does it cost?", a: "There is a free plan with 30 credits every month. Creator is £19 a month with 600 credits and Pro is £49 a month with 2,000 credits. You can also buy credit top-ups at any time." },
+  { q: "How much does it cost?", a: "Accounts are free, but AI generation requires a top-up from £5 or a paid subscription. Creator is £19 a month with 600 credits and Pro is £49 a month with 2,000 credits." },
 ];
 
 export default function Landing() {
@@ -105,7 +105,7 @@ export default function Landing() {
             </h1>
             <div ref={headRef} className={`transition-opacity duration-700 ${mode === 0 ? "invisible opacity-0" : "opacity-100"}`}>{mode !== 0 && <TypedHeadline />}{mode === 0 && <p className="text-5xl md:text-8xl font-extrabold leading-[0.95]" aria-hidden><span className="block">&nbsp;</span><span className="block">&nbsp;</span></p>}</div>
             <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-              Type an idea or paste an article link. Vydora writes the script, creates a picture for every scene and records the voiceover, then exports a video ready for YouTube. Start free with 30 credits every month.
+              Type an idea or paste an article link. Vydora writes the script, creates a picture for every scene and records the voiceover, then exports a video ready for YouTube. Start generating with a £5 top-up or a subscription.
             </p>
             <div className="mt-10 flex flex-wrap gap-3">
               <Button size="lg" className="h-12 px-8 text-base shadow-elevated" asChild><Link to={cta}>Create a video</Link></Button>
@@ -216,11 +216,11 @@ export default function Landing() {
         <section className="container py-20">
           <div className="mb-10 text-center">
             <p className="text-sm uppercase tracking-widest text-accent">Simple plans</p>
-            <h2 className="mt-3 text-4xl font-extrabold md:text-5xl">Start free, upgrade when you grow</h2>
+            <h2 className="mt-3 text-4xl font-extrabold md:text-5xl">Start with £5, grow with a plan</h2>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
             {[
-              { t: "Free", p: "£0", d: "30 credits every month, videos up to 2 Minutes. Perfect for beginners trying AI video." },
+              { t: "Free account", p: "£0", d: "No free AI generations. Top up from £5 to create videos up to 2 Minutes, or subscribe for more." },
               { t: "Creator", p: "£19/month", d: "600 credits a month, videos up to 20 Minutes and more narrators for growing channels." },
               { t: "Pro", p: "£49/month", d: "2,000 credits a month, videos up to 60 Minutes and 1080p exports for long-form channels." },
             ].map((pl) => (
@@ -233,7 +233,7 @@ export default function Landing() {
           </div>
           <p className="mt-6 text-center text-sm text-muted-foreground">Credits are used for each AI step (script, images, voiceover), so how many videos you can make depends on their length. Top-ups add credits but don't unlock plan features.</p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Button size="lg" asChild><Link to={cta}>{user ? "Create a video" : "Start free"}</Link></Button>
+            <Button size="lg" asChild><Link to={cta}>{user ? "Create a video" : "Create an account"}</Link></Button>
             <Button size="lg" variant="outline" asChild><Link to="/pricing">See what things cost</Link></Button>
           </div>
           <p className="mt-6 text-center text-sm text-muted-foreground">

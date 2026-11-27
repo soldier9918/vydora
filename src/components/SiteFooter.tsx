@@ -26,7 +26,7 @@ export default function SiteFooter() {
             Vydora turns one sentence into a YouTube video — script, scenes, captions and voiceover, made with AI.
           </p>
           <p className="mt-4 max-w-sm text-sm text-muted-foreground">
-            Built for faceless channels, educators, bloggers and Shorts creators. Start free with 30 credits every month.
+            Built for faceless channels, educators, bloggers and Shorts creators. Start generating with a £5 top-up or a subscription.
           </p>
         </div>
 
@@ -41,7 +41,7 @@ export default function SiteFooter() {
             <li><Link className="transition-colors hover:text-primary" to="/pricing">Pricing &amp; costs</Link></li>
             <li><Link className="transition-colors hover:text-primary" to="/billing">Billing</Link></li>
             <li><Link className="transition-colors hover:text-primary" to="/#how">How it works</Link></li>
-            <li><Link className="transition-colors hover:text-primary" to="/auth?mode=signup">Start free</Link></li>
+            <li><Link className="transition-colors hover:text-primary" to="/auth?mode=signup">Create an account</Link></li>
           </ul>
         </div>
 

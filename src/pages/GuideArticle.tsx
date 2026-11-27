@@ -33,7 +33,7 @@ export default function GuideArticle({ guide }: { guide: Guide }) {
         </article>
         <section className="mt-14 rounded-2xl border border-border bg-card p-8 text-center">
           <h2 className="text-2xl font-bold">Put this into practice</h2>
-          <p className="mt-2 text-muted-foreground">Free plan includes 30 credits every month. <Link className="text-primary hover:underline" to="/pricing">Compare plans and prices</Link>.</p>
+          <p className="mt-2 text-muted-foreground">AI generation starts with a £5 top-up or a subscription. <Link className="text-primary hover:underline" to="/pricing">Compare plans and prices</Link>.</p>
           <div className="mt-6"><Button size="lg" asChild><Link to={guide.related.to}>{guide.related.label}</Link></Button></div>
         </section>
         <section className="mt-12">

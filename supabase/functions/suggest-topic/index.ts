@@ -1,12 +1,15 @@
 import { createOpenAI } from "npm:@ai-sdk/openai@3";
 import { streamText } from "npm:ai@6";
 import { corsHeaders, GATEWAY_URL, json, getUserClient, aiSdkError } from "../_shared/common.ts";
+import { requireGeneration } from "../_shared/credits.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
     const auth = await getUserClient(req);
     if (!auth) return json({ error: "Please sign in first." }, 401);
+    const blocked = await requireGeneration(auth.user.id);
+    if (blocked) return blocked;
 
     const { hint } = await req.json().catch(() => ({}));
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
