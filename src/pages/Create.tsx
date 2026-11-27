@@ -22,6 +22,8 @@ import { DEFAULT_QUALITY, QUALITIES } from "@/lib/quality";
 import { MUSIC_MOODS } from "@/lib/music";
 import { estimateCredits, websiteScenes, CREDIT_COSTS } from "@/lib/credits";
 import { aiFailureMessage } from "@/lib/aiStatus";
+import { useAuth } from "@/hooks/useAuth";
+import { clearCreateDraft, readCreateDraft, saveCreateDraft } from "@/lib/createDraft";
 import { useAccount } from "@/lib/account";
 import CreditsRequired from "@/components/CreditsRequired";
 import { MAX_SCENES_BY_TIER, MAX_SECONDS_BY_TIER, voiceAllowed, scenesAllowedForPlan, lengthAllowedForPlan, qualityAllowedForPlan, FREE_MAX_SCENES } from "@/lib/tiers";
@@ -29,7 +31,11 @@ import { lengthPlanLabel, LENGTH_PLAN_SUMMARY } from "@/lib/tiers";
 import { VIDEO_LENGTHS, formatSeconds, isLengthAllowed, secondsPerScene, minScenesForSeconds, maxScenesForSeconds } from "@/lib/durations";
 
 export type PlanSettings = Record<string, string | boolean>;
-const initialSettings = (): PlanSettings => { try { return JSON.parse(new URLSearchParams(window.location.search).get("settings") || "{}"); } catch { return {}; } };
+const initialSettings = (): PlanSettings => {
+  const saved = window.location.pathname === "/create" ? readCreateDraft()?.settings ?? {} : {};
+  try { return { ...saved, ...JSON.parse(new URLSearchParams(window.location.search).get("settings") || "{}") }; }
+  catch { return saved; }
+};
 
 export const AD_FRAMEWORKS = [
   { id: "problem-solution", label: "Problem → Solution" },
@@ -41,9 +47,10 @@ const AD_IMG_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
 export default function Create({ fromUrl = false, adMode = false, onPlan, planExtra }: { fromUrl?: boolean; adMode?: boolean; onPlan?: (topic: string, settings: PlanSettings) => Promise<boolean>; planExtra?: ReactNode }) {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [init] = useState(initialSettings);
   const g = (k: string, d: string) => (typeof init[k] === "string" ? (init[k] as string) : d);
-  const [topic, setTopic] = useState(() => new URLSearchParams(window.location.search).get("idea") ?? "");
+  const [topic, setTopic] = useState(() => new URLSearchParams(window.location.search).get("idea") ?? (window.location.pathname === "/create" ? readCreateDraft()?.topic ?? "" : ""));
   const [style, setStyle] = useState<string>(g("style", "Cinematic"));
   const [voice, setVoice] = useState<string>(g("voice", "Kore"));
   const [tone, setTone] = useState<string>(g("tone", "engaging"));
@@ -89,6 +96,12 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
   };
   const [suggesting, setSuggesting] = useState(false);
 
+  const signUpWithDraft = () => {
+    const saved = saveCreateDraft({ topic, settings: { style, voice, tone, scenes, caption, ratio, quality, mood, length, accent, speed, useFacts } });
+    if (!saved) { toast.error("Your idea couldn't be saved. Please copy it before signing up."); return; }
+    navigate("/auth?mode=signup&next=%2Fcreate");
+  };
+
   const suggest = async () => {
     if (!generationAllowed) { toast.error("Top up £5 or subscribe before using AI."); return; }
     setSuggesting(true);
@@ -104,6 +117,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
 
   const create = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user && !onPlan) { signUpWithDraft(); return; }
     if (onPlan) {
       setBusy(true);
       const ok = await onPlan(topic, { style, voice, tone, scenes, caption, ratio, quality, mood, length, accent, speed, useFacts });
@@ -116,7 +130,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
     setBusy(true);
     const started = new Date(Date.now() - 5000).toISOString();
     let moved = false;
-    const go = (videoId: string) => { if (moved) return; moved = true; clearInterval(poll); navigate(`/video/${videoId}?autogen=1`); };
+    const go = (videoId: string) => { if (moved) return; moved = true; clearInterval(poll); if (!adMode && !fromUrl) clearCreateDraft(); navigate(`/video/${videoId}?autogen=1`); };
     // Fallback: if the reply is slow or lost, open the new video as soon as it has its scenes.
     const findNew = async () => {
       const { data: u } = await supabase.auth.getUser();
@@ -158,6 +172,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
 
   const formEl = (
         <>
+        {!onPlan && !user && !authLoading && <p className="mt-6 text-sm text-muted-foreground">Create a free account to continue. AI generation requires a £5 top-up (125 credits) or a paid subscription.</p>}
         {!onPlan && account && !account.isAdmin && (!generationAllowed || account.balance === 0) && (
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/50 bg-primary/10 p-4 text-sm">
             <p><span className="font-semibold">Credits needed to generate.</span> You have {account.balance} credits. Top up from £5 (125 credits) or choose a plan before you set up your video.</p>
@@ -351,7 +366,11 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
           </p>
           {!onPlan && account && (!generationAllowed || !creditsOk) && <CreditsRequired balance={account.balance} required={estCost} />}
           {!pro && <p className="text-xs text-muted-foreground">Free plan: 4 narrators, up to {FREE_MAX_SCENES} scenes, 2 Minute videos and 720p. <Link to="/billing" className="text-primary underline">Subscribe to a plan</Link> to unlock every narrator and longer videos ({adMode ? "product ads up to 5 Minutes and 20 scenes" : "Creator: 20 Minutes, Pro: 60 Minutes"}, plus 1080p on Pro).</p>}
-          <Button type="submit" size="lg" disabled={busy || !lengthOk || !tierOk || !creditsOk || (!onPlan && !generationAllowed)}>{onPlan ? (busy ? "Adding…" : "Add to plan") : busy ? "Writing your script…" : "Generate video"}</Button>
+          {!onPlan && !user ? (
+            <Button type="button" size="lg" className="h-auto min-h-12 whitespace-normal" onClick={signUpWithDraft} disabled={authLoading}>Sign up to generate this video</Button>
+          ) : (
+            <Button type="submit" size="lg" disabled={busy || !lengthOk || !tierOk || !creditsOk || (!onPlan && !generationAllowed)}>{onPlan ? (busy ? "Adding…" : "Add to plan") : busy ? "Writing your script…" : "Generate video"}</Button>
+          )}
         </form>
         </>
   );

@@ -40,3 +40,10 @@
 # Admin Free testing
 - [x] Reset Free test mode to zero and remove AI admin bypass while testing, with isolated top-up simulation.
 - [x] Verify signed-in Free testing, purchase prompts and unchanged real billing history; 28 relevant tests passed.
+
+# Website conversion improvements
+- [ ] Make homepage example videos playable with owner-approved public samples (awaiting uploaded finished videos).
+- [x] Preserve visitor ideas and settings through signup on the Create page; keep AI payment checks unchanged.
+- [ ] Add homepage sample button using an approved finished video (awaiting uploaded finished videos).
+- [x] Show an accurate £5 / 125-credit breakdown on Pricing, without implying paid features are unlocked (720p Free; 1080p Pro).
+- [x] Verify signed-out signup, signed-in draft recovery, pricing links and desktop/mobile layout; 37 relevant tests passed, no AI spend or payments. Mobile visitor banner excluded.

@@ -37,3 +37,5 @@
 - Shared credit errors open `CreditNoticeHost` through `creditNotice`; notices offer existing Billing purchase paths. Why: AI actions must offer consistent recovery.
 - Vitest aliases Deno's `npm:zod@3` to installed Zod when testing real payment handlers with simulated Stripe confirmations. Why: exercise server validation without live charges.
 - Admin test AI eligibility is enforced by `can_generate_ai`, shared by effective accounts and paid functions; Free mode resets only the isolated test balance and eligibility, with resets logged. Why: testing must not inherit admin generation privileges or touch real billing.
+- Public /create saves visitor drafts in sessionStorage through signup; AI still requires authenticated payment eligibility. Why: ideas survive login without exposing paid generation.
+- Starter top-up examples derive video counts from estimateCredits. Why: marketing estimates stay consistent with charges.

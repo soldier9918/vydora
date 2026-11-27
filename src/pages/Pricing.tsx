@@ -8,6 +8,8 @@ import { Switch } from "@/components/ui/switch";
 import { CREDIT_COSTS, costBreakdown, estimateCredits } from "@/lib/credits";
 import { MIN_SCENES, MAX_SCENES } from "@/lib/sceneCount";
 import { CurrencyPreviewProvider, CurrencySelector, ConvertedPrice } from "@/components/CurrencyPreview";
+import { STARTER_TOPUP_GBP, STARTER_TOPUP_CREDITS, STARTER_VIDEO_RANGE } from "@/lib/topUpPreview";
+import { Check, ArrowRight } from "lucide-react";
 
 const MENU = [
   { label: "Write the script", credits: CREDIT_COSTS.script, note: "Once per video" },
@@ -43,6 +45,23 @@ export default function Pricing() {
         <h1 className="text-4xl font-extrabold md:text-5xl">What things cost</h1>
         <p className="mt-3 max-w-2xl text-muted-foreground">Vydora uses credits. Each AI step uses a few; everything that runs in your browser is free. You only pay for what you make.</p>
         <CurrencySelector />
+
+        <section aria-labelledby="starter-topup-title" className="mt-8 grid gap-6 border-y border-border py-8 sm:grid-cols-[1fr_auto] sm:items-center">
+          <div>
+            <p className="text-sm font-semibold text-accent">One-off top-up · No subscription</p>
+            <h2 id="starter-topup-title" className="mt-2 text-2xl font-bold">What does £{STARTER_TOPUP_GBP} get you?</h2>
+            <p className="mt-3 text-lg font-semibold">{STARTER_TOPUP_CREDITS} credits — about {STARTER_VIDEO_RANGE.min}–{STARTER_VIDEO_RANGE.max} standard videos</p>
+            <ul className="mt-4 grid gap-2 text-sm">
+              {["AI script, scene images and voiceover", "Captions, music and watermark-free downloads", "Free account: up to 2 Minutes, 6 scenes and 720p"].map((line) => <li key={line} className="flex gap-2"><Check aria-hidden="true" className="h-4 w-4 shrink-0 text-accent" /><span>{line}</span></li>)}
+            </ul>
+            <p className="mt-4 max-w-xl text-xs text-muted-foreground">Estimate based on five to six scenes per video (27–32 credits). Research, AI animation, thumbnails and redos cost extra. Top-ups add credits, not subscription features; 1080p requires Pro.</p>
+          </div>
+          <div className="flex flex-col items-start gap-3 sm:items-end">
+            <p className="font-display text-4xl font-extrabold">£{STARTER_TOPUP_GBP}</p>
+            <ConvertedPrice gbp={STARTER_TOPUP_GBP} />
+            <Button asChild><Link to="/billing?topup=5#top-ups">Top up £5<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link></Button>
+          </div>
+        </section>
 
         <section className="mt-10 grid gap-6 lg:grid-cols-2">
           <div className="rounded-xl border border-border bg-card p-6">

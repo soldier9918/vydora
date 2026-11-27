@@ -71,7 +71,7 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<ProtectedRoute><MyVideos /></ProtectedRoute>} />
             <Route path="/my-videos" element={<ProtectedRoute><MyVideos /></ProtectedRoute>} />
-            <Route path="/create" element={<ProtectedRoute><Create /></ProtectedRoute>} />
+            <Route path="/create" element={<Create />} />
             <Route path="/from-url" element={<ProtectedRoute><Create key="url" fromUrl /></ProtectedRoute>} />
             <Route path="/series" element={<ProtectedRoute><Series /></ProtectedRoute>} />
             <Route path="/ads" element={<ProtectedRoute><Create key="ads" adMode /></ProtectedRoute>} />
