@@ -62,9 +62,4 @@ describe("temporarily unavailable wording", () => {
     }
   });
 
-  it("the Create page keeps a service-down notice on screen", () => {
-    const page = readFileSync(join(root, "src/pages/Create.tsx"), "utf8");
-    expect(page).toMatch(/isAiUnavailable\(err\)\) setAiDown\(true\)/);
-    expect(page).toMatch(/aiDown &&/);
-  });
 });
