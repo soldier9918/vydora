@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
       "21:9": "ultra-wide 21:9 cinematic",
     } as Record<string, string>)[video.aspect_ratio ?? "16:9"] ?? "wide 16:9 landscape";
 
-    const denied = await charge(user.id, COSTS.script, "scene_extend");
+    const denied = await charge(user.id, COSTS.script, "scene_extend", req);
     if (denied) return denied;
     let ok = false;
     try {

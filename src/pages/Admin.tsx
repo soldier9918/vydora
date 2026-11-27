@@ -64,6 +64,8 @@ export default function Admin() {
     const { data, error } = await supabase.rpc("admin_ledger", { _limit: 300 }); if (error) throw error; return data ?? []; } });
   const coupons = useQuery({ queryKey: ["admin-coupons"], enabled: ok, queryFn: async () => {
     const { data, error } = await supabase.rpc("admin_coupons"); if (error) throw error; return data ?? []; } });
+  const sources = useQuery({ queryKey: ["admin-credit-sources"], enabled: ok, queryFn: async () => {
+    const { data, error } = await supabase.rpc("admin_credit_sources"); if (error) throw error; return data ?? []; } });
 
   const filtered = useMemo(() => (users.data ?? []).filter((u) =>
     (!q || u.email?.toLowerCase().includes(q.toLowerCase()) || u.user_id.includes(q) || u.referral_code?.includes(q.toUpperCase())) &&
@@ -193,6 +195,7 @@ export default function Admin() {
                         <button type="button" className="font-medium text-left hover:text-primary hover:underline" onClick={() => setDetail(u.user_id)}>{u.email}</button>
                         {!u.is_admin && <button type="button" className="ml-2 text-xs text-muted-foreground underline" onClick={async () => { try { await hideUser(u.user_id); toast.success("Hidden from admin stats"); refresh(); } catch (e) { toast.error((e as Error).message); } }}>Hide</button>}
                         <p className="text-xs text-muted-foreground">{u.referral_code} {u.is_admin && <span className="text-accent">· admin</span>} {!u.confirmed && <span className="text-destructive">· unconfirmed</span>}</p>
+                        {sources.data?.find((s) => s.user_id === u.user_id)?.review && <p className="text-xs font-semibold text-destructive">Credit review required</p>}
                       </td>
                       <td className="px-3 py-2 whitespace-nowrap">{fmt(u.created_at)}</td>
                       <td className="px-3 py-2 whitespace-nowrap">{fmt(u.last_sign_in_at)}</td>

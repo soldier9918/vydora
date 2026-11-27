@@ -14,9 +14,11 @@ const PLANS = [
   {
     name: "Free",
     price: "£0",
-    credits: "0 free AI generations",
+    credits: "0 included credits",
     perks: [
-      "Start with a £5 top-up or subscription",
+      "Free account registration · explore the platform",
+      "Purchase credits whenever needed · top-ups from £5",
+      "No monthly subscription required",
       `${FREE_VOICES.length} narrators`,
       `Videos up to ${FREE_MINUTES} minutes · ${FREE_MAX_SCENES} scenes`,
       "720p HD · music, SFX & captions free",
@@ -133,6 +135,7 @@ export default function SubscriptionPlans() {
           </div>
         ))}
       </div>
+      <p className="mt-5 text-sm text-muted-foreground">Creating an account is free. AI generation requires credits. Purchase 125 credits for £5 or choose a monthly Creator or Pro subscription.</p>
     </section>
   );
 }

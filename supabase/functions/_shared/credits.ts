@@ -3,7 +3,7 @@ import { adminClient, json } from "./common.ts";
 // Must match src/lib/credits.ts CREDIT_COSTS.
 export const COSTS = { script: 2, facts: 2, image: 3, voice: 2, animate: 25, thumbnail: 5, seo: 1, webCapture: 5 } as const;
 
-export const PAYMENT_REQUIRED = "AI generation requires a £5 top-up or a paid subscription. Get 125 credits for £5 on the Billing page.";
+export const PAYMENT_REQUIRED = "Your account doesn't have enough credits to complete this action. Purchase credits starting from £5 or choose a subscription plan to start creating AI videos.";
 const paymentRequired = () => json({ error: PAYMENT_REQUIRED, code: "payment_required" }, 402);
 
 /** Check before uncharged AI helpers or generating an uncached narrator sample. */
@@ -20,12 +20,18 @@ export function websiteScenes(count: number): number[] {
 }
 
 /** Atomically deducts credits (admins are free). Returns an error Response if the balance is too low. */
-export async function charge(userId: string, amount: number, reason: string): Promise<Response | null> {
+export async function charge(userId: string, amount: number, reason: string, request?: Request): Promise<Response | null> {
   if (amount <= 0) return null;
-  const { data, error } = await adminClient().rpc("spend_credits", { _user: userId, _amount: amount, _reason: reason });
+  const key = request?.headers.get("X-Idempotency-Key");
+  if (key && !/^[a-zA-Z0-9_-]{1,160}$/.test(key)) return json({ error: "Invalid request key." }, 400);
+  const args = { _user: userId, _amount: amount, _reason: reason };
+  const { data, error } = key
+    ? await adminClient().rpc("reserve_ai_credits", { ...args, _request_key: `${reason}:${key}` })
+    : await adminClient().rpc("spend_credits", args);
   if (error) { console.error("spend_credits", error); return json({ error: "Couldn't check your credit balance. Please try again." }, 500); }
+  if (data === "duplicate") return json({ error: "This request has already been handled. Refresh your video before trying again.", code: "duplicate_request" }, 409);
   if (data === "payment_required") return paymentRequired();
-  if (data === "insufficient") return json({ error: `You need ${amount} credits for this. Top up or subscribe on the Billing page.`, code: "insufficient_credits" }, 402);
+  if (data === "insufficient") return json({ error: PAYMENT_REQUIRED, code: "insufficient_credits", required: amount }, 402);
   return null;
 }
 

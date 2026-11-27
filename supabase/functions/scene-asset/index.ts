@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) return json({ error: "AI is not configured." }, 500);
     const COST = kind === "image" ? COSTS.image : COSTS.voice;
-    const denied = await charge(auth.user.id, COST, kind === "image" ? "scene_image" : "scene_voice");
+    const denied = await charge(auth.user.id, COST, kind === "image" ? "scene_image" : "scene_voice", req);
     if (denied) return denied;
     let charged = COST;
     try {

@@ -138,6 +138,15 @@ export default function MyVideos() {
           </Button>
         </div>
 
+        {account && !account.pro && account.balance === 0 && <section className="mt-6 border-y border-border py-6">
+          <h2 className="text-xl font-bold">Your Credit Balance: 0</h2>
+          <p className="mt-2 text-muted-foreground">Add credits to start creating AI videos. Top-ups start from £5, with 125 credits included.</p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Button asChild><Link to="/billing?topup=5#top-ups">Buy Credits</Link></Button>
+            <Button asChild variant="outline"><Link to="/billing#subscriptions">View Plans</Link></Button>
+          </div>
+        </section>}
+
         <div className="mt-6 flex flex-wrap items-center gap-2">
           <div className="relative min-w-[200px] flex-1">
             <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

@@ -14,6 +14,8 @@ import { VoiceSelect } from "@/components/VoiceSelect";
 import { STYLES, TONES, generateScript, generateSeries, type SeriesPlan } from "@/lib/videoApi";
 import { estimateCredits } from "@/lib/credits";
 import { useAccount } from "@/lib/account";
+import CreditsRequired, { CREDITS_REQUIRED_MESSAGE } from "@/components/CreditsRequired";
+import { showCreditNotice } from "@/lib/creditNotice";
 import { MAX_SCENES_BY_TIER, lengthAllowedForPlan } from "@/lib/tiers";
 import { lengthPlanLabel, LENGTH_PLAN_SUMMARY } from "@/lib/tiers";
 import { VIDEO_LENGTHS, formatSeconds, isLengthAllowed, minScenesForSeconds, maxScenesForSeconds } from "@/lib/durations";
@@ -38,7 +40,7 @@ export default function Series() {
   const sceneOptions = (pro ? [4, 6, 8, 10, 12, 14, 16, 18, 20, 22] : [4, 5, 6]).filter((n) => n <= MAX_SCENES_BY_TIER[tier]);
 
   const outline = async () => {
-    if (account?.canGenerate !== true) return toast.error("Top up £5 or subscribe before using AI.");
+    if (account?.canGenerate !== true) { showCreditNotice("payment_required"); return toast.error(CREDITS_REQUIRED_MESSAGE); }
     if (topic.trim().length < 3) return toast.error("Enter a topic for your series.");
     setPlanning(true); setMade({});
     try { setPlan((await generateSeries({ topic: topic.trim(), parts, tone, style })).plan); }
@@ -69,6 +71,7 @@ export default function Series() {
     if (acc && !acc.isAdmin && (acc.balance ?? 0) < perEpisode) {
       const msg = `Part ${i + 1} needs ${perEpisode} credits and you have ${acc.balance ?? 0}. Add credits or use fewer scenes.`;
       toast.error(msg);
+      showCreditNotice("insufficient_credits", perEpisode);
       throw new Error(msg);
     }
     setCreating(i);
@@ -120,10 +123,10 @@ export default function Series() {
               <p className="mt-1 text-xs text-muted-foreground">{LENGTH_PLAN_SUMMARY}.</p></div>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">Outline planning requires a top-up or subscription, but uses no additional credits. Each episode costs about <b className="text-foreground">{perEpisode} credits</b> (≈{perEpisode * parts} for the full series).</p>
+            <p className="text-sm text-muted-foreground">Outline planning requires a positive balance of valid credits, but uses no additional credits. Each episode costs about <b className="text-foreground">{perEpisode} credits</b> (≈{perEpisode * parts} for the full series).</p>
             <Button onClick={outline} disabled={planning || account?.canGenerate !== true}>{planning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}Plan series</Button>
           </div>
-          {account && account.canGenerate !== true && <Button asChild><Link to="/billing?topup=5#top-ups">Top up £5</Link></Button>}
+          {account && account.canGenerate !== true && <CreditsRequired balance={account.balance} />}
         </section>
 
         {plan && (

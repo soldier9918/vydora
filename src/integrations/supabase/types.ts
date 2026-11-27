@@ -74,6 +74,30 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_credit_requests: {
+        Row: {
+          amount: number
+          created_at: string
+          reason: string
+          request_key: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          reason: string
+          request_key: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          reason?: string
+          request_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           allow_dismiss: boolean
@@ -455,18 +479,24 @@ export type Database = {
       credit_accounts: {
         Row: {
           created_at: string
+          free_credit_reconciled_at: string | null
+          free_credit_review: string | null
           referral_code: string
           referred_by: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
+          free_credit_reconciled_at?: string | null
+          free_credit_review?: string | null
           referral_code: string
           referred_by?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
+          free_credit_reconciled_at?: string | null
+          free_credit_review?: string | null
           referral_code?: string
           referred_by?: string | null
           user_id?: string
@@ -1304,6 +1334,19 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_credit_sources: {
+        Args: never
+        Returns: {
+          balance: number
+          free_removed: number
+          historical_free: number
+          promotion_granted: number
+          review: string
+          subscription_granted: number
+          topup_granted: number
+          user_id: string
+        }[]
+      }
       admin_delete_announcement: { Args: { _id: string }; Returns: undefined }
       admin_failed_exports: {
         Args: { _limit?: number }
@@ -1591,6 +1634,15 @@ export type Database = {
         Args: { _error: string; _job: string; _retry: boolean; _worker: string }
         Returns: string
       }
+      free_credit_removal_amount: {
+        Args: {
+          _balance: number
+          _free: number
+          _mixed: boolean
+          _protected: boolean
+        }
+        Returns: number
+      }
       grant_monthly_free_credits_all: { Args: never; Returns: number }
       has_active_subscription: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
@@ -1615,6 +1667,15 @@ export type Database = {
       refund_credits: {
         Args: { _amount: number; _reason: string; _user: string }
         Returns: undefined
+      }
+      reserve_ai_credits: {
+        Args: {
+          _amount: number
+          _reason: string
+          _request_key: string
+          _user: string
+        }
+        Returns: string
       }
       retry_autopilot_plan: { Args: { _plan: string }; Returns: boolean }
       spend_credits: {

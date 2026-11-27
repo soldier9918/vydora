@@ -80,7 +80,7 @@ export default function SiteHeader() {
               <Button variant="ghost" asChild className={`${navBtn} ${on("/pricing")}`}><Link to="/pricing" aria-current={on("/pricing") ? "page" : undefined}>Pricing</Link></Button>
               <Button variant="ghost" asChild className={`${navBtn} ${on("/billing")}`}><Link to="/billing" aria-current={on("/billing") ? "page" : undefined}>Billing</Link></Button>
               <Button variant="ghost" asChild className={`${navBtn} ${on("/auth")}`}><Link to="/auth" aria-current={on("/auth") ? "page" : undefined}>Sign in</Link></Button>
-              <Button asChild className={navBtn}><Link to="/auth?mode=signup">Start free</Link></Button>
+              <Button asChild className={navBtn}><Link to="/auth?mode=signup">Create Free Account</Link></Button>
             </>
           )}
         </nav>
@@ -142,7 +142,7 @@ export default function SiteHeader() {
                 <Link to="/pricing" onClick={close} className={`${mobileLink} ${on("/pricing")}`}>Pricing</Link>
                 <Link to="/billing" onClick={close} className={`${mobileLink} ${on("/billing")}`}>Billing</Link>
                 <Link to="/auth" onClick={close} className={`${mobileLink} ${on("/auth")}`}>Sign in</Link>
-                <Link to="/auth?mode=signup" onClick={close} className="mt-2 block rounded-md bg-primary px-3 py-3 text-center font-semibold text-primary-foreground">Start free</Link>
+                <Link to="/auth?mode=signup" onClick={close} className="mt-2 block rounded-md bg-primary px-3 py-3 text-center font-semibold text-primary-foreground">Create Free Account</Link>
               </>
             )}
           </nav>

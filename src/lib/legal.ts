@@ -354,7 +354,7 @@ export const LEGAL_DOCS: LegalDoc[] = [
         id: "free",
         heading: "Free use",
         body: [
-          "Creating an account is free, but AI generation requires a top-up of at least £5 or a paid subscription. There are no free AI video generations. Existing account credits and videos are retained.",
+          "Creating an account is free and includes 0 credits. AI generation requires sufficient valid credits; top-ups start from £5, or you can choose a paid subscription. Unused signup and monthly free-credit allocations are withdrawn only where they can be reliably identified. Purchased, subscription and administrator-issued promotional credits, previously generated videos and credit history are preserved. Mixed balances are reviewed rather than automatically deducted.",
         ],
       },
       {

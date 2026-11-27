@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
       if (!scene.image_path) return json({ error: "Make or upload an image for this scene first." }, 400);
       if (!scene.image_path.startsWith(`${auth.user.id}/`) || scene.image_path.includes("..")) return json({ error: "This scene's image can't be used." }, 403);
       if (scene.clip_job_id) return json({ error: "This scene is already being animated." }, 409);
-      const denied = await charge(auth.user.id, COSTS.animate, "animate_scene");
+      const denied = await charge(auth.user.id, COSTS.animate, "animate_scene", req);
       if (denied) return denied;
       let charged: number = COSTS.animate;
       try {

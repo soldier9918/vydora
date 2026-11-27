@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
     const { data: video } = await client.from("videos").select("id,title,description,topic").eq("id", videoId).eq("user_id", auth.user.id).maybeSingle();
     if (!video) return json({ error: "Video not found." }, 404);
     const COST = COSTS.seo;
-    const denied = await charge(auth.user.id, COST, "seo");
+    const denied = await charge(auth.user.id, COST, "seo", req);
     if (denied) return denied;
     let charged = COST;
     try {
@@ -72,6 +72,6 @@ Deno.serve(async (req) => {
   } catch (e) {
     if ((e as Error)?.name === "AbortError") return new Response(null, { status: 499, headers: corsHeaders });
     console.error("generate-seo error", e);
-    return json({ error: "Something went wrong writing your SEO." }, 500);
+    return json({ error: "Something went wrong writing your title, description and tags." }, 500);
   }
 });

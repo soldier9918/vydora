@@ -38,3 +38,21 @@ describe("generation access privacy", () => {
     expect(data).toBeNull();
   });
 });
+
+describe.skipIf(!signedClient)("safe legacy free-credit removal", () => {
+  const cases = [
+    { name: "unused signup credits can be removed", balance: 30, free: 30, mixed: false, protected: false, expected: 30 },
+    { name: "spent signup credits are not deducted again", balance: 3, free: 30, mixed: false, protected: false, expected: 3 },
+    { name: "mixed purchased credits stay untouched", balance: 155, free: 30, mixed: true, protected: false, expected: 0 },
+    { name: "administrator promotions stay untouched", balance: 80, free: 30, mixed: true, protected: false, expected: 0 },
+    { name: "paid subscriber balances stay untouched", balance: 600, free: 30, mixed: false, protected: true, expected: 0 },
+    { name: "zero balances never become negative", balance: 0, free: 30, mixed: false, protected: false, expected: 0 },
+    { name: "unclassified excess balances need review", balance: 31, free: 30, mixed: false, protected: false, expected: 0 },
+  ];
+  for (const c of cases) it(c.name, async () => {
+    if (!signedClient) throw new Error("Signed-in test session required");
+    const {data,error}=await signedClient.rpc("free_credit_removal_amount",{_balance:c.balance,_free:c.free,_mixed:c.mixed,_protected:c.protected});
+    expect(error).toBeNull();
+    expect(data).toBe(c.expected);
+  });
+});

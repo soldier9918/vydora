@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 export const STARTER_CREDITS = 0;
-export const REFERRAL_BONUS = 50;
+export const REFERRAL_BONUS = 0;
 const PAID_REASONS = ["purchase", "topup", "subscription"];
 
 export type LedgerRow = { amount: number; reason: string; created_at: string; stripe_invoice_id?: string | null; livemode?: boolean | null };
@@ -19,10 +19,10 @@ export const isActiveStatus = (s?: string | null) => s === "active" || s === "tr
 export const hasSubscription = (ledger: LedgerRow[]) => ledger.some((l) => l.reason === "subscription" && l.amount > 0);
 export const balanceOf = (ledger: LedgerRow[]) => ledger.reduce((n, l) => n + l.amount, 0);
 export const used30d = (ledger: LedgerRow[], now = Date.now()) =>
-  ledger.filter((l) => l.amount < 0 && now - new Date(l.created_at).getTime() <= 30 * 864e5).reduce((n, l) => n - l.amount, 0);
+  ledger.filter((l) => l.amount < 0 && l.reason !== "free_credit_removal" && now - new Date(l.created_at).getTime() <= 30 * 864e5).reduce((n, l) => n - l.amount, 0);
 
 export const REASON_LABEL: Record<string, string> = {
-  starter: "Free monthly credits", monthly_free: "Monthly free credits", subscription: "Monthly plan credits", referral_joined: "Joined with an invite", referral_invite: "Friend joined with your invite", admin_adjustment: "Adjusted by Vydora", live_opening_adjustment: "Test-mode credits removed at launch",
+  starter: "Historical signup credits", monthly_free: "Historical monthly free credits", free_credit_removal: "Unused free credits withdrawn", subscription: "Monthly plan credits", referral_joined: "Joined with an invite", referral_invite: "Friend joined with your invite", admin_adjustment: "Adjusted by Vydora", live_opening_adjustment: "Test-mode credits removed at launch",
   topup: "Credit top-up", refund_reversal: "Refunded payment", dispute_reversal: "Disputed payment", dispute_restored: "Dispute resolved", coupon: "Coupon code", thumbnail: "Thumbnail", seo: "Title, description & tags", scene_voice: "Scene voiceover", scene_image: "Scene image", script: "Video script", animate: "Scene animation",
 };
 

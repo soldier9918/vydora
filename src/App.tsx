@@ -39,6 +39,7 @@ import { LEGAL_DOCS } from "@/lib/legal";
 import { queryClient } from "@/lib/queryClient";
 import CookieBanner from "@/components/consent/CookieBanner";
 import GoogleAdsTracker from "@/components/consent/GoogleAdsTracker";
+import CreditNoticeHost from "@/components/CreditNoticeHost";
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -47,6 +48,7 @@ const App = () => (
         <Sonner />
         <ConfirmDialogHost />
         <BrowserRouter>
+          <CreditNoticeHost />
           <ReferralCatcher />
           <PostLoginRedirect />
           <ScrollToTop />

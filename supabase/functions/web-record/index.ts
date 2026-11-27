@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
 
     const blocked = await requireMutable(auth.user.id);
     if (blocked) return blocked;
-    const denied = await charge(auth.user.id, COST, "web_recording");
+    const denied = await charge(auth.user.id, COST, "web_recording", req);
     if (denied) return denied;
     const secs = Math.min(15, Math.max(4, Math.ceil(typeof seconds === "number" && isFinite(seconds) ? seconds : 6)));
     const aspect = ["9:16", "4:5"].includes(v.aspect_ratio) ? "9:16" : "16:9";

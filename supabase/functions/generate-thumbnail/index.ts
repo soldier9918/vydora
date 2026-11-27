@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     if (!apiKey) return json({ error: "AI is not configured." }, 500);
     if ((mode === "text" || custom) && !video.thumbnail_path) return json({ error: "Make a thumbnail first." }, 400);
     const COST = COSTS.thumbnail;
-    const denied = await charge(auth.user.id, COST, "thumbnail");
+    const denied = await charge(auth.user.id, COST, "thumbnail", req);
     if (denied) return denied;
     let charged = COST;
     try {

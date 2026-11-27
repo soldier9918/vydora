@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
       apiKey,
       headers: { "Lovable-API-Key": apiKey, "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
     });
-    const denied = await charge(auth.user.id, COSTS.script, "scene_rewrite");
+    const denied = await charge(auth.user.id, COSTS.script, "scene_rewrite", req);
     if (denied) return denied;
     let ok = false;
     try {

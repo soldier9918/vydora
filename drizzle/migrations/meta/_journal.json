@@ -463,6 +463,34 @@
       "when": 1795742648547,
       "tag": "0065_require_payment_for_ai_generation",
       "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1795743206677,
+      "tag": "0066_credit_source_review_and_valid_promotions",
+      "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1795743290340,
+      "tag": "0067_net_promotional_ai_access",
+      "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1795743373423,
+      "tag": "0068_atomic_ai_request_reservations",
+      "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1795743606215,
+      "tag": "0069_retire_automatic_free_credit_schedule",
+      "breakpoints": true
     }
   ]
 }

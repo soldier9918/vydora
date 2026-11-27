@@ -146,6 +146,8 @@ export function UserDetailSheet({ userId, onClose }: { userId: string | null; on
   const qc = useQueryClient();
   const [amt, setAmt] = useState("");
   const q = useQuery({ queryKey: ["admin-user", userId], enabled: !!userId, queryFn: () => rpc("admin_user_detail", { _user: userId }) });
+  const sources = useQuery({ queryKey: ["admin-credit-sources"], enabled: !!userId, queryFn: () => rpc("admin_credit_sources") });
+  const creditSources = (sources.data as Any[] | undefined)?.find((s) => s.user_id === userId);
   const d = q.data;
   const adjust = async () => {
     const n = parseInt(amt, 10);
@@ -168,6 +170,18 @@ export function UserDetailSheet({ userId, onClose }: { userId: string | null; on
                 {d.subscription && <p className="text-xs text-muted-foreground">{d.subscription.status}{d.subscription.cancel_at_period_end ? " · ends" : " · renews"} {fmt(d.subscription.period_end)}</p>}
               </div>
             </div>
+            {creditSources && <section className="border-y border-border py-3">
+              <p className="font-semibold">Credit sources</p>
+              <dl className="mt-2 grid grid-cols-2 gap-2">
+                <dt>Purchased credits granted</dt><dd>{creditSources.topup_granted}</dd>
+                <dt>Subscription credits granted</dt><dd>{creditSources.subscription_granted}</dd>
+                <dt>Administrator promotions granted</dt><dd>{creditSources.promotion_granted}</dd>
+                <dt>Historical free credits granted</dt><dd>{creditSources.historical_free}</dd>
+                <dt>Unused free credits removed</dt><dd>{creditSources.free_removed}</dd>
+              </dl>
+              <p className="mt-2 text-xs text-muted-foreground">Historical grants, not separate remaining balances: spending was not recorded against individual sources.</p>
+              {creditSources.review && <p role="alert" className="mt-2 font-semibold text-destructive">Review required: {creditSources.review}</p>}
+            </section>}
             <div>
               <p className="font-semibold">YouTube</p>
               <p className="text-muted-foreground">{d.youtube ? `${d.youtube.channel} · connected ${fmt(d.youtube.connected_at)}` : "Not connected"}</p>

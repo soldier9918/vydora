@@ -36,4 +36,23 @@ describe("payment before AI generation", () => {
     rpc.mockResolvedValue({ data: null, error: { message: "offline" } });
     expect((await requireGeneration("user"))?.status).toBe(500);
   });
+  it("returns the required credits without starting an insufficient-balance action", async () => {
+    rpc.mockResolvedValue({ data: "insufficient", error: null });
+    const result = await charge("user", 25, "animate_scene");
+    expect(result?.status).toBe(402);
+    expect(await result?.json()).toMatchObject({ code: "insufficient_credits", required: 25 });
+    expect(rpc).toHaveBeenCalledTimes(1);
+  });
+  it("reserves an authenticated retry key before a paid AI action", async () => {
+    rpc.mockResolvedValue({ data: "ok", error: null });
+    const req = new Request("https://example.com", { headers: { "X-Idempotency-Key": "request-1" } });
+    expect(await charge("user", 3, "scene_image", req)).toBeNull();
+    expect(rpc).toHaveBeenCalledWith("reserve_ai_credits", { _user: "user", _amount: 3, _reason: "scene_image", _request_key: "scene_image:request-1" });
+  });
+  it("duplicate requests cannot proceed to paid AI work", async () => {
+    rpc.mockResolvedValue({ data: "duplicate", error: null });
+    const req = new Request("https://example.com", { headers: { "X-Idempotency-Key": "request-1" } });
+    expect((await charge("user", 3, "scene_image", req))?.status).toBe(409);
+    expect(rpc).toHaveBeenCalledTimes(1);
+  });
 });

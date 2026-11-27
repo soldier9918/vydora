@@ -1,4 +1,4 @@
-import { charge, refund, COSTS, websiteScenes, requireGeneration } from "../_shared/credits.ts";
+import { charge, refund, COSTS, websiteScenes, requireGeneration, PAYMENT_REQUIRED } from "../_shared/credits.ts";
 import { voiceAllowed, scenesAllowedForPlan, scenesLimitMessage, lengthAllowedForPlan, qualityAllowedForPlan } from "../_shared/tiers.ts";
 import { effectiveAccount } from "../_shared/account.ts";
 import { createOpenAI } from "npm:@ai-sdk/openai@3";
@@ -120,8 +120,8 @@ Deno.serve(async (req) => {
     const fullCost = cost + count * (COSTS.image + COSTS.voice) - webIdx.length * COSTS.image;
     const { data: eff } = await adminClient().rpc("effective_account", { _user: auth.user.id });
     const acc = eff as { isAdmin?: boolean; balance?: number } | null;
-    if (acc && !acc.isAdmin && (acc.balance ?? 0) < fullCost) return json({ error: `This video needs ${fullCost} credits and you have ${acc.balance ?? 0}. Use fewer scenes or add credits on the Billing page.`, code: "insufficient_credits" }, 402);
-    const denied = await charge(auth.user.id, cost, "video_script");
+    if (acc && !acc.isAdmin && (acc.balance ?? 0) < fullCost) return json({ error: PAYMENT_REQUIRED, code: "insufficient_credits", required: fullCost, balance: acc.balance ?? 0 }, 402);
+    const denied = await charge(auth.user.id, cost, "video_script", req);
     if (denied) return denied;
     let charged = cost;
     try {

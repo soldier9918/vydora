@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { queryClient } from "@/lib/queryClient";
+import { showCreditNotice } from "@/lib/creditNotice";
 
 export const STYLES = [
   "Documentary",
@@ -111,25 +112,29 @@ async function freshAuth() {
 
 async function invoke<T>(name: string, body: unknown): Promise<T> {
   await freshAuth();
-  let { data, error } = await supabase.functions.invoke(name, { body });
+  const headers = { "X-Idempotency-Key": crypto.randomUUID() };
+  let { data, error } = await supabase.functions.invoke(name, { body, headers });
   // One retry after refreshing the sign-in if the server didn't accept it.
   if (error && (error as { context?: Response }).context?.status === 401) {
     const { data: r } = await supabase.auth.refreshSession();
-    if (r.session) ({ data, error } = await supabase.functions.invoke(name, { body }));
+    if (r.session) ({ data, error } = await supabase.functions.invoke(name, { body, headers }));
   }
   // AI actions spend credits server-side; refresh the balance shown in the header.
   queryClient.invalidateQueries({ queryKey: ["account"] });
   if (error) {
     let message = error.message;
     let code = "";
+    let required: number | undefined;
     try {
       const ctx = (error as { context?: Response }).context;
       if (ctx) {
-        const body = (await ctx.json()) as { error?: string; code?: string };
+        const body = (await ctx.json()) as { error?: string; code?: string; required?: number };
         message = body.error ?? message;
         code = body.code ?? "";
+        required = body.required;
       }
     } catch { /* ignore */ }
+    showCreditNotice(code, required);
     throw Object.assign(new Error(message), { code });
   }
   return data as T;

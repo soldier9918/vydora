@@ -27,3 +27,12 @@
 - [x] Require verified payment before AI calls, including free helpers, without altering existing balances or subscriptions.
 - [x] Stop future free credit grants and update pricing and creation prompts.
 - [x] Test payment eligibility and verify an unpaid account is blocked before any AI spend; 393 tests passed, £5 Billing offer verified without initiating a payment.
+
+# Uploaded payment specification
+- [x] Safely reconcile remaining starter/monthly balances: 46 accounts, 1,130 credits; 2 mixed balances flagged and untouched.
+- [x] Preserve valid promotional and remaining subscription credits with server-enforced AI access; existing protected transactions unchanged.
+- [x] Add consistent Credits Required notices, zero-balance dashboard and Free pricing card; verify purchase links and mobile layout.
+- [x] Audit public/authenticated content and signup email; retire free-credit schedule and referral bonuses without changing tracking or paid plans.
+- [x] Run all 414 tests, including simulated Stripe confirmations and real signed-in concurrent charging/refunds without paid AI calls.
+- [ ] Administrator to review 2 mixed balances; no automatic deduction is safe.
+- [ ] Visually verify administrator credit-source drawer after authenticator verification (blocked by AAL2; no bypass).

@@ -53,6 +53,7 @@ export function moneyOfLedgerRow(
   row: { amount: number; reason: string; stripe_invoice_id?: string | null },
   paid: Map<string, { amount: number; currency: string }>,
 ): MoneyLine | null {
+  if (row.reason === "free_credit_removal") return null;
   if (row.amount < 0) return { sign: -1, pence: Math.round(gbpValueOf(row.amount) * 100), currency: "gbp" };
   const matched = row.stripe_invoice_id ? paid.get(row.stripe_invoice_id) : undefined;
   if (matched) return { sign: 1, pence: matched.amount, currency: matched.currency };
@@ -75,6 +76,7 @@ export function paidCreditsPerRow(ledger: { amount: number; reason: string }[]):
   let free = 0, paid = 0;
   for (let i = ledger.length - 1; i >= 0; i--) {
     const r = ledger[i];
+    if (r.reason === "free_credit_removal") { free = Math.max(0, free + r.amount); continue; }
     if (r.amount > 0) { if (PAID_REASONS.has(r.reason)) paid += r.amount; else free += r.amount; continue; }
     let need = -r.amount;
     const fromFree = Math.min(free, need); free -= fromFree; need -= fromFree;

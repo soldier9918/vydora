@@ -22,7 +22,8 @@ export const SignupEmail = ({ siteName, siteUrl, recipient, confirmationUrl }: S
         <Heading style={h1}>Confirm your email</Heading>
         <Text style={text}>
           Thanks for signing up for {siteName}. Please confirm that {recipient} is your
-          email address so you can start creating videos.
+          email address so you can explore your account. Registration is free and includes
+          0 credits. Add 125 credits from £5 or choose a subscription to start creating AI videos.
         </Text>
         <Button style={button} href={confirmationUrl}>
           Verify Email

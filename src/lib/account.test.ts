@@ -1,9 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { needsWatermark, hasSubscription, balanceOf, STARTER_CREDITS, REFERRAL_BONUS } from "./account";
+import { needsWatermark, hasSubscription, balanceOf, used30d, STARTER_CREDITS, REFERRAL_BONUS } from "./account";
 const r = (amount: number, reason: string) => ({ amount, reason, created_at: new Date().toISOString() });
 describe("account rules", () => {
   it("new signups get 0 starter credits", () => expect(STARTER_CREDITS).toBe(0));
-  it("referrals give 50 credits", () => expect(REFERRAL_BONUS).toBe(50));
+  it("automatic referral bonuses give 0 credits", () => expect(REFERRAL_BONUS).toBe(0));
+  it("removing unused free credits is not counted as AI usage", () => expect(used30d([r(-30, "free_credit_removal"), r(-3, "scene_image")])).toBe(3));
   it("free accounts get the watermark", () => expect(needsWatermark([r(30, "starter"), r(50, "referral_joined")])).toBe(true));
   it("paid accounts export without watermark", () => expect(needsWatermark([r(30, "starter"), r(500, "topup")])).toBe(false));
   it("a coupon code is not a purchase, so the watermark stays", () => expect(needsWatermark([r(30, "starter"), r(100, "coupon")])).toBe(true));

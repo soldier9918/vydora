@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
     if (!apiKey || !fcKey) return json({ error: "Website capture is not set up." }, 500);
     const headers = { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}`, "X-Connection-Api-Key": fcKey };
 
-    const denied = await charge(auth.user.id, COST, "scene_website_image");
+    const denied = await charge(auth.user.id, COST, "scene_website_image", req);
     if (denied) return denied;
     let charged = COST;
     try {
