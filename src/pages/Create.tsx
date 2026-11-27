@@ -157,6 +157,13 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
   const creditsOk = !!onPlan || !account || account.isAdmin || account.balance >= estCost;
 
   const formEl = (
+        <>
+        {!onPlan && account && !account.isAdmin && (!generationAllowed || account.balance === 0) && (
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/50 bg-primary/10 p-4 text-sm">
+            <p><span className="font-semibold">Credits needed to generate.</span> You have {account.balance} credits. Top up from £5 (125 credits) or choose a plan before you set up your video.</p>
+            <div className="flex gap-2"><Button size="sm" asChild><Link to="/billing?topup=5#top-ups">Top up £5</Link></Button><Button size="sm" variant="outline" asChild><Link to="/pricing">View plans</Link></Button></div>
+          </div>
+        )}
         <form onSubmit={create} className={`${onPlan ? "" : "mt-6 "}grid gap-5 rounded-xl border border-border bg-card p-6`}>
           {adMode ? (
             <div className="grid gap-2">
@@ -346,6 +353,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
           {!pro && <p className="text-xs text-muted-foreground">Free plan: 4 narrators, up to {FREE_MAX_SCENES} scenes, 2 Minute videos and 720p. <Link to="/billing" className="text-primary underline">Subscribe to a plan</Link> to unlock every narrator and longer videos ({adMode ? "product ads up to 5 Minutes and 20 scenes" : "Creator: 20 Minutes, Pro: 60 Minutes"}, plus 1080p on Pro).</p>}
           <Button type="submit" size="lg" disabled={busy || !lengthOk || !tierOk || !creditsOk || (!onPlan && !generationAllowed)}>{onPlan ? (busy ? "Adding…" : "Add to plan") : busy ? "Writing your script…" : "Generate video"}</Button>
         </form>
+        </>
   );
   if (onPlan) return formEl;
 

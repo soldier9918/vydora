@@ -162,7 +162,9 @@ export default function MyVideos() {
           {videos?.length === 0 && (
             <div className="rounded-xl border border-dashed border-border p-10 text-center">
               <p className="text-muted-foreground">No videos yet — your finished projects will appear here.</p>
-              <Button className="mt-4" asChild><Link to="/create">Create your first video</Link></Button>
+              {account && !account.isAdmin && !account.canGenerate
+                ? <Button className="mt-4" asChild><Link to="/billing?topup=5#top-ups">Top up £5 to create your first video</Link></Button>
+                : <Button className="mt-4" asChild><Link to="/create">Create your first video</Link></Button>}
             </div>
           )}
           {videos && videos.length > 0 && (() => {

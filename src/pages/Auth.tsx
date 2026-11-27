@@ -95,6 +95,9 @@ export default function Auth() {
           <Logo />
           <p className="text-sm text-muted-foreground">Sign in to your Vydora account</p>
         </div>
+        {!sentTo && mode === "signup" && (
+          <p className="mb-4 rounded-lg border border-primary/40 bg-primary/10 p-3 text-center text-sm">Creating an account is free. Making AI videos needs credits: start with a £5 top-up (125 credits, no subscription) or choose a monthly plan.</p>
+        )}
         {sentTo ? (
         <div className="rounded-xl border border-border bg-card p-6 text-center">
           <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-primary/15 text-2xl">✉️</div>

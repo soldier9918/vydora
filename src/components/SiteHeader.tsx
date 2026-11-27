@@ -64,7 +64,7 @@ export default function SiteHeader() {
               <Button variant="ghost" asChild className={`${navBtn} ${on("/pricing")}`}><Link to="/pricing" aria-current={on("/pricing") ? "page" : undefined}>Pricing</Link></Button>
               <Button variant="ghost" asChild className={`${navBtn} ${on("/billing")}`}><Link to="/billing" aria-current={on("/billing") ? "page" : undefined}>Plans &amp; Billing</Link></Button>
               <div className={`${balancePill} pr-1 ${low ? "border-primary/60 text-primary" : ""}`}>
-                <Link to="/billing" aria-label="Credit balance" className="inline-flex items-center gap-1.5 hover:opacity-80">
+                <Link to="/billing" aria-label="Credit balance" title={acct && !acct.isAdmin && acct.balance === 0 ? "Top up from £5 to start creating" : undefined} className="inline-flex items-center gap-1.5 hover:opacity-80">
                   <Coins className="h-4 w-4 text-primary" />
                   {acct ? (acct.isAdmin ? "Unlimited" : acct.balance) : "—"}<span className="font-medium text-muted-foreground">credits</span>
                 </Link>
