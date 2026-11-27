@@ -113,7 +113,6 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
     }
     if (!generationAllowed) { toast.error("Top up £5 or subscribe before generating a video."); return; }
     if (!creditsOk) { toast.error(`This video needs ${estCost} credits and you have ${account?.balance ?? 0}.`); return; }
-    setAiDown(false);
     setBusy(true);
     const started = new Date(Date.now() - 5000).toISOString();
     let moved = false;
