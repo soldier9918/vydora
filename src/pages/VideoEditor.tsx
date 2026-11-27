@@ -648,7 +648,7 @@ export default function VideoEditor() {
     if (plan.add === 0 && plan.remove === 0) return;
     const cost = plan.add ? CREDIT_COSTS.script + plan.add * (CREDIT_COSTS.image + CREDIT_COSTS.voice) : 0;
     if (plan.add && account && !account.isAdmin && account.balance < cost) {
-      toast.error(`Adding ${plan.add} scene${plan.add > 1 ? "s" : ""} costs ${cost} credits. You don't have enough credits.`);
+      toast.error(`Adding ${plan.add} scene${plan.add > 1 ? "s" : ""} costs ${cost} credits. You don't have enough credits.`, { description: "Get 125 credits for £5 — no subscription.", action: { label: "Top up £5", onClick: () => { window.location.href = "/billing?topup=5#top-ups"; } } });
       return;
     }
     const ok = await confirmDialog(plan.add
@@ -706,7 +706,7 @@ export default function VideoEditor() {
   const confirmRerecord = async (what: string) => {
     if (!scenes.length) return true;
     if (account && !account.isAdmin && account.balance < rerecordCost) {
-      toast.error(`Changing the ${what} re-records all ${scenes.length} scenes for ${rerecordCost} credits. You don't have enough credits.`);
+      toast.error(`Changing the ${what} re-records all ${scenes.length} scenes for ${rerecordCost} credits. You don't have enough credits.`, { description: "Get 125 credits for £5 — no subscription.", action: { label: "Top up £5", onClick: () => { window.location.href = "/billing?topup=5#top-ups"; } } });
       return false;
     }
     return confirmDialog({ title: `Change the ${what}?`, message: `This re-records all ${scenes.length} voiceovers for ${rerecordCost} credits (${CREDIT_COSTS.voice} per scene).`, confirmText: `Re-record · ${rerecordCost} cr` });

@@ -337,7 +337,16 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
             <span className="text-muted-foreground">Estimated cost (script, images, voiceovers, quality)</span>
             <Link to="/pricing" className="font-display font-bold text-primary hover:underline">⚡ {estCost} credits</Link>
           </p>
-          {!creditsOk && account && <p role="alert" className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">Not enough credits: this video needs {estCost} and you have {account.balance}. Use fewer scenes or <Link to="/billing" className="font-semibold underline">add credits</Link>.</p>}
+          {!creditsOk && account && (
+            <div role="alert" className="rounded-lg border border-primary/50 bg-primary/10 p-4 text-sm">
+              <p className="text-foreground">Not enough credits: this video needs {estCost} and you have {account.balance}.</p>
+              <p className="mt-1 font-semibold text-primary">Get 125 credits for £5 — enough for about 4 more videos. No subscription.</p>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <Button asChild size="sm"><Link to="/billing?topup=5#top-ups">Top up £5</Link></Button>
+                <span className="text-xs text-muted-foreground">or use fewer scenes</span>
+              </div>
+            </div>
+          )}
           {!pro && <p className="text-xs text-muted-foreground">Free plan: 4 narrators, up to {FREE_MAX_SCENES} scenes, 2 Minute videos and 720p. <Link to="/billing" className="text-primary underline">Subscribe to a plan</Link> to unlock every narrator and longer videos ({adMode ? "product ads up to 5 Minutes and 20 scenes" : "Creator: 20 Minutes, Pro: 60 Minutes"}, plus 1080p on Pro).</p>}
           <Button type="submit" size="lg" disabled={busy || !lengthOk || !tierOk || !creditsOk}>{onPlan ? (busy ? "Adding…" : "Add to plan") : busy ? "Writing your script…" : "Generate video"}</Button>
         </form>
