@@ -121,11 +121,16 @@ async function invoke<T>(name: string, body: unknown): Promise<T> {
   queryClient.invalidateQueries({ queryKey: ["account"] });
   if (error) {
     let message = error.message;
+    let code = "";
     try {
       const ctx = (error as { context?: Response }).context;
-      if (ctx) message = (await ctx.json()).error ?? message;
+      if (ctx) {
+        const body = (await ctx.json()) as { error?: string; code?: string };
+        message = body.error ?? message;
+        code = body.code ?? "";
+      }
     } catch { /* ignore */ }
-    throw new Error(message);
+    throw Object.assign(new Error(message), { code });
   }
   return data as T;
 }

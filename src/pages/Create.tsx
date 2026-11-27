@@ -21,6 +21,7 @@ import { DEFAULT_RATIO } from "@/lib/aspectRatio";
 import { DEFAULT_QUALITY, QUALITIES } from "@/lib/quality";
 import { MUSIC_MOODS } from "@/lib/music";
 import { estimateCredits, websiteScenes, CREDIT_COSTS } from "@/lib/credits";
+import { aiFailureMessage, isAiUnavailable } from "@/lib/aiStatus";
 import { useAccount } from "@/lib/account";
 import { MAX_SCENES_BY_TIER, MAX_SECONDS_BY_TIER, voiceAllowed, scenesAllowedForPlan, lengthAllowedForPlan, qualityAllowedForPlan, FREE_MAX_SCENES } from "@/lib/tiers";
 import { lengthPlanLabel, LENGTH_PLAN_SUMMARY } from "@/lib/tiers";
@@ -71,6 +72,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
   const [accent, setAccent] = useState(g("accent", "none"));
   const [speed, setSpeed] = useState(g("speed", "1"));
   const [busy, setBusy] = useState(false);
+  const [aiDown, setAiDown] = useState(false);
   const [framework, setFramework] = useState("problem-solution");
   const [cta, setCta] = useState("");
   const [adImages, setAdImages] = useState<File[]>([]);
@@ -108,6 +110,7 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
       return;
     }
     if (!creditsOk) { toast.error(`This video needs ${estCost} credits and you have ${account?.balance ?? 0}.`); return; }
+    setAiDown(false);
     setBusy(true);
     const started = new Date(Date.now() - 5000).toISOString();
     let moved = false;
@@ -142,7 +145,8 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
       if (vid) return go(vid);
       clearInterval(poll);
       if (moved) return;
-      toast.error((err as Error).message);
+      if (isAiUnavailable(err)) setAiDown(true);
+      toast.error(aiFailureMessage(err));
       setBusy(false);
     }
   };
@@ -153,6 +157,12 @@ export default function Create({ fromUrl = false, adMode = false, onPlan, planEx
 
   const formEl = (
         <form onSubmit={create} className={`${onPlan ? "" : "mt-6 "}grid gap-5 rounded-xl border border-border bg-card p-6`}>
+          {aiDown && (
+            <div role="alert" className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm">
+              <p className="font-semibold text-destructive">Video creation is temporarily unavailable.</p>
+              <p className="mt-1">Please try again in a few minutes. Your credits are safe.</p>
+            </div>
+          )}
           {adMode ? (
             <div className="grid gap-2">
               <Label htmlFor="url">Website or product page link (optional)</Label>

@@ -1,6 +1,6 @@
 import { createOpenAI } from "npm:@ai-sdk/openai@3";
 import { streamText } from "npm:ai@6";
-import { corsHeaders, GATEWAY_URL, json, getUserClient } from "../_shared/common.ts";
+import { corsHeaders, GATEWAY_URL, json, getUserClient, aiSdkError } from "../_shared/common.ts";
 
 const schema = {
   type: "object", additionalProperties: false, required: ["title", "logline", "visualMotif", "episodes"],
@@ -41,6 +41,8 @@ Deno.serve(async (req) => {
     plan.episodes = plan.episodes.slice(0, parts);
     return json({ plan });
   } catch (err) {
-    return json({ error: (err as Error).message }, 500);
+    const down = aiSdkError(err);
+    if (down) return down;
+    return json({ error: "The AI didn't return a series plan — try again." }, 500);
   }
 });

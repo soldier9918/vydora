@@ -33,16 +33,37 @@ export function adminClient() {
   return createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 }
 
+/** Shown when the AI service itself can't serve the request (workspace credits, policy block, outage).
+ * Users can't fix these, so never show the owner-side remedy or the raw upstream text. */
+export const AI_UNAVAILABLE = "Video creation is temporarily unavailable. Please try again in a few minutes — your credits are safe.";
+export const AI_BUSY = "Too many requests right now — please wait a moment and try again.";
+
+/** Statuses that mean the service (not the user) is at fault. */
+export function aiServiceDown(status: number): boolean {
+  return status === 401 || status === 402 || status === 403 || status >= 500;
+}
+
 /** Map gateway failures to a friendly message, preserving the status. */
 export async function gatewayError(res: Response) {
-  let message = "The AI service could not complete this request.";
+  let raw = "";
   try {
     const body = await res.json();
-    message = body?.error?.message ?? body?.message ?? message;
+    raw = String(body?.error?.message ?? body?.message ?? "");
   } catch { /* ignore */ }
-  if (res.status === 402) message = "Your workspace is out of AI credits. Add credits in Settings → Plans & credits.";
-  if (res.status === 429) message = "Too many requests right now — please wait a moment and try again.";
-  return json({ error: message }, res.status);
+  // Keep the real reason in the function logs for the owner; users only see the safe wording.
+  console.error("gateway failure", res.status, raw.slice(0, 300));
+  if (res.status === 429) return json({ error: AI_BUSY, code: "ai_busy" }, 429);
+  if (aiServiceDown(res.status)) return json({ error: AI_UNAVAILABLE, code: "ai_unavailable" }, res.status);
+  return json({ error: raw.slice(0, 300) || "The AI service could not complete this request." }, res.status);
+}
+
+/** Map an AI SDK (streamText) failure to a user-facing response. Null when the caller should handle it. */
+export function aiSdkError(e: unknown): Response | null {
+  const status = (e as { statusCode?: number })?.statusCode ?? 500;
+  console.error("AI SDK failure", status, String((e as Error)?.message ?? e).slice(0, 300));
+  if (status === 429) return json({ error: AI_BUSY, code: "ai_busy" }, 429);
+  if (aiServiceDown(status)) return json({ error: AI_UNAVAILABLE, code: "ai_unavailable" }, status);
+  return null;
 }
 
 async function hmac(msg: string) {

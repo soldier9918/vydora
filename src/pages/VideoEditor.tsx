@@ -40,6 +40,10 @@ import { scenesAllowedForPlan } from "@/lib/tiers";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronDown, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { aiFailureMessage } from "@/lib/aiStatus";
+
+// Service-down failures show the safe wording; every other failure keeps its own message.
+const errText = (e: unknown) => aiFailureMessage(e);
 
 function LookSelect<T extends string>({ label, value, options, onChange, swatch, disabled }: {
   label: string; value: string; options: readonly { value: T; label: string; css?: string; textValue?: string }[]; onChange: (v: T) => void; swatch?: boolean; disabled?: boolean;
@@ -273,8 +277,8 @@ export default function VideoEditor() {
       await generateSceneAsset(scene.id, kind);
       await qc.invalidateQueries({ queryKey: ["video", id] });
     } catch (e) {
-      toast.error(`Scene ${scene.position + 1}: ${(e as Error).message}`);
-      setAssetErr((m) => ({ ...m, [key]: (e as Error).message }));
+      toast.error(`Scene ${scene.position + 1}: ${errText(e)}`);
+      setAssetErr((m) => ({ ...m, [key]: errText(e) }));
       throw e;
     } finally {
       setWorking((w) => ({ ...w, [key]: false }));
@@ -297,7 +301,7 @@ export default function VideoEditor() {
       await qc.invalidateQueries({ queryKey: ["video", id] });
       toast.success(`Scene ${scene.position + 1} now uses your image.`);
     } catch (e) {
-      toast.error(`Upload failed: ${(e as Error).message}`);
+      toast.error(`Upload failed: ${errText(e)}`);
     } finally {
       setWorking((w) => ({ ...w, [key]: false }));
     }
@@ -322,7 +326,7 @@ export default function VideoEditor() {
       toast.error("Animation is taking too long — reload the page later to check.");
       } finally { clearInterval(tick); setClipPct((p) => { const n = { ...p }; delete n[scene.id]; return n; }); }
     } catch (e) {
-      toast.error(`Scene ${scene.position + 1}: ${(e as Error).message}`);
+      toast.error(`Scene ${scene.position + 1}: ${errText(e)}`);
     } finally {
       setWorking((w) => ({ ...w, [key]: false }));
     }
@@ -335,7 +339,7 @@ export default function VideoEditor() {
       await animateScene(scene.id, "start", sceneSeconds(scene.audio_path ? audioSecs[scene.id] : null, scene.narration));
       toast.message(`Animating scene ${scene.position + 1} — this takes 1–3 minutes.`);
     } catch (e) {
-      toast.error(`Scene ${scene.position + 1}: ${(e as Error).message}`);
+      toast.error(`Scene ${scene.position + 1}: ${errText(e)}`);
       setWorking((w) => ({ ...w, [key]: false }));
       return;
     }
@@ -355,7 +359,7 @@ export default function VideoEditor() {
       }
       toast.error("The recording is taking too long — reload the page later to check.");
     } catch (e) {
-      toast.error(`Scene ${scene.position + 1}: ${(e as Error).message}`);
+      toast.error(`Scene ${scene.position + 1}: ${errText(e)}`);
     } finally {
       setWorking((w) => ({ ...w, [key]: false }));
     }
@@ -368,7 +372,7 @@ export default function VideoEditor() {
       const r = await webRecord(scene.id, "start", { seconds: sceneSeconds(scene.audio_path ? audioSecs[scene.id] : null, scene.narration) });
       toast.message(`Recording ${r.url ?? "the website"} for scene ${scene.position + 1} — this takes about a minute.`);
     } catch (e) {
-      toast.error(`Scene ${scene.position + 1}: ${(e as Error).message}`);
+      toast.error(`Scene ${scene.position + 1}: ${errText(e)}`);
       setWorking((w) => ({ ...w, [key]: false }));
       return;
     }
@@ -399,7 +403,7 @@ export default function VideoEditor() {
       await qc.invalidateQueries({ queryKey: ["video", id] });
       toast.success(`Scene ${scene.position + 1} rewritten — recording the new voiceover…`);
     } catch (e) {
-      toast.error(`Scene ${scene.position + 1}: ${(e as Error).message}`);
+      toast.error(`Scene ${scene.position + 1}: ${errText(e)}`);
       return;
     } finally {
       setWorking((w) => ({ ...w, [key]: false }));
@@ -589,7 +593,7 @@ export default function VideoEditor() {
       await qc.invalidateQueries({ queryKey: ["video", id] });
       toast.success("Title, description and tags ready!");
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(errText(e));
     } finally {
       setSeoBusy(false);
     }
@@ -621,7 +625,7 @@ export default function VideoEditor() {
       await qc.invalidateQueries({ queryKey: ["video", id] });
       toast.success(opts?.text ? "Your text is on the thumbnail!" : opts?.mode ? "New text style ready!" : "Thumbnail ready!");
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(errText(e));
     } finally {
       setThumbBusy(false);
     }
@@ -671,7 +675,7 @@ export default function VideoEditor() {
         toast.success(`Trimmed to ${plan.target} scenes.`);
       }
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(errText(e));
     } finally {
       setSceneBusy(false);
     }
@@ -733,7 +737,7 @@ export default function VideoEditor() {
       await qc.invalidateQueries({ queryKey: ["video", id] });
       toast.success(`Scene ${scene.position + 1}: now showing ${r.url}`);
     } catch (e) {
-      toast.error(`Scene ${scene.position + 1}: ${(e as Error).message}`);
+      toast.error(`Scene ${scene.position + 1}: ${errText(e)}`);
     } finally {
       setWorking((w) => ({ ...w, [key]: false }));
     }
@@ -992,7 +996,7 @@ export default function VideoEditor() {
                 <Button variant="outline" disabled={busyAny || readOnly} onClick={async () => {
                   const t = toast.loading("Making your Shorts cut…");
                   try { const nid = await remixToShorts(id!); toast.success("Shorts cut ready — your original is untouched.", { id: t }); navigate(`/video/${nid}`); }
-                  catch (e) { toast.error((e as Error).message, { id: t }); }
+                  catch (e) { toast.error(errText(e), { id: t }); }
                 }}>📱 Remix for Shorts / TikTok</Button>
               )}
               <Button variant="outline" disabled={busyAny || readOnly} onClick={async () => {
@@ -1171,7 +1175,7 @@ export default function VideoEditor() {
                         await supabase.from("videos").update({ logo_path: path }).eq("id", id!);
                         toast.success("Logo added.");
                         refresh();
-                      } catch (err) { toast.error(`Upload failed: ${(err as Error).message}`); }
+                      } catch (err) { toast.error(`Upload failed: ${errText(err)}`); }
                       finally { setLogoBusy(false); }
                     }} />
                 </label>
@@ -1226,7 +1230,7 @@ export default function VideoEditor() {
                         await supabase.from("videos").update({ music_path: path, music_mood: "custom" }).eq("id", id!);
                         toast.success("Track uploaded — only use music you own or have a licence for.");
                         refresh();
-                      } catch (err) { toast.error(`Upload failed: ${(err as Error).message}`); }
+                      } catch (err) { toast.error(`Upload failed: ${errText(err)}`); }
                       finally { setMusicBusy(false); }
                     }}
                   />

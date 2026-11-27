@@ -1,6 +1,6 @@
 import { createOpenAI } from "npm:@ai-sdk/openai@3";
 import { streamText } from "npm:ai@6";
-import { corsHeaders, GATEWAY_URL, json, getUserClient, adminClient } from "../_shared/common.ts";
+import { corsHeaders, GATEWAY_URL, json, getUserClient, adminClient, aiSdkError } from "../_shared/common.ts";
 import { charge, refund, requireMutable, COSTS } from "../_shared/credits.ts";
 
 Deno.serve(async (req) => {
@@ -51,9 +51,8 @@ Deno.serve(async (req) => {
       });
       narration = (await result.text).trim().replace(/^["']|["']$/g, "");
     } catch (e) {
-      const status = (e as { statusCode?: number })?.statusCode ?? 500;
-      if (status === 402) return json({ error: "Your workspace is out of AI credits. Add credits in Settings → Plans & credits." }, 402);
-      if (status === 429) return json({ error: "Too many requests right now — please wait a moment and try again." }, 429);
+      const down = aiSdkError(e);
+      if (down) return down;
       throw e;
     }
     if (!narration) return json({ error: "No new script was written. Please try again." }, 502);

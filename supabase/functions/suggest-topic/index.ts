@@ -1,6 +1,6 @@
 import { createOpenAI } from "npm:@ai-sdk/openai@3";
 import { streamText } from "npm:ai@6";
-import { corsHeaders, GATEWAY_URL, json, getUserClient } from "../_shared/common.ts";
+import { corsHeaders, GATEWAY_URL, json, getUserClient, aiSdkError } from "../_shared/common.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -42,15 +42,18 @@ Deno.serve(async (req) => {
     });
 
     let idea = "";
-    let streamErr = "";
+    let streamErr: unknown = null;
     for await (const part of result.fullStream) {
       if (part.type === "text-delta") idea += part.text;
-      else if (part.type === "error") { streamErr = String((part.error as Error)?.message ?? part.error); console.error("suggest-topic AI error", part.error); }
+      else if (part.type === "error") { streamErr = part.error; console.error("suggest-topic AI error", part.error); }
     }
     idea = idea.trim().replace(/^["']|["']$/g, "");
-    if (!idea) return json({ error: "The AI did not suggest anything — try again.", detail: streamErr.slice(0, 300) }, 502);
+    if (!idea && streamErr) { const down = aiSdkError(streamErr); if (down) return down; }
+    if (!idea) return json({ error: "The AI did not suggest anything — try again." }, 502);
     return json({ idea });
   } catch (err) {
-    return json({ error: (err as Error).message }, 500);
+    const down = aiSdkError(err);
+    if (down) return down;
+    return json({ error: "The AI did not suggest anything — try again." }, 500);
   }
 });
