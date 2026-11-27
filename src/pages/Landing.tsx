@@ -13,21 +13,7 @@ import CreationTimelapse from "@/components/CreationTimelapse";
 import { FEATURE_PAGES } from "@/lib/featurePages";
 import TypedHeadline from "@/components/TypedHeadline";
 import { Play, Link2, Layers, Search, Film, Smartphone, Music, ArrowRight } from "lucide-react";
-import thumbMh370 from "@/assets/example-thumb-mh370.jpg";
-import thumbRome from "@/assets/example-thumb-rome.jpg";
-import thumbBitcoin from "@/assets/example-thumb-bitcoin.jpg";
-import thumbSpace from "@/assets/example-thumb-space.jpg";
-import thumbStoic from "@/assets/example-thumb-stoic.jpg";
-import thumbAi from "@/assets/example-thumb-ai.jpg";
-
-const examples = [
-  { img: thumbMh370, title: "The MH370 Mystery: What Really Happened?" },
-  { img: thumbRome, title: "The Rise of Rome in 10 Minutes" },
-  { img: thumbBitcoin, title: "Bitcoin Explained Simply" },
-  { img: thumbSpace, title: "Black Holes: What's Inside?" },
-  { img: thumbStoic, title: "5 Stoic Habits That Changed My Life" },
-  { img: thumbAi, title: "AI in 2030: The Future Is Closer Than You Think" },
-];
+import SampleVideos, { HERO_SAMPLE, SampleVideoPlayer, type VideoSample } from "@/components/SampleVideos";
 
 import reelTitanic from "@/assets/reel-titanic.jpg";
 import reelEgypt from "@/assets/reel-egypt.jpg";
@@ -79,6 +65,7 @@ const faqs = [
 export default function Landing() {
   const { user } = useAuth();
   const cta = user ? "/create" : "/auth?mode=signup";
+  const [sample, setSample] = useState<VideoSample | null>(null);
   // 0 = VYDORA in dots, 1 = dot grid, 2 = thumbnail reel, 3 = AI studio
   const [mode, setMode] = useState(2);
   const headRef = useRef<HTMLDivElement>(null);
@@ -109,6 +96,7 @@ export default function Landing() {
             </p>
             <div className="mt-10 flex flex-wrap gap-3">
               <Button size="lg" className="h-12 px-8 text-base shadow-elevated" asChild><Link to={cta}>Create a video</Link></Button>
+              <Button size="lg" variant="outline" className="h-12 px-6 text-base" onClick={() => setSample(HERO_SAMPLE)}><Play aria-hidden="true" />Watch 30 Seconds sample</Button>
               <Button size="lg" variant="outline" className="h-12 px-8 text-base" asChild><a href="#how">How it works</a></Button>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">Free account · Make videos from £5 (125 credits) or with a monthly plan · No watermark</p>
@@ -127,35 +115,7 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="container py-20">
-          <div className="mb-10 text-center">
-            <h2 className="text-4xl font-extrabold md:text-5xl">Made with Vydora</h2>
-            <p className="mt-3 text-muted-foreground">Example videos, each made from a single sentence.</p>
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {examples.map((e) => (
-              <figure key={e.title} className="group overflow-hidden rounded-xl border border-border bg-card">
-                <div className="relative aspect-video overflow-hidden">
-                  <img
-                    src={e.img}
-                    alt={e.title}
-                    loading="lazy"
-                    width={1280}
-                    height={720}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <span className="absolute inset-0 flex items-center justify-center bg-background/0 transition-colors group-hover:bg-background/30">
-                    <Play className="h-10 w-10 text-primary opacity-0 transition-opacity group-hover:opacity-100" fill="currentColor" />
-                  </span>
-                </div>
-                <figcaption className="p-4">
-                  <p className="font-semibold leading-snug">{e.title}</p>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-
-        </section>
+        <SampleVideos onSelect={setSample} />
 
         <CreationTimelapse />
 
@@ -270,6 +230,7 @@ export default function Landing() {
         </section>
       </main>
       <SiteFooter />
+      <SampleVideoPlayer sample={sample} onClose={() => setSample(null)} />
     </div>
   );
 }
