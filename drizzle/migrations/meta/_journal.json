@@ -491,6 +491,13 @@
       "when": 1795743606215,
       "tag": "0069_retire_automatic_free_credit_schedule",
       "breakpoints": true
+    },
+    {
+      "idx": 70,
+      "version": "7",
+      "when": 1795761595020,
+      "tag": "0070_mirror_free_ai_rules_in_admin_testing",
+      "breakpoints": true
     }
   ]
 }

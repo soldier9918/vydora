@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export default function AdminTesting() {
   const { data: account } = useAccount();
   const qc = useQueryClient();
-  const [amount, setAmount] = useState("30");
+  const [amount, setAmount] = useState("125");
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState(() => { try { return localStorage.getItem("vydora-admin-bar") !== "closed"; } catch { return true; } });
   const toggle = () => setOpen((o) => { const n = !o; try { localStorage.setItem("vydora-admin-bar", n ? "open" : "closed"); } catch { /* ignore */ } return n; });

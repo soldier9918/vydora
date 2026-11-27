@@ -36,3 +36,7 @@
 - [x] Run all 414 tests, including simulated Stripe confirmations and real signed-in concurrent charging/refunds without paid AI calls.
 - [ ] Administrator to review 2 mixed balances; no automatic deduction is safe.
 - [ ] Visually verify administrator credit-source drawer after authenticator verification (blocked by AAL2; no bypass).
+
+# Admin Free testing
+- [x] Reset Free test mode to zero and remove AI admin bypass while testing, with isolated top-up simulation.
+- [x] Verify signed-in Free testing, purchase prompts and unchanged real billing history; 28 relevant tests passed.

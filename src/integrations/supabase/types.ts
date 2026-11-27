@@ -31,18 +31,21 @@ export type Database = {
       }
       admin_test_accounts: {
         Row: {
+          ai_eligible: boolean
           balance: number
           mode: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          ai_eligible?: boolean
           balance?: number
           mode?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          ai_eligible?: boolean
           balance?: number
           mode?: string
           updated_at?: string

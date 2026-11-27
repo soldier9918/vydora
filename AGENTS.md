@@ -36,3 +36,4 @@
 - Browser AI requests send an idempotency key retained across authentication retries; paid endpoints reserve it through service-only `reserve_ai_credits` before external work and reject duplicates. Why: retries must not deduct twice or repeat paid AI calls.
 - Shared credit errors open `CreditNoticeHost` through `creditNotice`; notices offer existing Billing purchase paths. Why: AI actions must offer consistent recovery.
 - Vitest aliases Deno's `npm:zod@3` to installed Zod when testing real payment handlers with simulated Stripe confirmations. Why: exercise server validation without live charges.
+- Admin test AI eligibility is enforced by `can_generate_ai`, shared by effective accounts and paid functions; Free mode resets only the isolated test balance and eligibility, with resets logged. Why: testing must not inherit admin generation privileges or touch real billing.
