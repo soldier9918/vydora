@@ -42,9 +42,13 @@ Deno.serve(async (req) => {
     });
 
     let idea = "";
-    for await (const chunk of result.textStream) idea += chunk;
+    let streamErr = "";
+    for await (const part of result.fullStream) {
+      if (part.type === "text-delta") idea += part.text;
+      else if (part.type === "error") { streamErr = String((part.error as Error)?.message ?? part.error); console.error("suggest-topic AI error", part.error); }
+    }
     idea = idea.trim().replace(/^["']|["']$/g, "");
-    if (!idea) return json({ error: "The AI did not suggest anything — try again." }, 502);
+    if (!idea) return json({ error: "The AI did not suggest anything — try again.", detail: streamErr.slice(0, 300) }, 502);
     return json({ idea });
   } catch (err) {
     return json({ error: (err as Error).message }, 500);
