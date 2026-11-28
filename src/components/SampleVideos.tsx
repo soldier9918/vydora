@@ -2,14 +2,13 @@ import { useState } from "react";
 import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import fishVideo from "@/assets/samples/antarctic-fish.mp4.asset.json";
+import fishVideo from "@/assets/samples/antarctic-fish-20s.mp4.asset.json";
 import fishPoster from "@/assets/samples/antarctic-fish.jpg.asset.json";
-import fishPreview from "@/assets/samples/antarctic-fish-preview.mp4.asset.json";
-import salmonVideo from "@/assets/samples/dead-salmon.mp4.asset.json";
+import salmonVideo from "@/assets/samples/dead-salmon-20s.mp4.asset.json";
 import salmonPoster from "@/assets/samples/dead-salmon.jpg.asset.json";
-import octopusVideo from "@/assets/samples/octopus.mp4.asset.json";
+import octopusVideo from "@/assets/samples/octopus-20s.mp4.asset.json";
 import octopusPoster from "@/assets/samples/octopus.jpg.asset.json";
-import fungusVideo from "@/assets/samples/cicada-fungus.mp4.asset.json";
+import fungusVideo from "@/assets/samples/cicada-fungus-20s.mp4.asset.json";
 import fungusPoster from "@/assets/samples/cicada-fungus.jpg.asset.json";
 
 export interface VideoSample {
@@ -20,17 +19,17 @@ export interface VideoSample {
 }
 
 export const SAMPLE_VIDEOS: VideoSample[] = [
-  { title: "The Antarctic Fish That Makes Its Own Antifreeze", video: fishVideo.url, poster: fishPoster.url, duration: "1 Minute" },
-  { title: "The Dead Salmon That Exposed a Brain Science Trap", video: salmonVideo.url, poster: salmonPoster.url, duration: "1 Minute 1 Second" },
-  { title: "Are Octopuses the Smartest Animals on Earth?", video: octopusVideo.url, poster: octopusPoster.url, duration: "1 Minute 32 Seconds" },
-  { title: "This Fungus Turns Cicadas Into Flying Saltshakers", video: fungusVideo.url, poster: fungusPoster.url, duration: "56 Seconds" },
+  { title: "The Antarctic Fish That Makes Its Own Antifreeze", video: fishVideo.url, poster: fishPoster.url, duration: "20 Seconds" },
+  { title: "The Dead Salmon That Exposed a Brain Science Trap", video: salmonVideo.url, poster: salmonPoster.url, duration: "20 Seconds" },
+  { title: "Are Octopuses the Smartest Animals on Earth?", video: octopusVideo.url, poster: octopusPoster.url, duration: "20 Seconds" },
+  { title: "This Fungus Turns Cicadas Into Flying Saltshakers", video: fungusVideo.url, poster: fungusPoster.url, duration: "20 Seconds" },
 ];
 
 export const HERO_SAMPLE: VideoSample = {
   title: "The Antarctic Fish That Makes Its Own Antifreeze",
-  video: fishPreview.url,
+  video: fishVideo.url,
   poster: fishPoster.url,
-  duration: "30 Seconds preview",
+  duration: "20 Seconds",
 };
 
 export function SampleVideoPlayer({ sample, onClose }: { sample: VideoSample | null; onClose: () => void }) {

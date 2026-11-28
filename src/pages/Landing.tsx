@@ -96,7 +96,7 @@ export default function Landing() {
             </p>
             <div className="mt-10 flex flex-wrap gap-3">
               <Button size="lg" className="h-12 px-8 text-base shadow-elevated" asChild><Link to={cta}>Create a video</Link></Button>
-              <Button size="lg" variant="outline" className="h-12 px-6 text-base" onClick={() => setSample(HERO_SAMPLE)}><Play aria-hidden="true" />Watch 30 Seconds sample</Button>
+              <Button size="lg" variant="outline" className="h-12 px-6 text-base" onClick={() => setSample(HERO_SAMPLE)}><Play aria-hidden="true" />Watch 20 Seconds sample</Button>
               <Button size="lg" variant="outline" className="h-12 px-8 text-base" asChild><a href="#how">How it works</a></Button>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">Free account · Make videos from £5 (125 credits) or with a monthly plan · No watermark</p>

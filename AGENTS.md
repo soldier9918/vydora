@@ -39,4 +39,4 @@
 - Admin test AI eligibility is enforced by `can_generate_ai`, shared by effective accounts and paid functions; Free mode resets only the isolated test balance and eligibility, with resets logged. Why: testing must not inherit admin generation privileges or touch real billing.
 - Public /create saves visitor drafts in sessionStorage through signup; AI still requires authenticated payment eligibility. Why: ideas survive login without exposing paid generation.
 - Starter top-up examples derive video counts from estimateCredits. Why: marketing estimates stay consistent with charges.
-- Public samples use CDN pointers and an on-demand player. Why: no private media or idle video downloads.
+- Public samples: 20 Seconds CDN clips + "Made by Vydora" card. Why: light previews, no private media.

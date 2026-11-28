@@ -44,6 +44,6 @@
 # Website conversion improvements
 - [x] Make homepage example videos playable with the four uploaded, owner-approved public samples; actual cover frames and on-demand playback.
 - [x] Preserve visitor ideas and settings through signup on the Create page; keep AI payment checks unchanged.
-- [x] Add homepage sample button using a 30 Seconds excerpt of the approved Antarctic fish video; all five videos play on desktop and mobile, close stops playback, no overflow or runtime errors.
+- [x] Add homepage sample button using a 20 Seconds excerpt of the approved Antarctic fish video; all five videos play on desktop and mobile, close stops playback, no overflow or runtime errors.
 - [x] Show an accurate £5 / 125-credit breakdown on Pricing, without implying paid features are unlocked (720p Free; 1080p Pro).
 - [x] Verify signed-out signup, signed-in draft recovery, pricing links and desktop/mobile layout; 37 relevant tests passed, no AI spend or payments. Mobile visitor banner excluded.
