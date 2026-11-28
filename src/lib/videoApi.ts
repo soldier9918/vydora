@@ -47,7 +47,7 @@ export const VOICES = [
   { id: "Algieba", label: "Algieba — Male, smooth" },
   { id: "Algenib", label: "Algenib — Male, gravelly" },
   { id: "Rasalgethi", label: "Rasalgethi — Male, informative" },
-  { id: "Achernar", label: "Achernar — Male, soft" },
+  { id: "Achernar", label: "Achernar — Female, soft and warm" },
   { id: "Schedar", label: "Schedar — Male, even" },
 ] as const;
 export const TONES = [
@@ -77,6 +77,16 @@ export const TONES = [
   { id: "kids", label: "Kids / Playful" },
   { id: "podcast", label: "Casual Podcast" },
   { id: "serious", label: "Serious / Somber" },
+  { id: "shocked", label: "Shocked / Disbelief" },
+  { id: "urgent", label: "Urgent / Breaking News" },
+  { id: "suspense", label: "Tense / Suspense Thriller" },
+  { id: "wonder", label: "Curious / Wonder & Awe" },
+  { id: "compassionate", label: "Warm & Compassionate" },
+  { id: "outraged", label: "Outraged / Angry" },
+  { id: "whisper", label: "Whispering / Secretive" },
+  { id: "bold", label: "Confident & Bold" },
+  { id: "nostalgic", label: "Nostalgic / Reflective" },
+  { id: "skeptical", label: "Skeptical / Cynical" },
 ] as const;
 export const CAPTION_STYLES = [
   { id: "typewriter", label: "Typewriter — words appear one by one" },

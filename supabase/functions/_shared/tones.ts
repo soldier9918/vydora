@@ -26,6 +26,16 @@ export const TONES: Record<string, { label: string; voice: string; script: strin
   kids: { label: "Kids / Playful", voice: "Narrate cheerfully and playfully for young children, bright and simple", script: "a cheerful, simple style for kids" },
   podcast: { label: "Casual Podcast", voice: "Narrate casually and conversationally, like chatting to a friend on a podcast", script: "a relaxed, conversational podcast style" },
   serious: { label: "Serious / Somber", voice: "Narrate in a serious, respectful, somber tone", script: "a serious, respectful, somber style" },
+  shocked: { label: "Shocked / Disbelief", voice: "Narrate with stunned, wide-eyed disbelief, as if you can hardly believe what you are saying, with gasps of surprise at key facts", script: "a jaw-dropping 'you won't believe this' style full of surprising reveals" },
+  urgent: { label: "Urgent / Breaking News", voice: "Narrate with urgent, breathless intensity like breaking news, quick and pressing", script: "an urgent breaking-news style with time-sensitive stakes" },
+  suspense: { label: "Tense / Suspense Thriller", voice: "Narrate with quiet, tense intensity like a thriller, holding your breath before each turn", script: "a tense, suspenseful thriller style that keeps viewers on edge" },
+  wonder: { label: "Curious / Wonder & Awe", voice: "Narrate with fascinated wonder and awe, amazed and curious as if discovering something magical", script: "a curious, awe-filled style that celebrates discovery" },
+  compassionate: { label: "Warm & Compassionate", voice: "Narrate tenderly with warmth, empathy and genuine care", script: "a warm, compassionate and caring style" },
+  outraged: { label: "Outraged / Angry", voice: "Narrate with sharp, passionate outrage and indignation, forceful but controlled", script: "an impassioned, indignant style calling out what is wrong" },
+  whisper: { label: "Whispering / Secretive", voice: "Narrate in a close, conspiratorial whisper, as if sharing a secret with one listener", script: "a secretive, confiding style" },
+  bold: { label: "Confident & Bold", voice: "Narrate with bold, commanding confidence and decisive authority", script: "a confident, bold and decisive style" },
+  nostalgic: { label: "Nostalgic / Reflective", voice: "Narrate gently and wistfully, reflective and nostalgic, remembering the past fondly", script: "a nostalgic, reflective style" },
+  skeptical: { label: "Skeptical / Cynical", voice: "Narrate with dry, questioning scepticism, unimpressed and probing", script: "a sceptical, questioning style that challenges claims" },
 };
 
 export const toneOf = (id: unknown) => TONES[typeof id === "string" ? id : ""] ?? TONES.engaging;
